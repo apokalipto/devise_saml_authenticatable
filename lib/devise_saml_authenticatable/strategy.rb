@@ -17,6 +17,9 @@ module Devise
         end
       end
       
+      # This method should turn off storage whenever CSRF cannot be verified.
+      # Any known way on how to let the IdP send the CSRF token along with the SAMLResponse ?
+      # Please let me know!
       def store?
         true
       end

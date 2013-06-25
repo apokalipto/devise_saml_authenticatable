@@ -88,7 +88,7 @@ In config directory create a YAML file (attribute-map.yml) that maps SAML attrib
 
 The attribute mappings are very dependent on the way the IdP encodes the attributes. In this example the attributes are given in URN style. Other IdPs might provide them as OID's or other means. 
 
-You are now ready to test it against an IdP. When the user goes to /users/sign_in he will be redirected to the login page of the IdP. Upon successful login the user is redirected to devise user_root_path.
+You are now ready to test it against an IdP. When the user goes to /users/saml/sign_in he will be redirected to the login page of the IdP. Upon successful login the user is redirected to devise user_root_path.
 
 ## Identity Provider
 

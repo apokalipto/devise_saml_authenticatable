@@ -29,7 +29,9 @@ module Devise
         def authenticate_with_saml(attributes)
           key = Devise.saml_default_user_key
           inv_attr = attribute_map.invert
-          resource = where(key => attributes[inv_attr[key.to_s]]).first
+					auth_value = attributes[inv_attr[key.to_s]]
+					auth_value.try(:downcase!) if Devise.case_insensitive_keys.include?(key)
+          resource = where(key => auth_value).first
           if (resource.nil? && !Devise.saml_create_user)
             logger.info("User(#{attributes[inv_attr[key.to_s]]}) not found.  Not configured to create the user.")
             return nil 
