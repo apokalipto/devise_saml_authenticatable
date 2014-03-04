@@ -2,10 +2,9 @@ require "ruby-saml"
 
 class Devise::SamlSessionsController < Devise::SessionsController
   include DeviseSamlAuthenticatable::SamlConfig
-  unloadable
+  unloadable if Rails::VERSION::MAJOR < 4
   before_filter :get_saml_config
   def new
-    resource = build_resource
     request = Onelogin::Saml::Authrequest.new
     action = request.create(@saml_config)
     redirect_to action
