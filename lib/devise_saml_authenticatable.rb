@@ -5,6 +5,7 @@ require "devise_saml_authenticatable/exception"
 require "devise_saml_authenticatable/logger"
 require "devise_saml_authenticatable/routes"
 require "devise_saml_authenticatable/saml_config"
+
 begin
   Rails::Engine
 rescue
