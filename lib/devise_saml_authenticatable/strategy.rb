@@ -3,12 +3,14 @@ module Devise
   module Strategies
     class SamlAuthenticatable < Authenticatable
       include DeviseSamlAuthenticatable::SamlConfig
+
       def valid?
         params[:SAMLResponse]
       end
+
       def authenticate!
-        @response = Onelogin::Saml::Response.new(params[:SAMLResponse])
-	      @response.settings = get_saml_config
+        @response = OneLogin::RubySaml::Response.new(params[:SAMLResponse])
+	      @response.settings = saml_settings
 	      resource = mapping.to.authenticate_with_saml(@response.attributes)
         if @response.is_valid?
           success!(resource)
@@ -20,10 +22,10 @@ module Devise
       # This method should turn off storage whenever CSRF cannot be verified.
       # Any known way on how to let the IdP send the CSRF token along with the SAMLResponse ?
       # Please let me know!
-      def store?
-        true
-      end
-            
+      # def store?
+      #   true
+      # end
+
     end
   end
 end
