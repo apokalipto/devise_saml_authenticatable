@@ -43,11 +43,11 @@ module Devise
           end
 
 	        if (resource.nil? && Devise.saml_create_user)
-            logger.info("Creating user(#{attributes[inv_attr[key.to_s]]}).")
 	          resource = new
-            if (Device.saml_use_subject)
-              resource.send "#{key}", auth_value
+            if (Devise.saml_use_subject)
+              resource.send "#{key}=", auth_value
             else
+              logger.info("Creating user(#{attributes[inv_attr[key.to_s]]}).")              
               set_user_saml_attributes(resource,attributes)
             end
             resource.save!
