@@ -1,2 +1,2 @@
-#Include hook code here
+# Include hook code here
 require 'devise_saml_authenticatable'
