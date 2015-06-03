@@ -20,17 +20,17 @@ module Devise
   # Allow logging
   mattr_accessor :saml_logger
   @@saml_logger = true
-  
+
   # Add valid users to database
   mattr_accessor :saml_create_user
   @@saml_create_user = false
-  
+
   mattr_accessor :saml_config
   @@saml_config = "#{Rails.root}/config/saml.yml"
-  
+
   mattr_accessor :saml_default_user_key
   @@saml_default_user_key
-  
+
   mattr_accessor :saml_use_subject
   @@saml_use_subject
 end

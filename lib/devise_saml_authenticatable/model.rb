@@ -4,7 +4,7 @@ module Devise
   module Models
     module SamlAuthenticatable
       extend ActiveSupport::Concern
-      
+
       # Need to determine why these need to be included
       included do
         attr_reader :password, :current_password
@@ -26,7 +26,7 @@ module Devise
 
       module ClassMethods
         include DeviseSamlAuthenticatable::SamlConfig
-        def authenticate_with_saml(saml_response)         
+        def authenticate_with_saml(saml_response)
           key = Devise.saml_default_user_key
           if (Devise.saml_use_subject)
             auth_value = saml_response.name_id
@@ -35,15 +35,15 @@ module Devise
             inv_attr = attribute_map.invert
             auth_value = attributes[inv_attr[key.to_s]]
             auth_value.try(:downcase!) if Devise.case_insensitive_keys.include?(key)
-          end  
+          end
           resource = where(key => auth_value).first
           if (resource.nil? && !Devise.saml_create_user)
             logger.info("User(#{attributes[inv_attr[key.to_s]]}) not found.  Not configured to create the user.")
             return nil 
           end
 
-	        if (resource.nil? && Devise.saml_create_user)
-	          resource = new
+          if (resource.nil? && Devise.saml_create_user)
+            resource = new
             if (Devise.saml_use_subject)
               resource.send "#{key}=", auth_value
             else
@@ -54,18 +54,18 @@ module Devise
           end
 
           resource
-	      end
+        end
 
         def find_for_shibb_authentication(conditions)
           find_for_authentication(conditions)
         end
-        
+
         def attribute_map
           @attribute_map ||= YAML.load(File.read("#{Rails.root}/config/attribute-map.yml"))
         end
 
         private
-        
+
         def set_user_saml_attributes(user,attributes)
           attribute_map.each do |k,v|
             Rails.logger.info "Setting: #{v}, #{attributes[k]}"

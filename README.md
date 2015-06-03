@@ -43,10 +43,10 @@ In config/initializers/devise.rb
     # Set the default user key. The user will be looked up by this key. Make
     # sure that the Authentication Response includes the attribute.
     config.saml_default_user_key = :email
-	
-	# You can set this value to use Subject or SAML assertation as info to which email will be compared
-	# If you don't set it then email will be extracted from SAML assertation attributes
-	config.saml_use_subject = true
+
+    # You can set this value to use Subject or SAML assertation as info to which email will be compared
+    # If you don't set it then email will be extracted from SAML assertation attributes
+    config.saml_use_subject = true
   end
 ```
 
