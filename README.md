@@ -43,40 +43,37 @@ In config/initializers/devise.rb
     # Set the default user key. The user will be looked up by this key. Make
     # sure that the Authentication Response includes the attribute.
     config.saml_default_user_key = :email
+
+    # Configure with your SAML settings (see [ruby-saml][] for more information).
+    config.saml_configure do |settings|
+      settings.assertion_consumer_service_url     = "http://localhost:3000/users/sign_in"
+      settings.assertion_consumer_service_binding = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+      settings.name_identifier_format             = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
+      settings.issuer                             = "http://localhost:3000"
+      settings.authn_context                      = ""
+      settings.idp_sso_target_url                 = "http://localhost/simplesaml/www/saml2/idp/SSOService.php"
+      settings.idp_cert                           = <<-CERT.chomp
+-----BEGIN CERTIFICATE-----
+1111111111111111111111111111111111111111111111111111111111111111
+1111111111111111111111111111111111111111111111111111111111111111
+1111111111111111111111111111111111111111111111111111111111111111
+1111111111111111111111111111111111111111111111111111111111111111
+1111111111111111111111111111111111111111111111111111111111111111
+1111111111111_______IDP_CERTIFICATE________111111111111111111111
+1111111111111111111111111111111111111111111111111111111111111111
+1111111111111111111111111111111111111111111111111111111111111111
+1111111111111111111111111111111111111111111111111111111111111111
+1111111111111111111111111111111111111111111111111111111111111111
+1111111111111111111111111111111111111111111111111111111111111111
+1111111111111111111111111111111111111111111111111111111111111111
+1111111111111111111111111111111111111111111111111111111111111111
+111111111111111111
+-----END CERTIFICATE-----
+      CERT
+    end
   end
 ```
 
-In config directory, create a YAML file (`idp.yml`) with your SAML settings (see [ruby-saml][] for more information). For example
-
-```yaml
-  # idp.yaml
-  development:
-    idp_metadata: ""
-    idp_metadata_ttl: ""
-    assertion_consumer_service_url: "http://localhost:3000/users/sign_in"
-    assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-    name_identifier_format: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
-    issuer: "http://localhost:3000"
-    authn_context: ""
-    idp_sso_target_url: "http://localhost/simplesaml/www/saml2/idp/SSOService.php"
-    idp_cert: |-
-      -----BEGIN CERTIFICATE-----
-      1111111111111111111111111111111111111111111111111111111111111111
-      1111111111111111111111111111111111111111111111111111111111111111
-      1111111111111111111111111111111111111111111111111111111111111111
-      1111111111111111111111111111111111111111111111111111111111111111
-      1111111111111111111111111111111111111111111111111111111111111111
-      1111111111111_______IDP_CERTIFICATE________111111111111111111111
-      1111111111111111111111111111111111111111111111111111111111111111
-      1111111111111111111111111111111111111111111111111111111111111111
-      1111111111111111111111111111111111111111111111111111111111111111
-      1111111111111111111111111111111111111111111111111111111111111111
-      1111111111111111111111111111111111111111111111111111111111111111
-      1111111111111111111111111111111111111111111111111111111111111111
-      1111111111111111111111111111111111111111111111111111111111111111
-      111111111111111111
-      -----END CERTIFICATE-----
-```    
 In config directory create a YAML file (`attribute-map.yml`) that maps SAML attributes with your model's fields:
 
 ```yaml
