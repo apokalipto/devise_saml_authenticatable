@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'devise_saml_authenticatable'
 
 describe Devise::Models::SamlAuthenticatable do
   class Model

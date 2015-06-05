@@ -18,3 +18,5 @@ RSpec.configure do |config|
 end
 
 require 'support/rails_app'
+
+require 'devise_saml_authenticatable'
