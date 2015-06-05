@@ -41,5 +41,4 @@ def stop_app(name, pid)
     Process.kill(:TERM, pid)
     Process.wait(pid)
   end
-  FileUtils.rm_rf(File.expand_path("../../support/#{name}", __FILE__))
 end
