@@ -118,7 +118,8 @@ There are numerous IdPs that support SAML 2.0, there are propietary (like Micros
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Added some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+4. Run the tests (`bundle exec rspec`)
+5. Push to the branch (`git push origin my-new-feature`)
+6. Create new Pull Request
 
 [ruby-saml]: https://github.com/onelogin/ruby-saml
