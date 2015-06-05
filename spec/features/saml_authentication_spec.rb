@@ -5,6 +5,8 @@ Capybara.default_driver = :webkit
 
 describe "SAML Authentication", type: :feature do
   before(:all) do
+    create_app('idp')
+    create_app('sp')
     @idp_pid = start_app('idp', 8009)
     @sp_pid  = start_app('sp',  8020)
   end
