@@ -18,4 +18,5 @@ RSpec.configure do |config|
 end
 
 require 'support/rails_app'
+create_app('idp')
 create_app('sp')

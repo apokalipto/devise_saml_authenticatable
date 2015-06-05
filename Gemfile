@@ -9,5 +9,6 @@ group :test do
   gem 'rails'
   gem 'rspec-rails'
   gem 'sqlite3'
+  gem 'capybara-webkit'
 end
 
