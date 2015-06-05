@@ -1,15 +1,4 @@
-ENV["RAILS_ENV"] ||= 'test'
-
-require 'rails_app/config/environment'
-
-require 'rspec/rails'
-
-ActiveRecord::Migration.verbose = false
-ActiveRecord::Base.logger = Logger.new(nil)
-ActiveRecord::Migrator.migrate(File.expand_path("../rails_app/db/migrate/", __FILE__))
-
 RSpec.configure do |config|
-  config.use_transactional_fixtures = true
   config.run_all_when_everything_filtered = true
   config.filter_run :focus
   config.order = 'random'
@@ -27,3 +16,6 @@ RSpec.configure do |config|
     mocks.verify_partial_doubles = true
   end
 end
+
+require 'support/rails_app'
+create_app('sp')

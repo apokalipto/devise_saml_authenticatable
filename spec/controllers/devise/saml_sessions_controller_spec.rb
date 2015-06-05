@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 class Devise::SessionsController < ActionController::Base
 
@@ -8,16 +8,10 @@ require_relative '../../../app/controllers/devise/saml_sessions_controller'
 
 
 describe Devise::SamlSessionsController, type: :controller do
-
-  before do
-    @saml_config = OneLogin::RubySaml::Settings.new({})
-  end
-
   describe '#new' do
     it 'redirects to the SAML Auth Request endpoint' do
       get :new
-      expect(response).to redirect_to(OneLogin::RubySaml::Authrequest.new.create(@saml_config))
+      expect(response).to redirect_to(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
     end
   end
-
 end
