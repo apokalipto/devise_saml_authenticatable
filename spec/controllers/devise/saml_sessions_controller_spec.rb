@@ -1,11 +1,11 @@
 require 'spec_helper'
-require 'devise/modules'
 
 class Devise::SessionsController < ActionController::Base
 
 end
 
 require_relative '../../../app/controllers/devise/saml_sessions_controller'
+
 
 describe Devise::SamlSessionsController, type: :controller do
 

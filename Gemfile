@@ -4,9 +4,10 @@ source 'https://rubygems.org'
 gemspec
 
 group :test do
+  gem 'rake'
   gem 'rspec', '~> 3.0'
-  gem 'activemodel'
   gem 'rails'
   gem 'rspec-rails'
+  gem 'sqlite3'
 end
 
