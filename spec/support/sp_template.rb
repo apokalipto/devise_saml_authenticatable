@@ -2,14 +2,6 @@
 
 gem 'devise_saml_authenticatable', path: '../../..'
 
-generate :controller, 'home', 'index'
-insert_into_file('app/controllers/home_controller.rb', after: "class HomeController < ApplicationController\n") {
-  <<-AUTHENTICATE
-  before_action :authenticate_user!
-  AUTHENTICATE
-}
-route "root to: 'home#index'"
-
 create_file 'config/idp.yml', <<-IDP
 ---
 development: &development
@@ -28,6 +20,14 @@ create_file 'config/attribute-map.yml', <<-ATTRIBUTES
 ATTRIBUTES
 
 after_bundle do
+  generate :controller, 'home', 'index'
+  insert_into_file('app/controllers/home_controller.rb', after: "class HomeController < ApplicationController\n") {
+    <<-AUTHENTICATE
+    before_action :authenticate_user!
+    AUTHENTICATE
+  }
+  route "root to: 'home#index'"
+
   # Configure for our SAML IdP
   generate 'devise:install'
   gsub_file 'config/initializers/devise.rb', /^end$/, <<-CONFIG
