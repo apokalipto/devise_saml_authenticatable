@@ -1,11 +1,8 @@
 #!/usr/bin/env rake
 require "bundler/gem_tasks"
-require "rake/testtask"
+
+require "rspec/core/rake_task"
+RSpec::Core::RakeTask.new(:spec)
 
 desc "Default: run tests"
-task :default => :test
-
-desc 'TODO: write tests'
-Rake::TestTask.new(:test) do |t|
-  puts "TODO: write tests"
-end
+task :default => :spec

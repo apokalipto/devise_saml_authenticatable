@@ -1,6 +1,7 @@
 # DeviseSamlAuthenticatable
 
-Devise Saml Authenticatable is a Single-Sign-On authentication strategy for devise that relies on SAML. It uses [ruby-saml](https://github.com/onelogin/ruby-saml) to handle all SAML related stuff.
+Devise Saml Authenticatable is a Single-Sign-On authentication strategy for devise that relies on SAML.
+It uses [ruby-saml][] to handle all SAML related stuff.
 
 ## Installation
 
@@ -18,7 +19,8 @@ Or install it yourself as:
 
 ## Usage
 
-In app/models/<YOUR_MODEL>.rb set the :saml_authenticatable strategy. In the example the model is user.rb
+In `app/models/<YOUR_MODEL>.rb` set the `:saml_authenticatable` strategy.
+In the example the model is `user.rb`:
 
 ```ruby
   class User < ActiveRecord::Base
@@ -33,20 +35,20 @@ In config/initializers/devise.rb
 ```ruby
   Devise.setup do |config|
     ...
-    # ==> DeviseSamlAuthenticatable Configuration
+    # ==> Configuration for :saml_authenticatable
     
     # Create user if the user does not exist. (Default is false)
     config.saml_create_user = true
     
-    # Set the default user key (default is email). The user will be looked up by this key. Make sure that the Authentication Response includes
-    # the attribute
+    # Set the default user key. The user will be looked up by this key. Make
+    # sure that the Authentication Response includes the attribute.
     config.saml_default_user_key = :email
   end
 ```
 
-In config directory, create a YAML file (idp.yml) with your SAML settings (see ruby-saml for more information). For example
+In config directory, create a YAML file (`idp.yml`) with your SAML settings (see [ruby-saml][] for more information). For example
 
-```ruby
+```yaml
   # idp.yaml
   development:
     idp_metadata: ""
@@ -75,9 +77,9 @@ In config directory, create a YAML file (idp.yml) with your SAML settings (see r
       111111111111111111
       -----END CERTIFICATE-----
 ```    
-In config directory create a YAML file (attribute-map.yml) that maps SAML attributes with your model's fields
+In config directory create a YAML file (`attribute-map.yml`) that maps SAML attributes with your model's fields:
 
-```ruby
+```yaml
   # attribute-map.yml
   
   "urn:mace:dir:attribute-def:uid": "user_name"
@@ -86,18 +88,19 @@ In config directory create a YAML file (attribute-map.yml) that maps SAML attrib
   "urn:mace:dir:attribute-def:givenName": "name"
 ```
 
-The attribute mappings are very dependent on the way the IdP encodes the attributes. In this example the attributes are given in URN style. Other IdPs might provide them as OID's or other means. 
+The attribute mappings are very dependent on the way the IdP encodes the attributes.
+In this example the attributes are given in URN style.
+Other IdPs might provide them as OID's or other means.
 
-You are now ready to test it against an IdP. When the user goes to /users/saml/sign_in he will be redirected to the login page of the IdP. Upon successful login the user is redirected to devise user_root_path.
+You are now ready to test it against an IdP.
+When the user goes to `/users/saml/sign_in` he will be redirected to the login page of the IdP.
+Upon successful login the user is redirected to devise `user_root_path`.
 
 ## Identity Provider
 
 If you don't have an identity provider an you would like to test the authentication against your app there are some options:
 
-1. Use [ruby-saml-idp](https://github.com/lawrencepit/ruby-saml-idp). 
-
-You can add your own logic to your IdP, or you can also set it as a dummy IdP that always sends a valid authentication response to your app.
-
+1. Use [ruby-saml-idp](https://github.com/lawrencepit/ruby-saml-idp). You can add your own logic to your IdP, or you can also set it as a dummy IdP that always sends a valid authentication response to your app.
 2. Use an online service that can act as an IdP. Onelogin, Salesforce and some others provide you with this functionality
 3. Install your own IdP.
 
@@ -107,7 +110,7 @@ There are numerous IdPs that support SAML 2.0, there are propietary (like Micros
 
 ## Limitations
 
-1. At the moment there is no support for Single Logout (we're working on that)
+1. At the moment there is no support for Single Logout
 2. The Authentication Requests (from your app to the IdP) are not signed and encrypted
 
 ## Contributing
@@ -115,5 +118,8 @@ There are numerous IdPs that support SAML 2.0, there are propietary (like Micros
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Added some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+4. Run the tests (`bundle exec rspec`)
+5. Push to the branch (`git push origin my-new-feature`)
+6. Create new Pull Request
+
+[ruby-saml]: https://github.com/onelogin/ruby-saml

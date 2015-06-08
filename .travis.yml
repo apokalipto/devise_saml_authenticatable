@@ -4,3 +4,15 @@ rvm:
   - "2.0.0"
   - "2.1.0"
   - "2.2.0"
+
+script:
+  - xvfb-run bundle exec rake
+
+notifications:
+  hipchat:
+    rooms:
+      secure: eWahLFbtvZaJgulhDdnmbIxtSnl2lGR4zHqcJ6d7ExG0HzfxzCknHkau4YfqhANRa3+e66F4rCNoU3+db1EKE5jij7+oIOgRHAmVwLi9WRswzb7NQfWV0/PyUjdF6T7Ac/sfQRkFIDTUL2npYMr2zTQnjDcYrT7e0IkRxNA3VXWogzhqnC4sXKLr8j9zLLw5BdFfELcJD021Rpd7O1EmAt+hahxaJCipyXV2l/kDANR24jnlXgaQn8HJwgRXsBARAQe1QgApnrmbqnGnWc4T1GbI7kExsKGCUbHxYBOp+99m25T6MK66xnvRltwKaUeMXuUyWRZtmAV3LlbACRMX3n5qkDqg8P2OPNvWWua84hkRmUNUska7YrSLX7aCWvGfA6Vr1INnsueLl5sYjHhHZnaS8Wl0iC9ltxBUY4ikg1QlHSghXFQvMC5UAROJ2x7BHGV3kDRTc52ZLdy5BDuJrf/OFEhpuTp+HQALmEKkcJKFUdBn8Cu20wF0pF8o5XvYnSozuqytJKP+b/3+U0X4SEYqbkYCi/PcSnXTtSTIl0+7uxmEBCwPKpXRkkCfVsLqIVUkyVj1d1qIxG8Zbikn5NxK6USV5+Zl4KTDFUVD4r4T8fXCV09+8q0t/uyVjCDv3g1vGRcHvxQyDiLrs7q4DL3GNQY3trrEQ6WneA8nsLw=
+    template:
+      - '%{repository}<a href="%{build_url}">#%{build_number}</a> (%{branch} - <a href="%{compare_url}">%{commit}</a> : %{author}): %{message}'
+    format: html
+    on_pull_requests: false

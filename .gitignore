@@ -2,6 +2,7 @@
 *.rbc
 .bundle
 .config
+.idea/
 .yardoc
 Gemfile.lock
 InstalledFiles
@@ -12,6 +13,6 @@ lib/bundler/man
 pkg
 rdoc
 spec/reports
-test/tmp
-test/version_tmp
+spec/support/idp/
+spec/support/sp/
 tmp
