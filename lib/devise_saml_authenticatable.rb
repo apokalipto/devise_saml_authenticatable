@@ -25,14 +25,17 @@ module Devise
   mattr_accessor :saml_create_user
   @@saml_create_user = false
 
-  mattr_accessor :saml_config
-  @@saml_config = "#{Rails.root}/config/saml.yml"
-
   mattr_accessor :saml_default_user_key
   @@saml_default_user_key
 
   mattr_accessor :saml_use_subject
   @@saml_use_subject
+
+  mattr_accessor :saml_config
+  @@saml_config = OneLogin::RubySaml::Settings.new
+  def self.saml_configure
+    yield saml_config
+  end
 end
 
 # Add saml_authenticatable strategy to defaults.
