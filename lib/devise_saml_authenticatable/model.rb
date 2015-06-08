@@ -28,10 +28,10 @@ module Devise
         include DeviseSamlAuthenticatable::SamlConfig
         def authenticate_with_saml(saml_response)
           key = Devise.saml_default_user_key
+          attributes = saml_response.attributes
           if (Devise.saml_use_subject)
             auth_value = saml_response.name_id
           else
-            attributes = saml_response.attributes
             inv_attr = attribute_map.invert
             auth_value = attributes[inv_attr[key.to_s]]
             auth_value.try(:downcase!) if Devise.case_insensitive_keys.include?(key)
@@ -45,10 +45,9 @@ module Devise
           if (resource.nil? && Devise.saml_create_user)
             logger.info("Creating user(#{auth_value}).")
             resource = new
+            set_user_saml_attributes(resource,attributes)
             if (Devise.saml_use_subject)
               resource.send "#{key}=", auth_value
-            else
-              set_user_saml_attributes(resource,attributes)
             end
             resource.save!
           end

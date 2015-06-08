@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Devise::Models::SamlAuthenticatable do
   class Model
     include Devise::Models::SamlAuthenticatable
-    attr_accessor :email, :saved
+    attr_accessor :email, :name, :saved
     def save!
       self.saved = true
     end
@@ -30,11 +30,17 @@ describe Devise::Models::SamlAuthenticatable do
     allow(File).to receive(:read).with("/railsroot/config/attribute-map.yml").and_return(<<-ATTRIBUTEMAP)
 ---
 "saml-email-format": email
+"saml-name-format":  name
       ATTRIBUTEMAP
   end
 
   let(:response) { double(:response, attributes: attributes, name_id: name_id) }
-  let(:attributes) { OneLogin::RubySaml::Attributes.new('saml-email-format' => ['user@example.com']) }
+  let(:attributes) {
+    OneLogin::RubySaml::Attributes.new(
+      'saml-email-format' => ['user@example.com'],
+      'saml-name-format'  => ['A User'],
+    )
+  }
   let(:name_id) { nil }
 
   it "looks up the user by the configured default user key" do
@@ -72,10 +78,11 @@ describe Devise::Models::SamlAuthenticatable do
         allow(Devise).to receive(:saml_create_user).and_return(true)
       end
 
-      it "creates and returns a new user with the name identifier" do
+      it "creates and returns a new user with the name identifier and given attributes" do
         expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
         model = Model.authenticate_with_saml(response)
         expect(model.email).to eq('user@example.com')
+        expect(model.name).to  eq('A User')
         expect(model.saved).to be(true)
       end
     end
@@ -90,6 +97,7 @@ describe Devise::Models::SamlAuthenticatable do
       expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
       model = Model.authenticate_with_saml(response)
       expect(model.email).to eq('user@example.com')
+      expect(model.name).to  eq('A User')
       expect(model.saved).to be(true)
     end
   end
