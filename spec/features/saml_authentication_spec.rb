@@ -11,8 +11,8 @@ describe "SAML Authentication", type: :feature do
     @sp_pid  = start_app('sp',  8020)
   end
   after(:all) do
-    stop_app('idp', @idp_pid)
-    stop_app('sp', @sp_pid)
+    stop_app(@idp_pid)
+    stop_app(@sp_pid)
   end
 
   it "authenticates a user on a SP via an IdP" do

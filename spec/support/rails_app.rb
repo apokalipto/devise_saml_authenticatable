@@ -36,9 +36,9 @@ def start_app(name, port, options = {})
   pid
 end
 
-def stop_app(name, pid)
+def stop_app(pid)
   if pid
-    Process.kill(:TERM, pid)
+    Process.kill(:INT, pid)
     Process.wait(pid)
   end
 end
