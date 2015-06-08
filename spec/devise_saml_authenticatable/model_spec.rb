@@ -33,15 +33,52 @@ describe Devise::Models::SamlAuthenticatable do
       ATTRIBUTEMAP
   end
 
+  let(:response) { double(:response, attributes: attributes, name_id: name_id) }
+  let(:attributes) { OneLogin::RubySaml::Attributes.new('saml-email-format' => ['user@example.com']) }
+  let(:name_id) { nil }
+
   it "looks up the user by the configured default user key" do
     user = double(:user)
     expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
-    expect(Model.authenticate_with_saml('saml-email-format' => 'user@example.com')).to eq(user)
+    expect(Model.authenticate_with_saml(response)).to eq(user)
   end
 
   it "returns nil if it cannot find a user" do
     expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
-    expect(Model.authenticate_with_saml('saml-email-format' => 'user@example.com')).to be_nil
+    expect(Model.authenticate_with_saml(response)).to be_nil
+  end
+
+  context "when configured to use the subject" do
+    let(:attributes) { OneLogin::RubySaml::Attributes.new('saml-name-format' => ['A User']) }
+    let(:name_id) { 'user@example.com' }
+
+    before do
+      allow(Devise).to receive(:saml_use_subject).and_return(true)
+    end
+
+    it "looks up the user by the configured default user key" do
+      user = double(:user)
+      expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
+      expect(Model.authenticate_with_saml(response)).to eq(user)
+    end
+
+    it "returns nil if it cannot find a user" do
+      expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
+      expect(Model.authenticate_with_saml(response)).to be_nil
+    end
+
+    context "when configured to create a user and the user is not found" do
+      before do
+        allow(Devise).to receive(:saml_create_user).and_return(true)
+      end
+
+      it "creates and returns a new user with the name identifier" do
+        expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
+        model = Model.authenticate_with_saml(response)
+        expect(model.email).to eq('user@example.com')
+        expect(model.saved).to be(true)
+      end
+    end
   end
 
   context "when configured to create a user and the user is not found" do
@@ -51,7 +88,7 @@ describe Devise::Models::SamlAuthenticatable do
 
     it "creates and returns a new user with the given attributes" do
       expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
-      model = Model.authenticate_with_saml('saml-email-format' => 'user@example.com')
+      model = Model.authenticate_with_saml(response)
       expect(model.email).to eq('user@example.com')
       expect(model.saved).to be(true)
     end
@@ -65,7 +102,7 @@ describe Devise::Models::SamlAuthenticatable do
     it "looks up the user with a downcased value" do
       user = double(:user)
       expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
-      expect(Model.authenticate_with_saml('saml-email-format' => 'UsEr@ExAmPlE.cOm')).to eq(user)
+      expect(Model.authenticate_with_saml(response)).to eq(user)
     end
   end
 end

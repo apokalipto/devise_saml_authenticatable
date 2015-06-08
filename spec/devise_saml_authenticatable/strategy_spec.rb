@@ -4,8 +4,7 @@ describe Devise::Strategies::SamlAuthenticatable do
   subject(:strategy) { described_class.new(env, :user) }
   let(:env) { {} }
 
-  let(:response) { double(:response, :settings= => nil, attributes: attributes, is_valid?: true) }
-  let(:attributes) { double(:attributes) }
+  let(:response) { double(:response, :settings= => nil, is_valid?: true) }
   before do
     allow(OneLogin::RubySaml::Response).to receive(:new).and_return(response)
   end
@@ -34,10 +33,10 @@ describe Devise::Strategies::SamlAuthenticatable do
       expect(strategy).to be_valid
     end
 
-    it "authenticates with the response attributes" do
+    it "authenticates with the response" do
       expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse])
       expect(response).to receive(:settings=).with(saml_config)
-      expect(user_class).to receive(:authenticate_with_saml).with(attributes)
+      expect(user_class).to receive(:authenticate_with_saml).with(response)
 
       expect(strategy).to receive(:success!).with(user)
       strategy.authenticate!
