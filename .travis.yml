@@ -15,3 +15,4 @@ notifications:
     template:
       - '%{repository}<a href="%{build_url}">#%{build_number}</a> (<a href="%{compare_url}">%{branch}</a> - %{commit} : %{author}): %{message}'
     format: html
+    on_pull_requests: false
