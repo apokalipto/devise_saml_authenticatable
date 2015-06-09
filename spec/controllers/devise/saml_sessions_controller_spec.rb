@@ -8,9 +8,7 @@ require_relative '../../../app/controllers/devise/saml_sessions_controller'
 
 
 describe Devise::SamlSessionsController, type: :controller do
-  let(:saml_config) {
-    OneLogin::RubySaml::Settings.new(YAML.load_file(File.expand_path('../../../support/sp/config/idp.yml', __FILE__))[Rails.env])
-  }
+  let(:saml_config) { Devise.saml_config }
 
   describe '#new' do
     it 'redirects to the SAML Auth Request endpoint' do
