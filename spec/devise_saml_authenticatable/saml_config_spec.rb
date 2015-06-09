@@ -4,6 +4,14 @@ describe DeviseSamlAuthenticatable::SamlConfig do
   subject(:saml_config) { controller.get_saml_config }
   let(:controller) { Class.new { include DeviseSamlAuthenticatable::SamlConfig }.new }
 
+  # Replace global config since this test changes it
+  before do
+    @original_saml_config = Devise.saml_config
+  end
+  after do
+    Devise.saml_config = @original_saml_config
+  end
+
   context "when config/idp.yml does not exist" do
     before do
       allow(Rails).to receive(:root).and_return("/railsroot")
