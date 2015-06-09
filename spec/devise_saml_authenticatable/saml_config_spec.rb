@@ -4,19 +4,27 @@ describe DeviseSamlAuthenticatable::SamlConfig do
   subject(:saml_config) { controller.get_saml_config }
   let(:controller) { Class.new { include DeviseSamlAuthenticatable::SamlConfig }.new }
 
-  it "is the global devise SAML config" do
-    Devise.saml_configure do |config|
-      config.assertion_consumer_logout_service_binding = 'test'
+  context "when config/idp.yml does not exist" do
+    before do
+      allow(Rails).to receive(:root).and_return("/railsroot")
+      allow(File).to receive(:exists?).with("/railsroot/config/idp.yml").and_return(false)
     end
-    expect(saml_config).to be(Devise.saml_config)
-    expect(saml_config.assertion_consumer_logout_service_binding).to eq('test')
+
+    it "is the global devise SAML config" do
+      Devise.saml_configure do |settings|
+        settings.assertion_consumer_logout_service_binding = 'test'
+      end
+      expect(saml_config).to be(Devise.saml_config)
+      expect(saml_config.assertion_consumer_logout_service_binding).to eq('test')
+    end
   end
 
   context "when config/idp.yml exists" do
     before do
       allow(Rails).to receive(:env).and_return("environment")
-      allow(File).to receive(:exists?).with("/config/idp.yml").and_return(true)
-      allow(File).to receive(:read).with("/config/idp.yml").and_return(<<-IDP)
+      allow(Rails).to receive(:root).and_return("/railsroot")
+      allow(File).to receive(:exists?).with("/railsroot/config/idp.yml").and_return(true)
+      allow(File).to receive(:read).with("/railsroot/config/idp.yml").and_return(<<-IDP)
 ---
 environment:
   assertion_consumer_logout_service_binding: assertion_consumer_logout_service_binding
