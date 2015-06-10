@@ -60,7 +60,7 @@ module Devise
         end
 
         def attribute_map
-          @attribute_map ||= YAML.load(File.read("#{Rails.root}/config/attribute-map.yml"))
+          @attribute_map ||= attribute_map_for_environment
         end
 
         private
@@ -69,6 +69,15 @@ module Devise
           attribute_map.each do |k,v|
             Rails.logger.info "Setting: #{v}, #{attributes[k]}"
             user.send "#{v}=", attributes[k]
+          end
+        end
+
+        def attribute_map_for_environment
+          attribute_map = YAML.load(File.read("#{Rails.root}/config/attribute-map.yml"))
+          if attribute_map.has_key?(Rails.env)
+            attribute_map[Rails.env]
+          else
+            attribute_map
           end
         end
       end
