@@ -23,6 +23,8 @@ describe Devise::Models::SamlAuthenticatable do
 
   before do
     allow(Devise).to receive(:saml_default_user_key).and_return(:email)
+    allow(Devise).to receive(:saml_create_user).and_return(false)
+    allow(Devise).to receive(:saml_use_subject).and_return(false)
   end
 
   before do

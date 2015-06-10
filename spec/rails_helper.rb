@@ -2,7 +2,7 @@ ENV["RAILS_ENV"] ||= 'test'
 
 require 'spec_helper'
 
-create_app('sp')
+create_app('sp', %w(n))
 require 'support/sp/config/environment'
 require 'rspec/rails'
 

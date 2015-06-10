@@ -1,3 +1,5 @@
+require 'open3'
+
 def sh!(cmd)
   unless system(cmd)
     raise "[#{cmd}] failed with exit code #{$?.exitstatus}"
@@ -9,13 +11,24 @@ def app_ready?(pid, port)
     system("lsof -i:#{port}", out: '/dev/null')
 end
 
-def create_app(name)
-  rails_new_options = "-T -J -S --skip-spring"
-  rails_new_options << " -O" if name == 'idp'
+def create_app(name, answers = [])
+  rails_new_options = %w(-T -J -S --skip-spring)
+  rails_new_options << "-O" if name == 'idp'
   Bundler.with_clean_env do
     Dir.chdir(File.expand_path('../../support', __FILE__)) do
       FileUtils.rm_rf(name)
-      sh! "rails new #{name} #{rails_new_options} -m #{name}_template.rb"
+      Open3.popen3("rails", "new", name, *rails_new_options, "-m", "#{name}_template.rb") do |stdin, stdout, stderr, wait_thread|
+        while answers.any?
+          question = stdout.gets
+          answer = answers.shift
+          stdin.puts answer
+          $stdout.puts "#{question} #{answer}"
+        end
+        wait_thread.join
+
+        $stdout.puts stdout.read
+        $stderr.puts stderr.read
+      end
     end
   end
 end
