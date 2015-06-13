@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/apokalipto/devise_saml_authenticatable.svg?branch=master)](https://travis-ci.org/apokalipto/devise_saml_authenticatable)
 # DeviseSamlAuthenticatable
 
 Devise Saml Authenticatable is a Single-Sign-On authentication strategy for devise that relies on SAML.
@@ -50,7 +51,7 @@ In config/initializers/devise.rb
 
     # Configure with your SAML settings (see [ruby-saml][] for more information).
     config.saml_configure do |settings|
-      settings.assertion_consumer_service_url     = "http://localhost:3000/users/sign_in"
+      settings.assertion_consumer_service_url     = "http://localhost:3000/users/saml/auth"
       settings.assertion_consumer_service_binding = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
       settings.name_identifier_format             = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
       settings.issuer                             = "http://localhost:3000"
@@ -114,6 +115,11 @@ There are numerous IdPs that support SAML 2.0, there are propietary (like Micros
 1. At the moment there is no support for Single Logout
 2. The Authentication Requests (from your app to the IdP) are not signed and encrypted
 
+## Thanks
+
+The continued maintenance of this gem could not have been possible without the hard work of [Adam Stegman](https://github.com/adamstegman) and [Mitch Lindsay](https://github.com/mitch-lindsay). Thank you guys for keeping this project alive.
+
+Thanks to all other contributors that have also helped us make this software better.
 ## Contributing
 
 1. Fork it
