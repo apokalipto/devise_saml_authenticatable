@@ -21,6 +21,7 @@ class Devise::SamlSessionsController < Devise::SessionsController
     if @saml_config.assertion_consumer_logout_service_url
       # Assume the SP is handling sign out at their logout ACS URL
       warden.session(resource_name)[:logout_request_id] = logout_request.uuid
+      # Respond just like `super`, but without signing out
       respond_to do |format|
         format.all { head :no_content }
         format.any(*navigational_formats) { redirect_to after_sign_out_path_for(resource_name) }
@@ -36,6 +37,7 @@ class Devise::SamlSessionsController < Devise::SessionsController
     @request ||= OneLogin::RubySaml::Logoutrequest.new
   end
 
+  # Override devise to send user to IdP logout for SLO
   def after_sign_out_path_for(_)
     logout_request.create(@saml_config)
   end
