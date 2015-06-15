@@ -1,13 +1,10 @@
 require 'rails_helper'
 
 class Devise::SessionsController < ActionController::Base
-  # Copied from devise with unnecessary parts elided
+  # The important parts from devise
   def destroy
     sign_out
-    respond_to do |format|
-      format.all { head :no_content }
-      format.any(*navigational_formats) { redirect_to after_sign_out_path_for(resource_name) }
-    end
+    redirect_to after_sign_out_path_for(:user)
   end
 end
 
@@ -37,7 +34,7 @@ describe Devise::SamlSessionsController, type: :controller do
 
   describe '#destroy' do
     it 'signs out and redirects to the IdP' do
-      expect(controller).to receive(:sign_out).and_call_original
+      expect(controller).to receive(:sign_out)
       delete :destroy
       expect(response).to redirect_to(%r(\Ahttp://localhost:8009/saml/logout\?SAMLRequest=))
     end
