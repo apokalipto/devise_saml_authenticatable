@@ -111,6 +111,36 @@ There are numerous IdPs that support SAML 2.0, there are propietary (like Micros
 
 [SimpleSAMLphp](http://simplesamlphp.org/) was my choice for development since it is a production-ready SAML solution, that is also really easy to install, configure and use.
 
+## Logout
+
+Logout support is included by immediately terminating the local session and then redirecting to the IdP.
+If, instead, you want to handle the logout response from the IdP yourself (in case of errors like a partial logout of other session participants), you can add a route to the configuration like so:
+
+```ruby
+    config.saml_configure do |settings|
+      # ...
+      settings.assertion_consumer_logout_service_url = "http://localhost:3000/users/sign_out"
+    end
+```
+
+Then in `/users/sign_out` you can parse the logout response and verify it against the request id:
+
+```ruby
+class UsersController < ApplicationController
+  # ...
+  def sign_out
+    # The logout request id is stored in the warden session for the current scope
+    logout_response = OneLogin::RubySaml::Logoutresponse.new(params[:SAMLResponse], Devise.saml_config, matches_request_id: warden.session(:user)[:logout_request_id])
+    if logout_response.validate
+      sign_out :user
+      redirect_to root_path
+    end
+
+    # render error page
+  end
+end
+```
+
 ## Limitations
 
 1. The Authentication Requests (from your app to the IdP) are not signed and encrypted

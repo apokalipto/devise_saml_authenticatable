@@ -17,11 +17,27 @@ class Devise::SamlSessionsController < Devise::SessionsController
     render :xml => meta.generate(@saml_config)
   end
 
+  def destroy
+    if @saml_config.assertion_consumer_logout_service_url
+      # Assume the SP is handling sign out at their logout ACS URL
+      warden.session(resource_name)[:logout_request_id] = logout_request.uuid
+      respond_to do |format|
+        format.all { head :no_content }
+        format.any(*navigational_formats) { redirect_to after_sign_out_path_for(resource_name) }
+      end
+    else
+      super
+    end
+  end
+
   protected
 
+  def logout_request
+    @request ||= OneLogin::RubySaml::Logoutrequest.new
+  end
+
   def after_sign_out_path_for(_)
-    request = OneLogin::RubySaml::Logoutrequest.new
-    request.create(@saml_config)
+    logout_request.create(@saml_config)
   end
 end
 
