@@ -32,6 +32,21 @@ describe "SAML Authentication", type: :feature do
       expect(page).to have_content("A User")
       expect(current_url).to eq("http://localhost:8020/")
     end
+
+    it "logs a user out of the IdP via the SP" do
+      sign_in
+
+      # prove user is still signed in
+      visit 'http://localhost:8020/'
+      expect(page).to have_content("you@example.com")
+      expect(current_url).to eq("http://localhost:8020/")
+
+      click_on "Log out"
+
+      # prove user is now signed out
+      visit 'http://localhost:8020/'
+      expect(current_url).to match(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
+    end
   end
 
   context "when the attributes are used to authenticate" do
@@ -67,5 +82,15 @@ describe "SAML Authentication", type: :feature do
   def create_user(email)
     response = Net::HTTP.post_form(URI('http://localhost:8020/users'), email: email)
     expect(response.code).to eq('201')
+  end
+
+  def sign_in
+    visit 'http://localhost:8020/'
+    expect(current_url).to match(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
+    fill_in "Email", with: "you@example.com"
+    fill_in "Password", with: "asdf"
+    click_on "Sign in"
+    expect(page).to have_content("you@example.com")
+    expect(current_url).to eq("http://localhost:8020/")
   end
 end

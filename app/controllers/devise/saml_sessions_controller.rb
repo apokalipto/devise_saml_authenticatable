@@ -16,6 +16,12 @@ class Devise::SamlSessionsController < Devise::SessionsController
     meta = OneLogin::RubySaml::Metadata.new
     render :xml => meta.generate(@saml_config)
   end
-  
+
+  protected
+
+  def after_sign_out_path_for(_)
+    request = OneLogin::RubySaml::Logoutrequest.new
+    request.create(@saml_config)
+  end
 end
 
