@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'net/http'
+require 'timeout'
 require 'uri'
 require 'capybara/rspec'
 require 'capybara/webkit'
@@ -90,7 +91,13 @@ describe "SAML Authentication", type: :feature do
     fill_in "Email", with: "you@example.com"
     fill_in "Password", with: "asdf"
     click_on "Sign in"
-    expect(page).to have_content("you@example.com")
+    Timeout.timeout(Capybara.default_wait_time) do
+      loop do
+        sleep 0.1
+        break if current_url == "http://localhost:8020/"
+      end
+    end
+  rescue Timeout::Error
     expect(current_url).to eq("http://localhost:8020/")
   end
 end
