@@ -16,6 +16,13 @@ class Devise::SamlSessionsController < Devise::SessionsController
     meta = OneLogin::RubySaml::Metadata.new
     render :xml => meta.generate(@saml_config)
   end
-  
+
+  protected
+
+  # Override devise to send user to IdP logout for SLO
+  def after_sign_out_path_for(_)
+    request = OneLogin::RubySaml::Logoutrequest.new
+    request.create(@saml_config)
+  end
 end
 

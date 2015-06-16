@@ -56,6 +56,7 @@ In config/initializers/devise.rb
       settings.name_identifier_format             = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
       settings.issuer                             = "http://localhost:3000"
       settings.authn_context                      = ""
+      settings.idp_slo_target_url                 = "http://localhost/simplesaml/www/saml2/idp/SingleLogoutService.php"
       settings.idp_sso_target_url                 = "http://localhost/simplesaml/www/saml2/idp/SSOService.php"
       settings.idp_cert                           = <<-CERT.chomp
 -----BEGIN CERTIFICATE-----
@@ -110,10 +111,13 @@ There are numerous IdPs that support SAML 2.0, there are propietary (like Micros
 
 [SimpleSAMLphp](http://simplesamlphp.org/) was my choice for development since it is a production-ready SAML solution, that is also really easy to install, configure and use.
 
+## Logout
+
+Logout support is included by immediately terminating the local session and then redirecting to the IdP.
+
 ## Limitations
 
-1. At the moment there is no support for Single Logout
-2. The Authentication Requests (from your app to the IdP) are not signed and encrypted
+1. The Authentication Requests (from your app to the IdP) are not signed and encrypted
 
 ## Thanks
 

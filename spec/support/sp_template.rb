@@ -18,7 +18,12 @@ after_bundle do
     AUTHENTICATE
   }
   insert_into_file('app/views/home/index.html.erb', after: /\z/) {
-    "<%= current_user.email %> <%= current_user.name %>"
+    <<-HOME
+<%= current_user.email %> <%= current_user.name %>
+<%= form_tag destroy_user_session_path, method: :delete do %>
+  <%= submit_tag "Log out" %>
+<% end %>
+    HOME
   }
   route "root to: 'home#index'"
 
@@ -33,6 +38,7 @@ after_bundle do
   config.saml_configure do |settings|
     settings.assertion_consumer_service_url = "http://localhost:8020/users/saml/auth"
     settings.issuer = "http://localhost:8020/saml/metadata"
+    settings.idp_slo_target_url = "http://localhost:8009/saml/logout"
     settings.idp_sso_target_url = "http://localhost:8009/saml/auth"
     settings.idp_cert_fingerprint = "9E:65:2E:03:06:8D:80:F2:86:C7:6C:77:A1:D9:14:97:0A:4D:F4:4D"
   end
@@ -41,7 +47,7 @@ end
 
   generate :devise, "user", "email:string", "name:string"
   gsub_file 'app/models/user.rb', /database_authenticatable.*\n.*/, 'saml_authenticatable'
-  route "resources :users"
+  route "resources :users, only: [:create]"
   create_file('app/controllers/users_controller.rb', <<-USERS)
 class UsersController < ApplicationController
   skip_before_filter :verify_authenticity_token
