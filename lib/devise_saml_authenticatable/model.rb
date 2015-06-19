@@ -28,6 +28,12 @@ module Devise
         include DeviseSamlAuthenticatable::SamlConfig
 
         def authenticate_with_saml(attributes)
+
+          #downcase the keys of the attributes
+          attributes = attributes.each_with_object({}) do |(k, v), h|
+            h[k.downcase] = v
+          end
+
           key = Devise.saml_default_user_key
           inv_attr = attribute_map.invert
           auth_value = attributes[inv_attr[key.to_s]]

@@ -1,4 +1,5 @@
 *.gem
+.DS_Store
 *.rbc
 .bundle
 .config
