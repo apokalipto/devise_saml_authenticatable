@@ -11,6 +11,7 @@ module Devise
         @response.settings = get_saml_config
         resource = mapping.to.authenticate_with_saml(@response)
         if @response.is_valid?
+          resource.after_saml_authentication(@response.sessionindex)
           success!(resource)
         else
           fail!(:invalid)

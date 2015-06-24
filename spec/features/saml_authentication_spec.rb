@@ -65,6 +65,37 @@ describe "SAML Authentication", type: :feature do
     it_behaves_like "it authenticates and creates users"
   end
 
+  context "Forces a signout initiated by the IDP" do
+    before(:each) do
+      create_app('idp', %w(y))
+      create_app('sp', %w(n))
+      @idp_pid = start_app('idp', idp_port)
+      @sp_pid  = start_app('sp',  sp_port)
+    end
+    after(:each) do
+      stop_app(@idp_pid)
+      stop_app(@sp_pid)
+    end
+
+    it 'fadfasdf' do
+      create_user("you@example.com")
+
+      visit 'http://localhost:8020/'
+      expect(current_url).to match(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
+      fill_in "Email", with: "you@example.com"
+      fill_in "Password", with: "asdf"
+      click_on "Sign in"
+      expect(page).to have_content("you@example.com")
+      expect(current_url).to eq("http://localhost:8020/")
+
+      visit "http://localhost:#{idp_port}/saml/sp_sign_out"
+
+      visit 'http://localhost:8020/'
+      expect(current_url).to match(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
+    end
+  end
+
+
   context "when the subject is used to authenticate" do
     before(:each) do
       create_app('idp', %w(n))

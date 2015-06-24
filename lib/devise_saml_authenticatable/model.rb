@@ -24,6 +24,20 @@ module Devise
         result
       end
 
+      def after_saml_authentication(session_index)
+        if self.respond_to? Devise.saml_session_index_key
+          self.update_attribute(Devise.saml_session_index_key, session_index)
+        end
+      end
+
+      def authenticatable_salt
+        if self.respond_to? Devise.saml_session_index_key
+          self.send(Devise.saml_session_index_key)
+        else
+          super
+        end
+      end
+
       module ClassMethods
         include DeviseSamlAuthenticatable::SamlConfig
         def authenticate_with_saml(saml_response)
@@ -53,6 +67,11 @@ module Devise
           end
 
           resource
+        end
+
+        def reset_session_key_for(name_id)
+          resource = find_by(Devise.saml_default_user_key => name_id)
+          resource.update_attribute(Devise.saml_session_index_key, nil) unless resource.nil?
         end
 
         def find_for_shibb_authentication(conditions)

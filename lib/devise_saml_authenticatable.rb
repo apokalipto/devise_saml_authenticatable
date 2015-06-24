@@ -31,6 +31,9 @@ module Devise
   mattr_accessor :saml_use_subject
   @@saml_use_subject
 
+  mattr_accessor :saml_session_index_key
+  @@saml_session_index_key
+
   mattr_accessor :saml_config
   @@saml_config = OneLogin::RubySaml::Settings.new
   def self.saml_configure
