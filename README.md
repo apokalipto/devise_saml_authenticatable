@@ -45,6 +45,10 @@ In config/initializers/devise.rb
     # sure that the Authentication Response includes the attribute.
     config.saml_default_user_key = :email
 
+    # Optional. This stores the session index defined by the IDP during login.  If provided it will be used as a salt
+    # for the user's session to facilitate an IDP initiated logout request.
+    config.saml_session_index_key = :session_index
+
     # You can set this value to use Subject or SAML assertation as info to which email will be compared
     # If you don't set it then email will be extracted from SAML assertation attributes
     config.saml_use_subject = true
@@ -114,6 +118,11 @@ There are numerous IdPs that support SAML 2.0, there are propietary (like Micros
 ## Logout
 
 Logout support is included by immediately terminating the local session and then redirecting to the IdP.
+
+## Logout Request
+
+Logout requests from the IDP are supported by the `idp_sign_out` end point.  Directing logout requests to `users/saml/idp_sign_out` will logout the respective user by invalidating their current sessions.
+`saml_session_index_key` must be configured to support this feature.
 
 ## Limitations
 
