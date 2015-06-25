@@ -48,36 +48,8 @@ describe "SAML Authentication", type: :feature do
       visit 'http://localhost:8020/'
       expect(current_url).to match(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
     end
-  end
 
-  context "when the attributes are used to authenticate" do
-    before(:each) do
-      create_app('idp', %w(y))
-      create_app('sp', %w(n))
-      @idp_pid = start_app('idp', idp_port)
-      @sp_pid  = start_app('sp',  sp_port)
-    end
-    after(:each) do
-      stop_app(@idp_pid)
-      stop_app(@sp_pid)
-    end
-
-    it_behaves_like "it authenticates and creates users"
-  end
-
-  context "Forces a signout initiated by the IDP" do
-    before(:each) do
-      create_app('idp', %w(y))
-      create_app('sp', %w(n))
-      @idp_pid = start_app('idp', idp_port)
-      @sp_pid  = start_app('sp',  sp_port)
-    end
-    after(:each) do
-      stop_app(@idp_pid)
-      stop_app(@sp_pid)
-    end
-
-    it 'fadfasdf' do
+    it 'logs a user out of the SP via the IpD' do
       create_user("you@example.com")
 
       visit 'http://localhost:8020/'
@@ -95,6 +67,20 @@ describe "SAML Authentication", type: :feature do
     end
   end
 
+  context "when the attributes are used to authenticate" do
+    before(:each) do
+      create_app('idp', %w(y))
+      create_app('sp', %w(n))
+      @idp_pid = start_app('idp', idp_port)
+      @sp_pid  = start_app('sp',  sp_port)
+    end
+    after(:each) do
+      stop_app(@idp_pid)
+      stop_app(@sp_pid)
+    end
+
+    it_behaves_like "it authenticates and creates users"
+  end
 
   context "when the subject is used to authenticate" do
     before(:each) do

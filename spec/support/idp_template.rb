@@ -11,4 +11,4 @@ route "get '/saml/sp_sign_out' => 'saml_idp#sp_sign_out'"
 
 template File.expand_path('../saml_idp_controller.rb.erb', __FILE__), 'app/controllers/saml_idp_controller.rb'
 copy_file File.expand_path('../saml_idp-saml_slo_post.html.erb', __FILE__), 'app/views/saml_idp/saml_slo_post.html.erb'
-copy_file File.expand_path('../application.css', __FILE__), 'public/stylesheets/application.css'
+create_file 'public/stylesheets/application.css', ''

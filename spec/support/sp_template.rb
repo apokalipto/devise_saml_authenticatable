@@ -63,4 +63,4 @@ end
   rake "db:migrate"
 end
 
-copy_file File.expand_path('../application.css', __FILE__), 'public/stylesheets/application.css'
+create_file 'public/stylesheets/application.css', ''

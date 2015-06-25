@@ -69,8 +69,8 @@ module Devise
           resource
         end
 
-        def reset_session_key_for(name_id)
-          resource = find_by(Devise.saml_default_user_key => name_id)
+        def reset_session_key_for(session_index)
+          resource = find_by(Devise.saml_session_index_key => session_index)
           resource.update_attribute(Devise.saml_session_index_key, nil) unless resource.nil?
         end
 
