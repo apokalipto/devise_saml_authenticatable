@@ -31,7 +31,7 @@ module Devise
       end
 
       def authenticatable_salt
-        if self.respond_to? Devise.saml_session_index_key
+        if self.respond_to? Devise.saml_session_index_key && self.send(Devise.saml_session_index_key).present?
           self.send(Devise.saml_session_index_key)
         else
           super
