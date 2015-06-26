@@ -52,8 +52,6 @@ describe "SAML Authentication", type: :feature do
     it 'logs a user out of the SP via the IpD' do
       sign_in
 
-      expect(current_url).to eq("http://localhost:8020/")
-
       visit "http://localhost:#{idp_port}/saml/sp_sign_out"
 
       visit 'http://localhost:8020/'

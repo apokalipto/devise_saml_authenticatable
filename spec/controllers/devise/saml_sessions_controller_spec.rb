@@ -66,6 +66,25 @@ describe Devise::SamlSessionsController, type: :controller do
       expect(response.status).to eq 500
     end
 
+    it 'accepts a LogoutResponse and redirects sign_in' do
+      post :idp_sign_out, SAMLResponse: 'stubbed_response'
+      expect(response.status).to eq 302
+      expect(response).to redirect_to '/users/saml/sign_in'
+    end
+
+    context 'when saml_sign_out_success_url is configured' do
+      let(:test_url) { '/test/url' }
+      before do
+        Devise.saml_sign_out_success_url = test_url
+      end
+
+      it 'accepts a LogoutResponse and returns success' do
+        post :idp_sign_out, SAMLResponse: 'stubbed_response'
+        expect(response.status).to eq 302
+        expect(response).to redirect_to test_url
+      end
+    end
+
     context 'when saml_session_index_key is not configured' do
       before do
         Devise.saml_session_index_key = nil

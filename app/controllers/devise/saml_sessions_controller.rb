@@ -23,6 +23,15 @@ class Devise::SamlSessionsController < Devise::SessionsController
       resource_class.reset_session_key_for(logout_request.name_id)
 
       redirect_to generate_idp_logout_response(logout_request)
+    elsif params[:SAMLResponse]
+      #Currently Devise handles the session invalidation when the request is made.
+      #To support a true SP initiated logout response, the request ID would have to be tracked and session invalidated
+      #based on that.
+      if Devise.saml_sign_out_success_url
+        redirect_to Devise.saml_sign_out_success_url
+      else
+        redirect_to action: :new
+      end
     else
       head :invalid_request
     end
