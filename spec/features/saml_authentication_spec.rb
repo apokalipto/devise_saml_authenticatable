@@ -50,14 +50,8 @@ describe "SAML Authentication", type: :feature do
     end
 
     it 'logs a user out of the SP via the IpD' do
-      create_user("you@example.com")
+      sign_in
 
-      visit 'http://localhost:8020/'
-      expect(current_url).to match(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
-      fill_in "Email", with: "you@example.com"
-      fill_in "Password", with: "asdf"
-      click_on "Sign in"
-      expect(page).to have_content("you@example.com")
       expect(current_url).to eq("http://localhost:8020/")
 
       visit "http://localhost:#{idp_port}/saml/sp_sign_out"
