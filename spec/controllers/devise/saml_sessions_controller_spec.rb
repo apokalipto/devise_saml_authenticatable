@@ -45,10 +45,10 @@ describe Devise::SamlSessionsController, type: :controller do
   end
 
   describe '#idp_sign_out' do
-    let(:session_index) { '12312312' }
+    let(:name_id) { '12312312' }
     let(:saml_request) { double(:logout_request, {
         id: 42,
-        session_indexes: [session_index]
+        name_id: name_id
       }) }
     let(:sam_response) { double(:logout_response)}
     let(:response_url) { 'http://localhost/logout_response' }
@@ -61,7 +61,7 @@ describe Devise::SamlSessionsController, type: :controller do
     end
 
     it 'returns invalid request if SAMLRequest is not passed' do
-      expect(User).not_to receive(:reset_session_key_for).with(session_index)
+      expect(User).not_to receive(:reset_session_key_for).with(name_id)
       post :idp_sign_out
       expect(response.status).to eq 500
     end
@@ -72,14 +72,14 @@ describe Devise::SamlSessionsController, type: :controller do
       end
 
       it 'returns invalid request' do
-        expect(User).not_to receive(:reset_session_key_for).with(session_index)
+        expect(User).not_to receive(:reset_session_key_for).with(name_id)
         post :idp_sign_out, SAMLRequest: 'stubbed_request'
         expect(response.status).to eq 500
       end
     end
 
     it 'direct the resource to reset the session key' do
-      expect(User).to receive(:reset_session_key_for).with(session_index)
+      expect(User).to receive(:reset_session_key_for).with(name_id)
       post :idp_sign_out, SAMLRequest: 'stubbed_request'
       expect(response).to redirect_to response_url
     end
