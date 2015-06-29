@@ -10,6 +10,9 @@ class Devise::SessionsController < ActionController::Base
     sign_out
     redirect_to after_sign_out_path_for(:user)
   end
+
+  def require_no_authentication
+  end
 end
 
 require_relative '../../../app/controllers/devise/saml_sessions_controller'

@@ -43,6 +43,8 @@ describe "SAML Authentication", type: :feature do
       expect(current_url).to eq("http://localhost:8020/")
 
       click_on "Log out"
+      #confirm the logout response redirected to the SP which in turn attempted to sign the user back in
+      expect(current_url).to match(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
 
       # prove user is now signed out
       visit 'http://localhost:8020/'

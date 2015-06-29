@@ -3,6 +3,7 @@
 use_subject_to_authenticate = ask("Use subject to authenticate?", limit: %w(y n)) == "y"
 
 gem 'devise_saml_authenticatable', path: '../../..'
+gem 'thin'
 
 create_file 'config/attribute-map.yml', <<-ATTRIBUTES
 ---
