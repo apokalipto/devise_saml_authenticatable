@@ -6,6 +6,7 @@ module Devise
       def valid?
         params[:SAMLResponse] && !(params[:SAMLResponse].include? 'LogoutResponse')
       end
+
       def authenticate!
         @response = OneLogin::RubySaml::Response.new(params[:SAMLResponse])
         @response.settings = get_saml_config

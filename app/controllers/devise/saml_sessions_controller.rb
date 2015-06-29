@@ -5,7 +5,6 @@ class Devise::SamlSessionsController < Devise::SessionsController
   unloadable if Rails::VERSION::MAJOR < 4
   before_filter :get_saml_config
   skip_before_filter :verify_authenticity_token
-  before_filter :require_no_authentication, only: [:new, :create, :idp_sign_out]
 
   def new
     request = OneLogin::RubySaml::Authrequest.new
