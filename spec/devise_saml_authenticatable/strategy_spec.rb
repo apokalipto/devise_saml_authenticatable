@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe Devise::Strategies::SamlAuthenticatable do
   subject(:strategy) { described_class.new(env, :user) }
