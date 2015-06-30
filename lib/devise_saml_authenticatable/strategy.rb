@@ -6,7 +6,7 @@ module Devise
       def valid?
         if params[:SAMLResponse]
           response = OneLogin::RubySaml::Logoutresponse.new(params[:SAMLResponse], get_saml_config)
-          !(response.document.include? 'LogoutReponse')
+          !(response.response.include? 'LogoutResponse')
         else
           false
         end
