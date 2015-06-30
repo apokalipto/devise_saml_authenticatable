@@ -5,9 +5,8 @@ module Devise
       include DeviseSamlAuthenticatable::SamlConfig
       def valid?
         if params[:SAMLResponse]
-          response = OneLogin::RubySaml::Response.new(params[:SAMLResponse])
-          response.settings = get_saml_config
-          response.is_valid?
+          response = OneLogin::RubySaml::Logoutresponse.new(params[:SAMLResponse], get_saml_config)
+          !(response.document.include? 'LogoutReponse')
         else
           false
         end
