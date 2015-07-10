@@ -5,6 +5,7 @@ require "devise_saml_authenticatable/exception"
 require "devise_saml_authenticatable/logger"
 require "devise_saml_authenticatable/routes"
 require "devise_saml_authenticatable/saml_config"
+
 begin
   Rails::Engine
 rescue
@@ -30,6 +31,12 @@ module Devise
 
   mattr_accessor :saml_use_subject
   @@saml_use_subject
+
+  mattr_accessor :saml_session_index_key
+  @@saml_session_index_key
+
+  mattr_accessor :saml_sign_out_success_url
+  @@saml_sign_out_success_url
 
   mattr_accessor :saml_config
   @@saml_config = OneLogin::RubySaml::Settings.new

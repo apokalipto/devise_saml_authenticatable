@@ -3,6 +3,7 @@
 use_subject_to_authenticate = ask("Use subject to authenticate?", limit: %w(y n)) == "y"
 
 gem 'devise_saml_authenticatable', path: '../../..'
+gem 'thin'
 
 create_file 'config/attribute-map.yml', <<-ATTRIBUTES
 ---
@@ -31,6 +32,7 @@ after_bundle do
   generate 'devise:install'
   gsub_file 'config/initializers/devise.rb', /^end$/, <<-CONFIG
   config.saml_default_user_key = :email
+  config.saml_session_index_key = :session_index
 
   config.saml_use_subject = #{use_subject_to_authenticate}
   config.saml_create_user = true
@@ -45,7 +47,7 @@ after_bundle do
 end
   CONFIG
 
-  generate :devise, "user", "email:string", "name:string"
+  generate :devise, "user", "email:string", "name:string", "session_index:string"
   gsub_file 'app/models/user.rb', /database_authenticatable.*\n.*/, 'saml_authenticatable'
   route "resources :users, only: [:create]"
   create_file('app/controllers/users_controller.rb', <<-USERS)
@@ -61,3 +63,5 @@ end
   rake "db:create"
   rake "db:migrate"
 end
+
+create_file 'public/stylesheets/application.css', ''

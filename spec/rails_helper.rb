@@ -13,3 +13,8 @@ ActiveRecord::Migrator.migrate(File.expand_path("../support/sp/db/migrate/", __F
 RSpec.configure do |config|
   config.use_transactional_fixtures = true
 end
+
+Devise.setup do |config|
+  config.saml_default_user_key = :email
+  config.saml_session_index_key = :session_index
+end

@@ -4,13 +4,20 @@ module Devise
     class SamlAuthenticatable < Authenticatable
       include DeviseSamlAuthenticatable::SamlConfig
       def valid?
-        params[:SAMLResponse]
+        if params[:SAMLResponse]
+          response = OneLogin::RubySaml::Logoutresponse.new(params[:SAMLResponse], get_saml_config)
+          !(response.response.include? 'LogoutResponse')
+        else
+          false
+        end
       end
+
       def authenticate!
         @response = OneLogin::RubySaml::Response.new(params[:SAMLResponse])
         @response.settings = get_saml_config
         resource = mapping.to.authenticate_with_saml(@response)
         if @response.is_valid?
+          resource.after_saml_authentication(@response.sessionindex)
           success!(resource)
         else
           fail!(:invalid)
