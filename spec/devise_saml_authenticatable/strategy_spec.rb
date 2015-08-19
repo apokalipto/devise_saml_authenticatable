@@ -35,8 +35,7 @@ describe Devise::Strategies::SamlAuthenticatable do
     end
 
     it "authenticates with the response" do
-      expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse])
-      expect(response).to receive(:settings=).with(saml_config)
+      expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], settings: saml_config)
       expect(user_class).to receive(:authenticate_with_saml).with(response)
       expect(user).to receive(:after_saml_authentication).with(response.sessionindex)
 
