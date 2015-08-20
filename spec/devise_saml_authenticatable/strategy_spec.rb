@@ -43,6 +43,15 @@ describe Devise::Strategies::SamlAuthenticatable do
       strategy.authenticate!
     end
 
+    context "and the resource cannot does not exist" do
+      let(:user) { nil }
+
+      it "fails to authenticate" do
+        expect(strategy).to receive(:fail!).with(:invalid)
+        strategy.authenticate!
+      end
+    end
+
     context "and the SAML response is not valid" do
       before do
         allow(response).to receive(:is_valid?).and_return(false)
