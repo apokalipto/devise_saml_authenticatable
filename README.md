@@ -37,10 +37,10 @@ In config/initializers/devise.rb
   Devise.setup do |config|
     ...
     # ==> Configuration for :saml_authenticatable
-    
+
     # Create user if the user does not exist. (Default is false)
     config.saml_create_user = true
-    
+
     # Set the default user key. The user will be looked up by this key. Make
     # sure that the Authentication Response includes the attribute.
     config.saml_default_user_key = :email
@@ -58,7 +58,7 @@ In config/initializers/devise.rb
       settings.assertion_consumer_service_url     = "http://localhost:3000/users/saml/auth"
       settings.assertion_consumer_service_binding = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
       settings.name_identifier_format             = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
-      settings.issuer                             = "http://localhost:3000"
+      settings.issuer                             = "http://localhost:3000/saml/metadata"
       settings.authn_context                      = ""
       settings.idp_slo_target_url                 = "http://localhost/simplesaml/www/saml2/idp/SingleLogoutService.php"
       settings.idp_sso_target_url                 = "http://localhost/simplesaml/www/saml2/idp/SSOService.php"
@@ -88,7 +88,7 @@ In config directory create a YAML file (`attribute-map.yml`) that maps SAML attr
 
 ```yaml
   # attribute-map.yml
-  
+
   "urn:mace:dir:attribute-def:uid": "user_name"
   "urn:mace:dir:attribute-def:email": "email"
   "urn:mace:dir:attribute-def:name": "last_name"
