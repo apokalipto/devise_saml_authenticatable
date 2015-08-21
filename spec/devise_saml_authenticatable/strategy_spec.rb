@@ -35,13 +35,21 @@ describe Devise::Strategies::SamlAuthenticatable do
     end
 
     it "authenticates with the response" do
-      expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse])
-      expect(response).to receive(:settings=).with(saml_config)
+      expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], settings: saml_config)
       expect(user_class).to receive(:authenticate_with_saml).with(response)
       expect(user).to receive(:after_saml_authentication).with(response.sessionindex)
 
       expect(strategy).to receive(:success!).with(user)
       strategy.authenticate!
+    end
+
+    context "and the resource cannot does not exist" do
+      let(:user) { nil }
+
+      it "fails to authenticate" do
+        expect(strategy).to receive(:fail!).with(:invalid)
+        strategy.authenticate!
+      end
     end
 
     context "and the SAML response is not valid" do
