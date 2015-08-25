@@ -14,6 +14,13 @@ describe Devise::Models::SamlAuthenticatable do
       def logger; end
     end
   end
+  class UserTest
+    attr_accessor :email, :name
+    def initialize(email, name)
+      @email = email
+      @name = name
+    end
+  end
 
   before do
     logger = double(:logger).as_null_object
@@ -90,7 +97,7 @@ describe Devise::Models::SamlAuthenticatable do
     end
   end
 
-  context "when configured to create a user and the user is not found" do
+  context "when configured to create an user and the user is not found" do
     before do
       allow(Devise).to receive(:saml_create_user).and_return(true)
     end
@@ -103,6 +110,26 @@ describe Devise::Models::SamlAuthenticatable do
       expect(model.saved).to be(true)
     end
   end
+
+  context "when configured to update an user" do
+    before do
+      allow(Devise).to receive(:saml_update_user).and_return(true)
+    end
+
+    it "returns nil if the user is not found" do
+      expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
+      expect(Model.authenticate_with_saml(response)).to be_nil
+    end
+
+    it "updates the attributes if the user is found" do
+      user = UserTest.new("old_mail@mail.com", "old name")
+      expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])      
+      model = Model.authenticate_with_saml(response)
+      expect(model.email).to eq('user@example.com')
+      expect(model.name).to  eq('A User')
+    end
+  end
+
 
   context "when configured with a case-insensitive key" do
     before do

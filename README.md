@@ -41,6 +41,9 @@ In config/initializers/devise.rb
     # Create user if the user does not exist. (Default is false)
     config.saml_create_user = true
 
+    # Update the attributes of the user after a successful login. (Default is false)
+    config.saml_update_user = true
+
     # Set the default user key. The user will be looked up by this key. Make
     # sure that the Authentication Response includes the attribute.
     config.saml_default_user_key = :email

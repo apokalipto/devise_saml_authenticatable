@@ -26,6 +26,10 @@ module Devise
   mattr_accessor :saml_create_user
   @@saml_create_user = false
 
+  # Update user attributes after login
+  mattr_accessor :saml_update_user
+  @@saml_update_user = false
+
   mattr_accessor :saml_default_user_key
   @@saml_default_user_key
 
@@ -48,9 +52,7 @@ end
 # Add saml_authenticatable strategy to defaults.
 #
 Devise.add_module(:saml_authenticatable,
-                  :route => :saml_authenticatable, 
+                  :route => :saml_authenticatable,
                   :strategy   => true,
                   :controller => :saml_sessions,
                   :model  => 'devise_saml_authenticatable/model')
-
-
