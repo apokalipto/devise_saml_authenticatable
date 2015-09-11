@@ -93,6 +93,21 @@ describe Devise::Models::SamlAuthenticatable do
         expect(model.saved).to be(true)
       end
     end
+
+    context "when configured to update a user and the user is found" do
+      before do
+        allow(Devise).to receive(:saml_update_user).and_return(true)
+      end
+
+      it "creates and returns a new user with the name identifier and given attributes" do
+        user = Model.new(email: "old_mail@mail.com", name: "old name")
+        expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
+        model = Model.authenticate_with_saml(response)
+        expect(model.email).to eq('user@example.com')
+        expect(model.name).to  eq('A User')
+        expect(model.saved).to be(true)
+      end
+    end
   end
 
   context "when configured to create an user and the user is not found" do

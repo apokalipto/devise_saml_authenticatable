@@ -54,6 +54,9 @@ module Devise
 
           if (!resource.nil? && Devise.saml_update_user)
             set_user_saml_attributes(resource, attributes)
+            if (Devise.saml_use_subject)
+              resource.send "#{key}=", auth_value
+            end
             resource.save!
           end
 
