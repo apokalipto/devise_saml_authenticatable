@@ -7,6 +7,11 @@ describe Devise::Models::SamlAuthenticatable do
     def initialize(params = {})
       @email = params[:email]
       @name = params[:name]
+      @new_record = params.fetch(:new_record, true)
+    end
+
+    def new_record?
+      @new_record
     end
 
     def save!
@@ -51,7 +56,7 @@ describe Devise::Models::SamlAuthenticatable do
   let(:name_id) { nil }
 
   it "looks up the user by the configured default user key" do
-    user = double(:user)
+    user = Model.new(new_record: false)
     expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
     expect(Model.authenticate_with_saml(response)).to eq(user)
   end
@@ -70,7 +75,7 @@ describe Devise::Models::SamlAuthenticatable do
     end
 
     it "looks up the user by the configured default user key" do
-      user = double(:user)
+      user = Model.new(new_record: false)
       expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
       expect(Model.authenticate_with_saml(response)).to eq(user)
     end
@@ -100,7 +105,7 @@ describe Devise::Models::SamlAuthenticatable do
       end
 
       it "creates and returns a new user with the name identifier and given attributes" do
-        user = Model.new(email: "old_mail@mail.com", name: "old name")
+        user = Model.new(email: "old_mail@mail.com", name: "old name", new_record: false)
         expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
         model = Model.authenticate_with_saml(response)
         expect(model.email).to eq('user@example.com')
@@ -135,7 +140,7 @@ describe Devise::Models::SamlAuthenticatable do
     end
 
     it "updates the attributes if the user is found" do
-      user = Model.new(email: "old_mail@mail.com", name: "old name")
+      user = Model.new(email: "old_mail@mail.com", name: "old name", new_record: false)
       expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
       model = Model.authenticate_with_saml(response)
       expect(model.email).to eq('user@example.com')
@@ -151,7 +156,7 @@ describe Devise::Models::SamlAuthenticatable do
     end
 
     it "looks up the user with a downcased value" do
-      user = double(:user)
+      user = Model.new(new_record: false)
       expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
       expect(Model.authenticate_with_saml(response)).to eq(user)
     end
