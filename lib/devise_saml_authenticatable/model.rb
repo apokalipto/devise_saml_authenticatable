@@ -14,7 +14,7 @@ module Devise
       def update_with_password(params={})
         params.delete(:current_password)
         self.update_without_password(params)
-      end	
+      end
 
       def update_without_password(params={})
         params.delete(:password)
@@ -51,9 +51,14 @@ module Devise
             auth_value.try(:downcase!) if Devise.case_insensitive_keys.include?(key)
           end
           resource = where(key => auth_value).first
+
+          if (!resource.nil? && Devise.saml_update_user)
+            set_user_saml_attributes(resource,attributes)
+          end
+
           if (resource.nil? && !Devise.saml_create_user)
             logger.info("User(#{auth_value}) not found.  Not configured to create the user.")
-            return nil 
+            return nil
           end
 
           if (resource.nil? && Devise.saml_create_user)
