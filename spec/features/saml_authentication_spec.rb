@@ -34,6 +34,19 @@ describe "SAML Authentication", type: :feature do
       expect(current_url).to eq("http://localhost:8020/")
     end
 
+    it "updates a user on the SP from the IdP attributes" do
+      create_user("you@example.com")
+
+      visit 'http://localhost:8020/'
+      expect(current_url).to match(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
+      fill_in "Email", with: "you@example.com"
+      fill_in "Password", with: "asdf"
+      click_on "Sign in"
+      expect(page).to have_content("you@example.com")
+      expect(page).to have_content("A User")
+      expect(current_url).to eq("http://localhost:8020/")
+    end
+
     it "logs a user out of the IdP via the SP" do
       sign_in
 

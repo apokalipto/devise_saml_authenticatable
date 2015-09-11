@@ -36,6 +36,7 @@ after_bundle do
 
   config.saml_use_subject = #{use_subject_to_authenticate}
   config.saml_create_user = true
+  config.saml_update_user = true
 
   config.saml_configure do |settings|
     settings.assertion_consumer_service_url = "http://localhost:8020/users/saml/auth"
