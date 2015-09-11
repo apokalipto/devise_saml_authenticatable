@@ -4,6 +4,11 @@ describe Devise::Models::SamlAuthenticatable do
   class Model
     include Devise::Models::SamlAuthenticatable
     attr_accessor :email, :name, :saved
+    def initialize(params = {})
+      @email = params[:email]
+      @name = params[:name]
+    end
+
     def save!
       self.saved = true
     end
@@ -12,13 +17,6 @@ describe Devise::Models::SamlAuthenticatable do
     class << self
       def where(*args); end
       def logger; end
-    end
-  end
-  class UserTest
-    attr_accessor :email, :name
-    def initialize(email, name)
-      @email = email
-      @name = name
     end
   end
 
@@ -122,11 +120,12 @@ describe Devise::Models::SamlAuthenticatable do
     end
 
     it "updates the attributes if the user is found" do
-      user = UserTest.new("old_mail@mail.com", "old name")
-      expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])      
+      user = Model.new(email: "old_mail@mail.com", name: "old name")
+      expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
       model = Model.authenticate_with_saml(response)
       expect(model.email).to eq('user@example.com')
       expect(model.name).to  eq('A User')
+      expect(model.saved).to be(true)
     end
   end
 

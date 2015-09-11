@@ -53,7 +53,8 @@ module Devise
           resource = where(key => auth_value).first
 
           if (!resource.nil? && Devise.saml_update_user)
-            set_user_saml_attributes(resource,attributes)
+            set_user_saml_attributes(resource, attributes)
+            resource.save!
           end
 
           if (resource.nil? && !Devise.saml_create_user)
@@ -64,7 +65,7 @@ module Devise
           if (resource.nil? && Devise.saml_create_user)
             logger.info("Creating user(#{auth_value}).")
             resource = new
-            set_user_saml_attributes(resource,attributes)
+            set_user_saml_attributes(resource, attributes)
             if (Devise.saml_use_subject)
               resource.send "#{key}=", auth_value
             end
