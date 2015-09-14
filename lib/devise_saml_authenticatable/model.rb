@@ -52,19 +52,18 @@ module Devise
           end
           resource = where(key => auth_value).first
 
-          if (!resource.nil? && Devise.saml_update_user)
-            set_user_saml_attributes(resource,attributes)
+          if resource.nil?
+            if Devise.saml_create_user
+              logger.info("Creating user(#{auth_value}).")
+              resource = new
+            else
+              logger.info("User(#{auth_value}) not found.  Not configured to create the user.")
+              return nil
+            end
           end
 
-          if (resource.nil? && !Devise.saml_create_user)
-            logger.info("User(#{auth_value}) not found.  Not configured to create the user.")
-            return nil
-          end
-
-          if (resource.nil? && Devise.saml_create_user)
-            logger.info("Creating user(#{auth_value}).")
-            resource = new
-            set_user_saml_attributes(resource,attributes)
+          if Devise.saml_update_user || (resource.new_record? && Devise.saml_create_user)
+            set_user_saml_attributes(resource, attributes)
             if (Devise.saml_use_subject)
               resource.send "#{key}=", auth_value
             end
