@@ -127,9 +127,9 @@ Logout support is included by immediately terminating the local session and then
 Logout requests from the IDP are supported by the `idp_sign_out` end point.  Directing logout requests to `users/saml/idp_sign_out` will logout the respective user by invalidating their current sessions.
 `saml_session_index_key` must be configured to support this feature.
 
-## Limitations
+## Signing and Encrypting Authentication Requests
 
-1. The Authentication Requests (from your app to the IdP) are not signed and encrypted
+ruby-saml 1.0.0 supports signature and decrypt. Teh only requirement is to place the public certificate and the private key. Please reffer to these features in the ruby-saml documentation [here](https://github.com/onelogin/ruby-saml#signing)
 
 ## Thanks
 
