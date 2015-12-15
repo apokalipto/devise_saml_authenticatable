@@ -76,8 +76,8 @@ describe "SAML Authentication", type: :feature do
 
   context "when the attributes are used to authenticate" do
     before(:each) do
-      create_app('idp', %w(y))
-      create_app('sp', %w(n))
+      create_app('idp', 'INCLUDE_SUBJECT_IN_ATTRIBUTES' => "true")
+      create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "false")
       @idp_pid = start_app('idp', idp_port)
       @sp_pid  = start_app('sp',  sp_port)
     end
@@ -91,8 +91,8 @@ describe "SAML Authentication", type: :feature do
 
   context "when the subject is used to authenticate" do
     before(:each) do
-      create_app('idp', %w(n))
-      create_app('sp', %w(y))
+      create_app('idp', 'INCLUDE_SUBJECT_IN_ATTRIBUTES' => "false")
+      create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "true")
       @idp_pid = start_app('idp', idp_port)
       @sp_pid  = start_app('sp',  sp_port)
     end

@@ -1,6 +1,6 @@
 # Set up a SAML Service Provider
 
-use_subject_to_authenticate = ask("Use subject to authenticate?", limit: %w(y n)) == "y"
+use_subject_to_authenticate = ENV.fetch('USE_SUBJECT_TO_AUTHENTICATE')
 
 gem 'devise_saml_authenticatable', path: '../../..'
 gem 'thin'

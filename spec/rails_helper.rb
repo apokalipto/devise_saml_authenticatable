@@ -2,7 +2,7 @@ ENV["RAILS_ENV"] ||= 'test'
 
 require 'spec_helper'
 
-create_app('sp', %w(n))
+create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "false")
 require 'support/sp/config/environment'
 require 'rspec/rails'
 

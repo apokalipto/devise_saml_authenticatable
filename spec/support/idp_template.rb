@@ -1,6 +1,6 @@
 # Set up a SAML IdP
 
-@include_subject_in_attributes = ask("Include the subject in the attributes?", limit: %w(y n)) == "y"
+@include_subject_in_attributes = ENV.fetch('INCLUDE_SUBJECT_IN_ATTRIBUTES')
 
 gem 'ruby-saml-idp'
 gem 'thin'
