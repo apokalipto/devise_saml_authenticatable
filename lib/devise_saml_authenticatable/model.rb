@@ -25,13 +25,15 @@ module Devise
       end
 
       def after_saml_authentication(session_index)
-        if self.respond_to? Devise.saml_session_index_key
+        if Devise.saml_session_index_key && self.respond_to?(Devise.saml_session_index_key)
           self.update_attribute(Devise.saml_session_index_key, session_index)
         end
       end
 
       def authenticatable_salt
-        if self.respond_to?(Devise.saml_session_index_key) && self.send(Devise.saml_session_index_key).present?
+        if Devise.saml_session_index_key &&
+           self.respond_to?(Devise.saml_session_index_key) &&
+           self.send(Devise.saml_session_index_key).present?
           self.send(Devise.saml_session_index_key)
         else
           super

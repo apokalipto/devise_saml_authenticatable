@@ -63,8 +63,10 @@ describe "SAML Authentication", type: :feature do
       visit 'http://localhost:8020/'
       expect(current_url).to match(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
     end
+  end
 
-    it 'logs a user out of the SP via the IpD' do
+  shared_examples_for "it logs a user out via the IdP" do
+    it 'logs a user out of the SP via the IdP' do
       sign_in
 
       visit "http://localhost:#{idp_port}/saml/sp_sign_out"
@@ -93,6 +95,37 @@ describe "SAML Authentication", type: :feature do
     before(:each) do
       create_app('idp', 'INCLUDE_SUBJECT_IN_ATTRIBUTES' => "false")
       create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "true")
+      @idp_pid = start_app('idp', idp_port)
+      @sp_pid  = start_app('sp',  sp_port)
+    end
+    after(:each) do
+      stop_app(@idp_pid)
+      stop_app(@sp_pid)
+    end
+
+    it_behaves_like "it authenticates and creates users"
+  end
+
+  context "when the session index key is set" do
+    before(:each) do
+      create_app('idp', 'INCLUDE_SUBJECT_IN_ATTRIBUTES' => "false")
+      create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "true", 'SAML_SESSION_INDEX_KEY' => ":session_index")
+      @idp_pid = start_app('idp', idp_port)
+      @sp_pid  = start_app('sp',  sp_port)
+    end
+    after(:each) do
+      stop_app(@idp_pid)
+      stop_app(@sp_pid)
+    end
+
+    it_behaves_like "it authenticates and creates users"
+    it_behaves_like "it logs a user out via the IdP"
+  end
+
+  context "when the session index key is not set" do
+    before(:each) do
+      create_app('idp', 'INCLUDE_SUBJECT_IN_ATTRIBUTES' => "false")
+      create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "true", 'SAML_SESSION_INDEX_KEY' => "nil")
       @idp_pid = start_app('idp', idp_port)
       @sp_pid  = start_app('sp',  sp_port)
     end
