@@ -1,4 +1,4 @@
-require 'devise/strategies/authenticatable' 
+require 'devise/strategies/authenticatable'
 
 module Devise
   module Strategies
@@ -6,7 +6,7 @@ module Devise
       include DeviseSamlAuthenticatable::SamlConfig
       def valid?
         if params[:SAMLResponse]
-          response = OneLogin::RubySaml::Logoutresponse.new(params[:SAMLResponse], get_saml_config)
+          response = OneLogin::RubySaml::Logoutresponse.new(params[:SAMLResponse], saml_config)
           !(response.response.include? 'LogoutResponse')
         else
           false
@@ -14,7 +14,7 @@ module Devise
       end
 
       def authenticate!
-        @response = OneLogin::RubySaml::Response.new(params[:SAMLResponse], settings: get_saml_config)
+        @response = OneLogin::RubySaml::Response.new(params[:SAMLResponse], settings: saml_config)
         resource = mapping.to.authenticate_with_saml(@response)
         if @response.is_valid? && resource
           resource.after_saml_authentication(@response.sessionindex)

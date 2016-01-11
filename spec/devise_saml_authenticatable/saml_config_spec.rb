@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe DeviseSamlAuthenticatable::SamlConfig do
-  subject(:saml_config) { controller.get_saml_config }
+  subject(:saml_config) { controller.saml_config }
   let(:controller) { Class.new { include DeviseSamlAuthenticatable::SamlConfig }.new }
 
   # Replace global config since this test changes it
