@@ -11,7 +11,7 @@ describe Devise::Strategies::SamlAuthenticatable do
 
   let(:saml_config) { OneLogin::RubySaml::Settings.new }
   before do
-    allow(strategy).to receive(:get_saml_config).and_return(saml_config)
+    allow(strategy).to receive(:saml_config).and_return(saml_config)
   end
 
   let(:mapping) { double(:mapping, to: user_class) }
