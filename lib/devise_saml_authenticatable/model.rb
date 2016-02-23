@@ -76,7 +76,7 @@ module Devise
         end
 
         def reset_session_key_for(name_id)
-          resource = find_by(Devise.saml_default_user_key => name_id)
+          resource = self.where(Devise.saml_default_user_key => name_id).first
           resource.update_attribute(Devise.saml_session_index_key, nil) unless resource.nil?
         end
 
