@@ -11,19 +11,6 @@ module Devise
         attr_accessor :password_confirmation
       end
 
-      def update_with_password(params={})
-        params.delete(:current_password)
-        self.update_without_password(params)
-      end
-
-      def update_without_password(params={})
-        params.delete(:password)
-        params.delete(:password_confirmation)
-
-        result = update_attributes(params)
-        result
-      end
-
       def after_saml_authentication(session_index)
         if Devise.saml_session_index_key && self.respond_to?(Devise.saml_session_index_key)
           self.update_attribute(Devise.saml_session_index_key, session_index)
