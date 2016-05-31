@@ -97,6 +97,7 @@ class SamlIdpController < SamlIdp::IdpController
     idp_slo_authenticate(params[:name_id])
     saml_slo_request = encode_SAML_SLO_Request("you@example.com")
     uri = URI.parse("http://localhost:8020/users/saml/idp_sign_out")
+    require 'net/http'
     Net::HTTP.post_form(uri, {"SAMLRequest" => saml_slo_request})
     head :no_content
   end
