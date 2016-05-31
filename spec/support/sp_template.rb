@@ -6,6 +6,18 @@ use_subject_to_authenticate = ENV.fetch('USE_SUBJECT_TO_AUTHENTICATE')
 gem 'devise_saml_authenticatable', path: '../../..'
 gem 'thin'
 
+insert_into_file('Gemfile', after: /\z/) {
+  <<-GEMFILE
+# Lock down versions of gems for older versions of Ruby
+if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.0")
+  gem 'mime-types', '~> 2.99'
+end
+if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.1")
+  gem 'devise', '~> 3.5'
+end
+  GEMFILE
+}
+
 create_file 'config/attribute-map.yml', <<-ATTRIBUTES
 ---
 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress": email
