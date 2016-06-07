@@ -66,7 +66,7 @@ environment:
       IDP
     end
 
-    it "stores the configured IdP settings" do
+    it "uses that file's contents" do
       expect(saml_config.assertion_consumer_logout_service_binding).to eq('assertion_consumer_logout_service_binding')
       expect(saml_config.assertion_consumer_logout_service_url).to eq('assertion_consumer_logout_service_url')
       expect(saml_config.assertion_consumer_service_binding).to eq('assertion_consumer_service_binding')
