@@ -21,6 +21,14 @@ require_relative '../../../app/controllers/devise/saml_sessions_controller'
 describe Devise::SamlSessionsController, type: :controller do
   let(:saml_config) { Devise.saml_config }
 
+  before do
+    @original_saml_config = Devise.saml_config
+  end
+  after do
+    Devise.saml_config = @original_saml_config
+    Devise.idp_settings_adapter = nil
+  end
+
   describe '#new' do
     it 'redirects to the SAML Auth Request endpoint' do
       get :new
@@ -29,13 +37,55 @@ describe Devise::SamlSessionsController, type: :controller do
   end
 
   describe '#metadata' do
-    it 'generates metadata' do
-      get :metadata
+    context "with the default configuration" do
+      it 'generates metadata' do
+        get :metadata
 
-      # Remove ID that can vary across requests
-      expected_metadata = OneLogin::RubySaml::Metadata.new.generate(saml_config)
-      metadata_pattern = Regexp.escape(expected_metadata).gsub(/ ID='[^']+'/, " ID='[\\w-]+'")
-      expect(response.body).to match(Regexp.new(metadata_pattern))
+        # Remove ID that can vary across requests
+        expected_metadata = OneLogin::RubySaml::Metadata.new.generate(saml_config)
+        metadata_pattern = Regexp.escape(expected_metadata).gsub(/ ID='[^']+'/, " ID='[\\w-]+'")
+        expect(response.body).to match(Regexp.new(metadata_pattern))
+      end
+    end
+
+    context "with a specified IDP" do
+      let(:idp_providers_adapter) {
+        Class.new {
+          def self.settings(idp_entity_id)
+            {
+              assertion_consumer_service_url: "acs_url",
+              assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+              name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+              issuer: "sp_issuer",
+              idp_entity_id: "http://www.example.com",
+              authn_context: "",
+              idp_slo_target_url: "idp_slo_url",
+              idp_sso_target_url: "idp_sso_url",
+              idp_cert: "idp_cert"
+            }
+          end
+        }
+      }
+      let(:saml_config) { controller.saml_config(idp_entity_id: "anything") }
+
+      before do
+        Devise.idp_settings_adapter = idp_providers_adapter
+        Devise.saml_configure do |settings|
+          settings.assertion_consumer_service_url     = "http://localhost:3000/users/saml/auth"
+          settings.assertion_consumer_service_binding = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+          settings.name_identifier_format             = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
+          settings.issuer                             = "http://localhost:3000"
+        end
+      end
+
+      it "generates the same service metadata" do
+        get :metadata
+
+        # Remove ID that can vary across requests
+        expected_metadata = OneLogin::RubySaml::Metadata.new.generate(saml_config)
+        metadata_pattern = Regexp.escape(expected_metadata).gsub(/ ID='[^']+'/, " ID='[\\w-]+'")
+        expect(response.body).to match(Regexp.new(metadata_pattern))
+      end
     end
   end
 
