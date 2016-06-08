@@ -1,8 +1,9 @@
 require 'ruby-saml'
 module DeviseSamlAuthenticatable
   module SamlConfig
-    def saml_config
+    def saml_config(idp_entity_id: nil)
       return file_based_config if file_based_config
+      return adapter_based_config(idp_entity_id) if Devise.idp_settings_adapter
 
       Devise.saml_config
     end
@@ -14,8 +15,21 @@ module DeviseSamlAuthenticatable
       idp_config_path = "#{Rails.root}/config/idp.yml"
 
       if File.exists?(idp_config_path)
-        @file_based_config ||= Devise.saml_config = OneLogin::RubySaml::Settings.new(YAML.load(File.read(idp_config_path))[Rails.env])
+        @file_based_config ||= OneLogin::RubySaml::Settings.new(YAML.load(File.read(idp_config_path))[Rails.env])
       end
+    end
+
+    def adapter_based_config(idp_entity_id)
+      config = Marshal.load(Marshal.dump(Devise.saml_config))
+
+      Devise.idp_settings_adapter.settings(idp_entity_id).each do |k,v|
+        acc = "#{k.to_s}=".to_sym
+
+        if config.respond_to? acc
+          config.send(acc, v)
+        end
+      end
+      config
     end
   end
 end

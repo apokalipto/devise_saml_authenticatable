@@ -42,6 +42,9 @@ module Devise
   mattr_accessor :saml_sign_out_success_url
   @@saml_sign_out_success_url
 
+  mattr_accessor :idp_settings_adapter
+  @@idp_settings_adapter
+
   mattr_accessor :saml_config
   @@saml_config = OneLogin::RubySaml::Settings.new
   def self.saml_configure

@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe DeviseSamlAuthenticatable::SamlConfig do
-  subject(:saml_config) { controller.saml_config }
+  let(:saml_config) { controller.saml_config }
   let(:controller) { Class.new { include DeviseSamlAuthenticatable::SamlConfig }.new }
 
   # Replace global config since this test changes it
@@ -24,6 +24,66 @@ describe DeviseSamlAuthenticatable::SamlConfig do
       end
       expect(saml_config).to be(Devise.saml_config)
       expect(saml_config.assertion_consumer_logout_service_binding).to eq('test')
+    end
+
+    context "when the idp_providers_adapter key exists" do
+      before do
+        Devise.idp_settings_adapter = idp_providers_adapter
+      end
+
+      let(:saml_config) { controller.saml_config(idp_entity_id: idp_entity_id) }
+      let(:idp_providers_adapter) {
+        Class.new {
+          def self.settings(idp_entity_id)
+            #some hash of stuff (by doing a fetch, in our case, but could also be a giant hash keyed by idp_entity_id)
+            if idp_entity_id == "http://www.example.com"
+              {
+                assertion_consumer_service_url: "acs_url",
+                assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+                name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+                issuer: "sp_issuer",
+                idp_entity_id: "http://www.example.com",
+                authn_context: "",
+                idp_slo_target_url: "idp_slo_url",
+                idp_sso_target_url: "idp_sso_url",
+                idp_cert: "idp_cert"
+              }
+            elsif idp_entity_id == "http://www.example.com_other"
+              {
+                assertion_consumer_service_url: "acs_url_other",
+                assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST_other",
+                name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress_other",
+                issuer: "sp_issuer_other",
+                idp_entity_id: "http://www.example.com_other",
+                authn_context: "_other",
+                idp_slo_target_url: "idp_slo_url_other",
+                idp_sso_target_url: "idp_sso_url_other",
+                idp_cert: "idp_cert_other"
+              }
+            else
+              {}
+            end
+          end
+        }
+      }
+
+      context "when a specific idp_entity_id is requested" do
+        let(:idp_entity_id) { "http://www.example.com" }
+        it "uses the settings from the adapter for that idp" do
+          expect(saml_config.idp_entity_id).to eq (idp_entity_id)
+          expect(saml_config.idp_sso_target_url).to eq ("idp_sso_url")
+          expect(saml_config.class).to eq OneLogin::RubySaml::Settings
+        end
+      end
+
+      context "when another idp_entity_id is requested" do
+        let(:idp_entity_id) { "http://www.example.com_other" }
+        it "returns the other idp settings" do
+          expect(saml_config.idp_entity_id).to eq (idp_entity_id)
+          expect(saml_config.idp_sso_target_url).to eq ("idp_sso_url_other")
+          expect(saml_config.class).to eq OneLogin::RubySaml::Settings
+        end
+      end
     end
   end
 
