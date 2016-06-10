@@ -6,8 +6,9 @@ class Devise::SamlSessionsController < Devise::SessionsController
   skip_before_filter :verify_authenticity_token
 
   def new
+    idp_entity_id = params["SAMLResponse"] ? get_idp_entity_id(params["SAMLResponse"]) : nil
     request = OneLogin::RubySaml::Authrequest.new
-    action = request.create(saml_config)
+    action = request.create(saml_config(idp_entity_id: idp_entity_id))
     redirect_to action
   end
 
@@ -47,5 +48,11 @@ class Devise::SamlSessionsController < Devise::SessionsController
   def generate_idp_logout_response(logout_request)
     logout_request_id = logout_request.id
     OneLogin::RubySaml::SloLogoutresponse.new.create(saml_config, logout_request_id, nil)
+  end
+
+  private
+
+  def get_idp_entity_id(saml_response)
+    OneLogin::RubySaml::Response.new(saml_response).issuers.first
   end
 end

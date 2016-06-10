@@ -20,6 +20,23 @@ require_relative '../../../app/controllers/devise/saml_sessions_controller'
 
 describe Devise::SamlSessionsController, type: :controller do
   let(:saml_config) { Devise.saml_config }
+  let(:idp_providers_adapter) {
+    Class.new {
+      def self.settings(idp_entity_id)
+        {
+          assertion_consumer_service_url: "acs_url",
+          assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+          name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+          issuer: "sp_issuer",
+          idp_entity_id: "http://www.example.com",
+          authn_context: "",
+          idp_slo_target_url: "idp_slo_url",
+          idp_sso_target_url: "http://idp_sso_url",
+          idp_cert: "idp_cert"
+        }
+      end
+    }
+  }
 
   before do
     @original_saml_config = Devise.saml_config
@@ -30,9 +47,26 @@ describe Devise::SamlSessionsController, type: :controller do
   end
 
   describe '#new' do
-    it 'redirects to the SAML Auth Request endpoint' do
-      get :new
-      expect(response).to redirect_to(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
+    let(:saml_response){ File.read(File.join(File.dirname(__FILE__), '../../support', 'response_encrypted_nameid.xml.base64')) }
+    
+    context "when using the default saml config" do
+      it "redirects to the IdP SSO target url" do
+        get :new, "SAMLResponse" => saml_response
+        expect(response).to redirect_to(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
+      end
+    end
+
+    context "with a specified idp" do
+      let(:saml_config) { controller.saml_config(idp_entity_id: "https://app.onelogin.com/saml2") }
+
+      before do
+        Devise.idp_settings_adapter = idp_providers_adapter
+      end
+
+      it "redirects to the associated IdP SSO target url" do
+        get :new, "SAMLResponse" => saml_response
+        expect(response).to redirect_to(%r(\Ahttp://idp_sso_url\?SAMLRequest=))
+      end
     end
   end
 
@@ -49,23 +83,6 @@ describe Devise::SamlSessionsController, type: :controller do
     end
 
     context "with a specified IDP" do
-      let(:idp_providers_adapter) {
-        Class.new {
-          def self.settings(idp_entity_id)
-            {
-              assertion_consumer_service_url: "acs_url",
-              assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
-              name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
-              issuer: "sp_issuer",
-              idp_entity_id: "http://www.example.com",
-              authn_context: "",
-              idp_slo_target_url: "idp_slo_url",
-              idp_sso_target_url: "idp_sso_url",
-              idp_cert: "idp_cert"
-            }
-          end
-        }
-      }
       let(:saml_config) { controller.saml_config(idp_entity_id: "anything") }
 
       before do
