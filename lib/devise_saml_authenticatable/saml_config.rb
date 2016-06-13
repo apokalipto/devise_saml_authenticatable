@@ -31,5 +31,9 @@ module DeviseSamlAuthenticatable
       end
       config
     end
+
+    def get_idp_entity_id(saml_response)
+      OneLogin::RubySaml::Response.new(saml_response).issuers.first
+    end
   end
 end

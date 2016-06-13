@@ -49,10 +49,4 @@ class Devise::SamlSessionsController < Devise::SessionsController
     logout_request_id = logout_request.id
     OneLogin::RubySaml::SloLogoutresponse.new.create(saml_config, logout_request_id, nil)
   end
-
-  private
-
-  def get_idp_entity_id(saml_response)
-    OneLogin::RubySaml::Response.new(saml_response).issuers.first
-  end
 end
