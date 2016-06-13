@@ -42,6 +42,7 @@ module Devise
   mattr_accessor :saml_sign_out_success_url
   @@saml_sign_out_success_url
 
+  # Point to adapter for multiple IdP support
   mattr_accessor :idp_settings_adapter
   @@idp_settings_adapter
 
