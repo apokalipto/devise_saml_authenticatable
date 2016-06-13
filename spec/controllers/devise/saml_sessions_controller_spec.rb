@@ -17,38 +17,38 @@ end
 
 require_relative '../../../app/controllers/devise/saml_sessions_controller'
 
-
 describe Devise::SamlSessionsController, type: :controller do
   let(:saml_config) { Devise.saml_config }
-  let(:idp_providers_adapter) {
-    Class.new {
-      def self.settings(idp_entity_id)
-        {
-          assertion_consumer_service_url: "acs_url",
-          assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
-          name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
-          issuer: "sp_issuer",
-          idp_entity_id: "http://www.example.com",
-          authn_context: "",
-          idp_slo_target_url: "idp_slo_url",
-          idp_sso_target_url: "http://idp_sso_url",
-          idp_cert: "idp_cert"
-        }
-      end
-    }
-  }
+  let(:idp_providers_adapter) { spy("Stub IDPSettings Adaptor") }
 
   before do
     @original_saml_config = Devise.saml_config
+    @original_sign_out_success_url = Devise.saml_sign_out_success_url
+    @original_saml_session_index_key = Devise.saml_session_index_key
+
+    allow(idp_providers_adapter).to receive(:settings).and_return({
+      assertion_consumer_service_url: "acs_url",
+      assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+      name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+      issuer: "sp_issuer",
+      idp_entity_id: "http://www.example.com",
+      authn_context: "",
+      idp_slo_target_url: "http://idp_slo_url",
+      idp_sso_target_url: "http://idp_sso_url",
+      idp_cert: "idp_cert"
+    })
   end
+
   after do
     Devise.saml_config = @original_saml_config
+    Devise.saml_sign_out_success_url = @original_sign_out_success_url
+    Devise.saml_session_index_key = @original_saml_session_index_key
     Devise.idp_settings_adapter = nil
   end
 
   describe '#new' do
-    let(:saml_response){ File.read(File.join(File.dirname(__FILE__), '../../support', 'response_encrypted_nameid.xml.base64')) }
-    
+    let(:saml_response) { File.read(File.join(File.dirname(__FILE__), '../../support', 'response_encrypted_nameid.xml.base64')) }
+
     context "when using the default saml config" do
       it "redirects to the IdP SSO target url" do
         get :new, "SAMLResponse" => saml_response
@@ -57,8 +57,6 @@ describe Devise::SamlSessionsController, type: :controller do
     end
 
     context "with a specified idp" do
-      let(:saml_config) { controller.saml_config(idp_entity_id: "https://app.onelogin.com/saml2") }
-
       before do
         Devise.idp_settings_adapter = idp_providers_adapter
       end
@@ -88,10 +86,10 @@ describe Devise::SamlSessionsController, type: :controller do
       before do
         Devise.idp_settings_adapter = idp_providers_adapter
         Devise.saml_configure do |settings|
-          settings.assertion_consumer_service_url     = "http://localhost:3000/users/saml/auth"
+          settings.assertion_consumer_service_url = "http://localhost:3000/users/saml/auth"
           settings.assertion_consumer_service_binding = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-          settings.name_identifier_format             = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
-          settings.issuer                             = "http://localhost:3000"
+          settings.name_identifier_format = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress"
+          settings.issuer = "http://localhost:3000"
         end
       end
 
@@ -116,18 +114,18 @@ describe Devise::SamlSessionsController, type: :controller do
 
   describe '#idp_sign_out' do
     let(:name_id) { '12312312' }
-    let(:saml_request) { double(:logout_request, {
-        id: 42,
-        name_id: name_id
-      }) }
-    let(:sam_response) { double(:logout_response)}
+    let(:saml_request) { double(:slo_logoutrequest, {
+      id: 42,
+      name_id: name_id,
+      issuer: "http://www.example.com"
+    }) }
+    let(:saml_response) { double(:slo_logoutresponse) }
     let(:response_url) { 'http://localhost/logout_response' }
-
 
     before do
       allow(OneLogin::RubySaml::SloLogoutrequest).to receive(:new).and_return(saml_request)
-      allow(OneLogin::RubySaml::SloLogoutresponse).to receive(:new).and_return(sam_response)
-      allow(sam_response).to receive(:create).and_return(response_url)
+      allow(OneLogin::RubySaml::SloLogoutresponse).to receive(:new).and_return(saml_response)
+      allow(saml_response).to receive(:create).and_return(response_url)
     end
 
     it 'returns invalid request if SAMLRequest is not passed' do
@@ -140,6 +138,20 @@ describe Devise::SamlSessionsController, type: :controller do
       post :idp_sign_out, SAMLResponse: 'stubbed_response'
       expect(response.status).to eq 302
       expect(response).to redirect_to '/users/saml/sign_in'
+    end
+
+    context "with a specified idp" do
+      let(:idp_entity_id) { "http://www.example.com" }
+      before do
+        Devise.idp_settings_adapter = idp_providers_adapter
+      end
+
+      it "accepts a LogoutResponse for the associated slo_target_url and redirects to sign_in" do
+        post :idp_sign_out, SAMLRequest: "stubbed_logout_request"
+        expect(response.status).to eq 302
+        expect(idp_providers_adapter).to have_received(:settings).with(idp_entity_id)
+        expect(response).to redirect_to "http://localhost/logout_response"
+      end
     end
 
     context 'when saml_sign_out_success_url is configured' do

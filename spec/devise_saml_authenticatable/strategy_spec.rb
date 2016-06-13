@@ -4,14 +4,10 @@ describe Devise::Strategies::SamlAuthenticatable do
   subject(:strategy) { described_class.new(env, :user) }
   let(:env) { {} }
 
-  let(:response) { double(:response, :settings= => nil, is_valid?: true, sessionindex: '123123123') }
+  let(:response) { double(:response, issuers: [idp_entity_id], :settings= => nil, is_valid?: true, sessionindex: '123123123') }
+  let(:idp_entity_id) { "https://test/saml/metadata/123123" }
   before do
     allow(OneLogin::RubySaml::Response).to receive(:new).and_return(response)
-  end
-
-  let(:saml_config) { OneLogin::RubySaml::Settings.new }
-  before do
-    allow(strategy).to receive(:saml_config).and_return(saml_config)
   end
 
   let(:mapping) { double(:mapping, to: user_class) }
@@ -35,7 +31,7 @@ describe Devise::Strategies::SamlAuthenticatable do
     end
 
     it "authenticates with the response" do
-      expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], settings: saml_config)
+      expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], anything)
       expect(user_class).to receive(:authenticate_with_saml).with(response)
       expect(user).to receive(:after_saml_authentication).with(response.sessionindex)
 
@@ -43,7 +39,47 @@ describe Devise::Strategies::SamlAuthenticatable do
       strategy.authenticate!
     end
 
-    context "and the resource cannot does not exist" do
+    context "when saml config uses an idp_adapter" do
+      let(:idp_providers_adapter) {
+        Class.new {
+          def self.settings(idp_entity_id)
+            #something about this spec's setup is keeping the code in here from being used
+            {
+              assertion_consumer_service_url: "acs_url",
+              assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+              name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+              issuer: "sp_issuer",
+              idp_entity_id: "http://www.example.com",
+              authn_context: "",
+              idp_slo_target_url: "idp_slo_url",
+              idp_sso_target_url: "http://idp_sso_url",
+              idp_cert: "idp_cert"
+            }
+          end
+        }
+      }
+
+      before do
+        Devise.idp_settings_adapter = idp_providers_adapter
+        allow(idp_providers_adapter).to receive(:settings).and_return({})
+      end
+
+      it "is valid" do
+        expect(strategy).to be_valid
+      end
+
+      it "authenticates with the response for the corresponding idp" do
+        expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], anything)
+        expect(idp_providers_adapter).to receive(:settings).with(idp_entity_id)
+        expect(user_class).to receive(:authenticate_with_saml).with(response)
+        expect(user).to receive(:after_saml_authentication).with(response.sessionindex)
+
+        expect(strategy).to receive(:success!).with(user)
+        strategy.authenticate!
+      end
+    end
+
+    context "and the resource does not exist" do
       let(:user) { nil }
 
       it "fails to authenticate" do

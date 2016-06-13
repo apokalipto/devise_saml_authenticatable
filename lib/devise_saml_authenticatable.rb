@@ -36,9 +36,11 @@ module Devise
   mattr_accessor :saml_use_subject
   @@saml_use_subject
 
+  # Key used to index sessions for later retrieval
   mattr_accessor :saml_session_index_key
   @@saml_session_index_key
 
+  # Redirect after signout (redirects to 'users/saml/sign_in' by default)
   mattr_accessor :saml_sign_out_success_url
   @@saml_sign_out_success_url
 

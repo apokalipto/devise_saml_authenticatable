@@ -19,10 +19,11 @@ class Devise::SamlSessionsController < Devise::SessionsController
 
   def idp_sign_out
     if params[:SAMLRequest] && Devise.saml_session_index_key
+      saml_config = saml_config(idp_entity_id: get_logout_idp_entity_id(params[:SAMLRequest]))
       logout_request = OneLogin::RubySaml::SloLogoutrequest.new(params[:SAMLRequest], settings: saml_config)
       resource_class.reset_session_key_for(logout_request.name_id)
 
-      redirect_to generate_idp_logout_response(logout_request)
+      redirect_to generate_idp_logout_response(saml_config, logout_request.id)
     elsif params[:SAMLResponse]
       #Currently Devise handles the session invalidation when the request is made.
       #To support a true SP initiated logout response, the request ID would have to be tracked and session invalidated
@@ -45,8 +46,11 @@ class Devise::SamlSessionsController < Devise::SessionsController
     request.create(saml_config)
   end
 
-  def generate_idp_logout_response(logout_request)
-    logout_request_id = logout_request.id
+  def generate_idp_logout_response(saml_config, logout_request_id)
     OneLogin::RubySaml::SloLogoutresponse.new.create(saml_config, logout_request_id, nil)
+  end
+
+  def get_logout_idp_entity_id(saml_request)
+    OneLogin::RubySaml::SloLogoutrequest.new(saml_request).issuer
   end
 end
