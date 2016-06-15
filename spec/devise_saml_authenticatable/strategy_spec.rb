@@ -100,15 +100,6 @@ describe Devise::Strategies::SamlAuthenticatable do
     end
   end
 
-  context "with a logout SAMLResponse parameter" do
-    let(:params) { {SAMLResponse: "PHNhbWxwOkxvZ291dFJlc3BvbnNlIFZlcnNpb249JzIuMCcgSW5SZXNwb25zZVRvPSdfMTM0MjQzMjQzMjQzMicgeG1sbnM6c2FtbHA9J3VybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpwcm90b2NvbCcgSXNzdWVJbnN0YW50PScyMDE1LTA2LTMwVDE0OjQzOjQ0JyBJRD0nXzY5OTc2OTc5Nzk4Nzk4Nzk3OTg3Jz48c2FtbDpJc3N1ZXIgeG1sbnM6c2FtbD0ndXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmFzc2VydGlvbic+aHR0cHM6Ly90ZXN0L3NhbWwvbWV0YWRhdGEvMTQzMjQzMjwvc2FtbDpJc3N1ZXI+PHNhbWxwOlN0YXR1cz48c2FtbHA6U3RhdHVzQ29kZSBWYWx1ZT0ndXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOnN0YXR1czpTdWNjZXNzJy8+PHNhbWxwOlN0YXR1c01lc3NhZ2U+U3VjY2Vzc2Z1bGx5IGxvZ2dlZCBvdXQgZnJvbSBzZXJ2aWNlIDwvc2FtbHA6U3RhdHVzTWVzc2FnZT48L3NhbWxwOlN0YXR1cz48L3NhbWxwOkxvZ291dFJlc3BvbnNlPg=="} }
-
-    it "is valid" do
-      expect(strategy).not_to be_valid
-    end
-  end
-
-
   it "is not valid without a SAMLResponse parameter" do
     expect(strategy).not_to be_valid
   end
