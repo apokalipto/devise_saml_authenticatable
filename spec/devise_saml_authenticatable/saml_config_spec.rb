@@ -31,7 +31,7 @@ describe DeviseSamlAuthenticatable::SamlConfig do
         Devise.idp_settings_adapter = idp_providers_adapter
       end
 
-      let(:saml_config) { controller.saml_config(idp_entity_id: idp_entity_id) }
+      let(:saml_config) { controller.saml_config(idp_entity_id) }
       let(:idp_providers_adapter) {
         Class.new {
           def self.settings(idp_entity_id)

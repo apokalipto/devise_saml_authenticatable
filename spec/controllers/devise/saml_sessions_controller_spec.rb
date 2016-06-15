@@ -81,7 +81,7 @@ describe Devise::SamlSessionsController, type: :controller do
     end
 
     context "with a specified IDP" do
-      let(:saml_config) { controller.saml_config(idp_entity_id: "anything") }
+      let(:saml_config) { controller.saml_config("anything") }
 
       before do
         Devise.idp_settings_adapter = idp_providers_adapter

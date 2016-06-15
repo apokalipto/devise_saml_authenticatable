@@ -8,7 +8,7 @@ class Devise::SamlSessionsController < Devise::SessionsController
   def new
     idp_entity_id = params["SAMLResponse"] ? get_idp_entity_id(params["SAMLResponse"]) : nil
     request = OneLogin::RubySaml::Authrequest.new
-    action = request.create(saml_config(idp_entity_id: idp_entity_id))
+    action = request.create(saml_config(idp_entity_id))
     redirect_to action
   end
 
@@ -19,7 +19,7 @@ class Devise::SamlSessionsController < Devise::SessionsController
 
   def idp_sign_out
     if params[:SAMLRequest] && Devise.saml_session_index_key
-      saml_config = saml_config(idp_entity_id: get_logout_idp_entity_id(params[:SAMLRequest]))
+      saml_config = saml_config(get_logout_idp_entity_id(params[:SAMLRequest]))
       logout_request = OneLogin::RubySaml::SloLogoutrequest.new(params[:SAMLRequest], settings: saml_config)
       resource_class.reset_session_key_for(logout_request.name_id)
 
