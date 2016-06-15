@@ -22,10 +22,6 @@ describe Devise::SamlSessionsController, type: :controller do
   let(:idp_providers_adapter) { spy("Stub IDPSettings Adaptor") }
 
   before do
-    @original_saml_config = Devise.saml_config
-    @original_sign_out_success_url = Devise.saml_sign_out_success_url
-    @original_saml_session_index_key = Devise.saml_session_index_key
-
     allow(idp_providers_adapter).to receive(:settings).and_return({
       assertion_consumer_service_url: "acs_url",
       assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
@@ -37,13 +33,6 @@ describe Devise::SamlSessionsController, type: :controller do
       idp_sso_target_url: "http://idp_sso_url",
       idp_cert: "idp_cert"
     })
-  end
-
-  after do
-    Devise.saml_config = @original_saml_config
-    Devise.saml_sign_out_success_url = @original_sign_out_success_url
-    Devise.saml_session_index_key = @original_saml_session_index_key
-    Devise.idp_settings_adapter = nil
   end
 
   describe '#new' do
