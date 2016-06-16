@@ -137,6 +137,25 @@ describe "SAML Authentication", type: :feature do
     it_behaves_like "it authenticates and creates users"
   end
 
+  context "when the idp_settings_adapter key is set" do
+
+    before(:each) do
+      create_app('idp', 'INCLUDE_SUBJECT_IN_ATTRIBUTES' => "false")
+      create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "true", 'IDP_SETTINGS_ADAPTER' => "IdpSettingsAdapter")
+
+      @idp_pid = start_app('idp', idp_port)
+      @sp_pid  = start_app('sp',  sp_port)
+    end
+
+    after(:each) do
+      stop_app(@idp_pid)
+      stop_app(@sp_pid)
+    end
+
+    it_behaves_like "it authenticates and creates users"
+    it_behaves_like "it logs a user out via the IdP"
+  end
+
   def create_user(email)
     response = Net::HTTP.post_form(URI('http://localhost:8020/users'), email: email)
     expect(response.code).to eq('201')

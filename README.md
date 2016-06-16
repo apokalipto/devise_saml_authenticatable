@@ -112,7 +112,7 @@ Upon successful login the user is redirected to devise `user_root_path`.
 
 ## Supporting Multiple IdPs
 
-If you must support multiple Identity Providers you can implement an adapter class with a ``#settings` method that takes an IdP entity id and returns a hash of settings for the corresponding IdP. The `config.idp_settings_adapter` then must be set to point to your adapter in config/initializers/devise.rb. The implementation of the adapter is up to you. A simple example may look like this:
+If you must support multiple Identity Providers you can implement an adapter class with a `#settings` method that takes an IdP entity id and returns a hash of settings for the corresponding IdP. The `config.idp_settings_adapter` then must be set to point to your adapter in config/initializers/devise.rb. The implementation of the adapter is up to you. A simple example may look like this:
 
 ```ruby
 class IdPSettingsAdapter

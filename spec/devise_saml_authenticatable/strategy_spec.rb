@@ -43,7 +43,6 @@ describe Devise::Strategies::SamlAuthenticatable do
       let(:idp_providers_adapter) {
         Class.new {
           def self.settings(idp_entity_id)
-            #something about this spec's setup is keeping the code in here from being used
             {
               assertion_consumer_service_url: "acs_url",
               assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",

@@ -2,6 +2,7 @@
 
 saml_session_index_key = ENV.fetch('SAML_SESSION_INDEX_KEY', ":session_index")
 use_subject_to_authenticate = ENV.fetch('USE_SUBJECT_TO_AUTHENTICATE')
+idp_settings_adapter = ENV.fetch('IDP_SETTINGS_ADAPTER', "nil")
 
 gem 'devise_saml_authenticatable', path: '../../..'
 gem 'thin'
@@ -17,6 +18,8 @@ if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.1")
 end
   GEMFILE
 }
+
+template File.expand_path('../idp_settings_adapter.rb.erb', __FILE__), 'app/lib/idp_settings_adapter.rb'
 
 create_file 'config/attribute-map.yml', <<-ATTRIBUTES
 ---
@@ -50,6 +53,7 @@ after_bundle do
   config.saml_use_subject = #{use_subject_to_authenticate}
   config.saml_create_user = true
   config.saml_update_user = true
+  config.idp_settings_adapter = #{idp_settings_adapter}
 
   config.saml_configure do |settings|
     settings.assertion_consumer_service_url = "http://localhost:8020/users/saml/auth"
