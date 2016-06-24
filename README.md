@@ -60,6 +60,10 @@ In config/initializers/devise.rb
     # an IdP entity id as an argument and returns a hash of idp settings for the corresponding IdP.
     config.idp_settings_adapter = nil
 
+    # You provide you own method to find the idp_entity_id in a SAML message in the case of multiple IdPs
+    # by setting this to a custom reader class, or use the default.
+    # config.idp_entity_id_reader = DefaultIdpEntityIdReader
+
     # Configure with your SAML settings (see [ruby-saml][] for more information).
     config.saml_configure do |settings|
       settings.assertion_consumer_service_url     = "http://localhost:3000/users/saml/auth"

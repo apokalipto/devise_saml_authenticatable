@@ -54,6 +54,33 @@ describe Devise::SamlSessionsController, type: :controller do
         get :new, "SAMLResponse" => saml_response
         expect(response).to redirect_to(%r(\Ahttp://idp_sso_url\?SAMLRequest=))
       end
+
+      it "uses the DefaultIdpEntityIdReader" do
+        expect(DeviseSamlAuthenticatable::DefaultIdpEntityIdReader).to receive(:entity_id)
+        get :new, "SAMLResponse" => saml_response
+      end
+
+      context "with a specified idp entity id reader" do
+        class OurIdpEntityIdReader
+          def self.entity_id(params)
+            params[:entity_id]
+          end
+        end
+
+        before do
+          @default_reader = Devise.idp_entity_id_reader
+          Devise.idp_entity_id_reader = OurIdpEntityIdReader # which will have some different behavior
+        end
+
+        after do
+          Devise.idp_entity_id_reader = @default_reader
+        end
+
+        it "redirects to the associated IdP SSO target url" do
+          get :new, entity_id: "http://www.example.com"
+          expect(response).to redirect_to(%r(\Ahttp://idp_sso_url\?SAMLRequest=))
+        end
+      end
     end
   end
 
