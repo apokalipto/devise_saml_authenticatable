@@ -1,30 +1,19 @@
 class IdpSettingsAdapter
   def self.settings(idp_entity_id)
-    { "http://localhost:8020/saml/metadata" =>
+    if idp_entity_id == "http://localhost:8020/saml/metadata"
       {
           assertion_consumer_service_url: "acs_url",
           assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
           name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
           issuer: "sp_issuer",
-          idp_entity_id: "http://www.example.com",
+          idp_entity_id: "http://localhost:8020/saml/metadata",
           authn_context: "",
-          idp_slo_target_url: "idp_slo_url",
-          idp_sso_target_url: "idp_sso_url",
+          idp_slo_target_url: "http://www.example.com",
+          idp_sso_target_url: "http://www.example.com",
           idp_cert: "idp_cert"
-      },
-    "http://www.example.com_other" =>
-      {
-          assertion_consumer_service_url: "acs_url_other",
-          assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST_other",
-          name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress_other",
-          issuer: "sp_issuer_other",
-          idp_entity_id: "http://www.example.com_other",
-          authn_context: "_other",
-          idp_slo_target_url: "idp_slo_url_other",
-          idp_sso_target_url: "idp_sso_url_other",
-          idp_cert: "idp_cert_other"
       }
-    }[idp_entity_id]
-
+    else
+      {}
+    end
   end
 end

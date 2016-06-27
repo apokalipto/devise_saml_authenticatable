@@ -141,7 +141,7 @@ describe "SAML Authentication", type: :feature do
 
     before(:each) do
       create_app('idp', 'INCLUDE_SUBJECT_IN_ATTRIBUTES' => "false")
-      create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "true", 'IDP_SETTINGS_ADAPTER' => "IdpSettingsAdapter")
+      create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "true", 'IDP_SETTINGS_ADAPTER' => "IdpSettingsAdapter", 'IDP_ENTITY_ID_READER' => "OurEntityIdReader")
 
       @idp_pid = start_app('idp', idp_port)
       @sp_pid  = start_app('sp',  sp_port)
@@ -152,8 +152,13 @@ describe "SAML Authentication", type: :feature do
       stop_app(@sp_pid)
     end
 
+    it "authenticates an existing user on a SP via an IdP" do
+      create_user("you@example.com")
+
+      visit 'http://localhost:8020/users/saml/sign_in/?entity_id=http%3A%2F%2Flocalhost%3A8020%2Fsaml%2Fmetadata'
+      expect(current_url).to match(%r(\Ahttp://www.example.com/\?SAMLRequest=))
+    end
     it_behaves_like "it authenticates and creates users"
-    it_behaves_like "it logs a user out via the IdP"
   end
 
   def create_user(email)
