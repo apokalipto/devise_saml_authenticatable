@@ -88,12 +88,28 @@ describe Devise::Strategies::SamlAuthenticatable do
     end
 
     context "and the SAML response is not valid" do
+      class CallbackHandler
+        def handle(response, strategy)
+        end
+      end
+
       before do
         allow(response).to receive(:is_valid?).and_return(false)
+        @saml_failed_login = Devise.saml_failed_callback
+        Devise.saml_failed_callback = CallbackHandler
+      end
+
+      after do
+        Devise.saml_failed_callback = @saml_failed_login
       end
 
       it "fails to authenticate" do
         expect(strategy).to receive(:fail!).with(:invalid)
+        strategy.authenticate!
+      end
+
+      it "redirects" do
+        expect_any_instance_of(CallbackHandler).to receive(:handle).with(response, strategy)
         strategy.authenticate!
       end
     end

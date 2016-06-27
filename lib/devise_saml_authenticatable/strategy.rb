@@ -20,6 +20,7 @@ module Devise
           success!(resource)
         else
           fail!(:invalid)
+          Devise.saml_failed_callback.new.handle(@response, self) if Devise.saml_failed_callback
         end
       end
 
