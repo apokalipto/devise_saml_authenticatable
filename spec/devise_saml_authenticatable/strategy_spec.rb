@@ -4,14 +4,10 @@ describe Devise::Strategies::SamlAuthenticatable do
   subject(:strategy) { described_class.new(env, :user) }
   let(:env) { {} }
 
-  let(:response) { double(:response, :settings= => nil, is_valid?: true, sessionindex: '123123123') }
+  let(:response) { double(:response, issuers: [idp_entity_id], :settings= => nil, is_valid?: true, sessionindex: '123123123') }
+  let(:idp_entity_id) { "https://test/saml/metadata/123123" }
   before do
     allow(OneLogin::RubySaml::Response).to receive(:new).and_return(response)
-  end
-
-  let(:saml_config) { OneLogin::RubySaml::Settings.new }
-  before do
-    allow(strategy).to receive(:saml_config).and_return(saml_config)
   end
 
   let(:mapping) { double(:mapping, to: user_class) }
@@ -35,7 +31,7 @@ describe Devise::Strategies::SamlAuthenticatable do
     end
 
     it "authenticates with the response" do
-      expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], settings: saml_config)
+      expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], anything)
       expect(user_class).to receive(:authenticate_with_saml).with(response)
       expect(user).to receive(:after_saml_authentication).with(response.sessionindex)
 
@@ -43,7 +39,46 @@ describe Devise::Strategies::SamlAuthenticatable do
       strategy.authenticate!
     end
 
-    context "and the resource cannot does not exist" do
+    context "when saml config uses an idp_adapter" do
+      let(:idp_providers_adapter) {
+        Class.new {
+          def self.settings(idp_entity_id)
+            {
+              assertion_consumer_service_url: "acs_url",
+              assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+              name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+              issuer: "sp_issuer",
+              idp_entity_id: "http://www.example.com",
+              authn_context: "",
+              idp_slo_target_url: "idp_slo_url",
+              idp_sso_target_url: "http://idp_sso_url",
+              idp_cert: "idp_cert"
+            }
+          end
+        }
+      }
+
+      before do
+        Devise.idp_settings_adapter = idp_providers_adapter
+        allow(idp_providers_adapter).to receive(:settings).and_return({})
+      end
+
+      it "is valid" do
+        expect(strategy).to be_valid
+      end
+
+      it "authenticates with the response for the corresponding idp" do
+        expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], anything)
+        expect(idp_providers_adapter).to receive(:settings).with(idp_entity_id)
+        expect(user_class).to receive(:authenticate_with_saml).with(response)
+        expect(user).to receive(:after_saml_authentication).with(response.sessionindex)
+
+        expect(strategy).to receive(:success!).with(user)
+        strategy.authenticate!
+      end
+    end
+
+    context "and the resource does not exist" do
       let(:user) { nil }
 
       it "fails to authenticate" do
@@ -63,15 +98,6 @@ describe Devise::Strategies::SamlAuthenticatable do
       end
     end
   end
-
-  context "with a logout SAMLResponse parameter" do
-    let(:params) { {SAMLResponse: "PHNhbWxwOkxvZ291dFJlc3BvbnNlIFZlcnNpb249JzIuMCcgSW5SZXNwb25zZVRvPSdfMTM0MjQzMjQzMjQzMicgeG1sbnM6c2FtbHA9J3VybjpvYXNpczpuYW1lczp0YzpTQU1MOjIuMDpwcm90b2NvbCcgSXNzdWVJbnN0YW50PScyMDE1LTA2LTMwVDE0OjQzOjQ0JyBJRD0nXzY5OTc2OTc5Nzk4Nzk4Nzk3OTg3Jz48c2FtbDpJc3N1ZXIgeG1sbnM6c2FtbD0ndXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOmFzc2VydGlvbic+aHR0cHM6Ly90ZXN0L3NhbWwvbWV0YWRhdGEvMTQzMjQzMjwvc2FtbDpJc3N1ZXI+PHNhbWxwOlN0YXR1cz48c2FtbHA6U3RhdHVzQ29kZSBWYWx1ZT0ndXJuOm9hc2lzOm5hbWVzOnRjOlNBTUw6Mi4wOnN0YXR1czpTdWNjZXNzJy8+PHNhbWxwOlN0YXR1c01lc3NhZ2U+U3VjY2Vzc2Z1bGx5IGxvZ2dlZCBvdXQgZnJvbSBzZXJ2aWNlIDwvc2FtbHA6U3RhdHVzTWVzc2FnZT48L3NhbWxwOlN0YXR1cz48L3NhbWxwOkxvZ291dFJlc3BvbnNlPg=="} }
-
-    it "is valid" do
-      expect(strategy).not_to be_valid
-    end
-  end
-
 
   it "is not valid without a SAMLResponse parameter" do
     expect(strategy).not_to be_valid

@@ -28,7 +28,6 @@ module Devise
       end
 
       module ClassMethods
-        include DeviseSamlAuthenticatable::SamlConfig
         def authenticate_with_saml(saml_response)
           key = Devise.saml_default_user_key
           attributes = saml_response.attributes

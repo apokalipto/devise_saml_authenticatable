@@ -6,15 +6,14 @@ module Devise
       include DeviseSamlAuthenticatable::SamlConfig
       def valid?
         if params[:SAMLResponse]
-          response = OneLogin::RubySaml::Logoutresponse.new(params[:SAMLResponse], saml_config)
-          !(response.response.include? 'LogoutResponse')
+          OneLogin::RubySaml::Response.new(params[:SAMLResponse])
         else
           false
         end
       end
 
       def authenticate!
-        @response = OneLogin::RubySaml::Response.new(params[:SAMLResponse], settings: saml_config)
+        @response = OneLogin::RubySaml::Response.new(params[:SAMLResponse], settings: saml_config(get_idp_entity_id(params)))
         resource = mapping.to.authenticate_with_saml(@response)
         if @response.is_valid? && resource
           resource.after_saml_authentication(@response.sessionindex)

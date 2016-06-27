@@ -5,6 +5,7 @@ require "devise_saml_authenticatable/exception"
 require "devise_saml_authenticatable/logger"
 require "devise_saml_authenticatable/routes"
 require "devise_saml_authenticatable/saml_config"
+require "devise_saml_authenticatable/default_idp_entity_id_reader"
 
 begin
   Rails::Engine
@@ -36,11 +37,21 @@ module Devise
   mattr_accessor :saml_use_subject
   @@saml_use_subject
 
+  # Key used to index sessions for later retrieval
   mattr_accessor :saml_session_index_key
   @@saml_session_index_key
 
+  # Redirect after signout (redirects to 'users/saml/sign_in' by default)
   mattr_accessor :saml_sign_out_success_url
   @@saml_sign_out_success_url
+
+  # Adapter for multiple IdP support
+  mattr_accessor :idp_settings_adapter
+  @@idp_settings_adapter
+
+  # Reader that can parse entity id from a SAMLMessage
+  mattr_accessor :idp_entity_id_reader
+  @@idp_entity_id_reader ||= ::DeviseSamlAuthenticatable::DefaultIdpEntityIdReader
 
   mattr_accessor :saml_config
   @@saml_config = OneLogin::RubySaml::Settings.new

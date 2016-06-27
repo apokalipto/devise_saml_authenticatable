@@ -2,6 +2,8 @@
 
 saml_session_index_key = ENV.fetch('SAML_SESSION_INDEX_KEY', ":session_index")
 use_subject_to_authenticate = ENV.fetch('USE_SUBJECT_TO_AUTHENTICATE')
+idp_settings_adapter = ENV.fetch('IDP_SETTINGS_ADAPTER', "nil")
+idp_entity_id_reader = ENV.fetch('IDP_ENTITY_ID_READER', "DeviseSamlAuthenticatable::DefaultIdpEntityIdReader")
 
 gem 'devise_saml_authenticatable', path: '../../..'
 gem 'thin'
@@ -18,11 +20,31 @@ end
   GEMFILE
 }
 
+template File.expand_path('../idp_settings_adapter.rb.erb', __FILE__), 'app/lib/idp_settings_adapter.rb'
+
 create_file 'config/attribute-map.yml', <<-ATTRIBUTES
 ---
 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress": email
 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name":         name
 ATTRIBUTES
+
+
+create_file('app/lib/our_entity_id_reader.rb', <<-READER)
+
+class OurEntityIdReader
+  def self.entity_id(params)
+    if params[:entity_id]
+      params[:entity_id]
+    elsif params[:SAMLRequest]
+      OneLogin::RubySaml::SloLogoutrequest.new(params[:SAMLRequest]).issuer
+    elsif params[:SAMLResponse]
+      OneLogin::RubySaml::Response.new(params[:SAMLResponse]).issuers.first
+    else
+      "http://www.cats.com"
+    end
+  end
+end
+READER
 
 after_bundle do
   generate :controller, 'home', 'index'
@@ -50,6 +72,8 @@ after_bundle do
   config.saml_use_subject = #{use_subject_to_authenticate}
   config.saml_create_user = true
   config.saml_update_user = true
+  config.idp_settings_adapter = #{idp_settings_adapter}
+  config.idp_entity_id_reader = #{idp_entity_id_reader}
 
   config.saml_configure do |settings|
     settings.assertion_consumer_service_url = "http://localhost:8020/users/saml/auth"

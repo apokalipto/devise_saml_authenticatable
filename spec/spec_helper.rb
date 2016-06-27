@@ -15,6 +15,19 @@ RSpec.configure do |config|
     # `true` in RSpec 4.
     mocks.verify_partial_doubles = true
   end
+
+  config.before :each do
+    @original_saml_config = Devise.saml_config
+    @original_sign_out_success_url = Devise.saml_sign_out_success_url
+    @original_saml_session_index_key = Devise.saml_session_index_key
+  end
+
+  config.after :each do
+    Devise.saml_config = @original_saml_config
+    Devise.saml_sign_out_success_url = @original_sign_out_success_url
+    Devise.saml_session_index_key = @original_saml_session_index_key
+    Devise.idp_settings_adapter = nil
+  end
 end
 
 require 'support/rails_app'

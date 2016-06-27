@@ -56,6 +56,14 @@ In config/initializers/devise.rb
     # If you don't set it then email will be extracted from SAML assertation attributes
     config.saml_use_subject = true
 
+    # You can support multiple IdPs by setting this value to a class that implements a #settings method which takes
+    # an IdP entity id as an argument and returns a hash of idp settings for the corresponding IdP.
+    config.idp_settings_adapter = nil
+
+    # You provide you own method to find the idp_entity_id in a SAML message in the case of multiple IdPs
+    # by setting this to a custom reader class, or use the default.
+    # config.idp_entity_id_reader = DefaultIdpEntityIdReader
+
     # Configure with your SAML settings (see [ruby-saml][] for more information).
     config.saml_configure do |settings|
       settings.assertion_consumer_service_url     = "http://localhost:3000/users/saml/auth"
@@ -106,12 +114,47 @@ You are now ready to test it against an IdP.
 When the user goes to `/users/saml/sign_in` he will be redirected to the login page of the IdP.
 Upon successful login the user is redirected to devise `user_root_path`.
 
+## Supporting Multiple IdPs
+
+If you must support multiple Identity Providers you can implement an adapter class with a `#settings` method that takes an IdP entity id and returns a hash of settings for the corresponding IdP. The `config.idp_settings_adapter` then must be set to point to your adapter in config/initializers/devise.rb. The implementation of the adapter is up to you. A simple example may look like this:
+
+```ruby
+class IdPSettingsAdapter
+  def self.settings(idp_entity_id)
+    settings = {
+      "http://www.example_idp_entity_id.com" => {
+        assertion_consumer_service_url: "http://localhost:3000/users/saml/auth",
+        assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+        name_identifier_format: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
+        issuer: "http://localhost:3000/saml/metadata",
+        idp_entity_id: "http://www.example_idp_entity_id.com",
+        authn_context: "",
+        idp_slo_target_url: "http://example_idp_slo_target_url.com",
+        idp_sso_target_url: "http://example_idp_sso_target_url.com",
+        idp_cert: "example_idp_cert"
+      },
+      "http://www.another_idp_entity_id.biz" => {
+        assertion_consumer_service_url: "http://localhost:3000/users/saml/auth",
+        assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+        name_identifier_format: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
+        issuer: "http://localhost:3000/saml/metadata",
+        idp_entity_id: "http://www.another_idp_entity_id.biz",
+        authn_context: "",
+        idp_slo_target_url: "http://another_idp_slo_target_url.com",
+        idp_sso_target_url: "http://another_idp_sso_target_url.com",
+        idp_cert: "another_idp_cert"
+      }
+    }
+  end
+end
+```
+
 ## Identity Provider
 
 If you don't have an identity provider an you would like to test the authentication against your app there are some options:
 
 1. Use [ruby-saml-idp](https://github.com/lawrencepit/ruby-saml-idp). You can add your own logic to your IdP, or you can also set it as a dummy IdP that always sends a valid authentication response to your app.
-2. Use an online service that can act as an IdP. Onelogin, Salesforce and some others provide you with this functionality
+2. Use an online service that can act as an IdP. Onelogin, Salesforce, Okta and some others provide you with this functionality
 3. Install your own IdP.
 
 There are numerous IdPs that support SAML 2.0, there are propietary (like Microsoft ADFS 2.0 or Ping federate) and there are also open source solutions like Shibboleth and simplesamlphp.
