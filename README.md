@@ -64,6 +64,10 @@ In config/initializers/devise.rb
     # by setting this to a custom reader class, or use the default.
     # config.idp_entity_id_reader = DeviseSamlAuthenticatable::DefaultIdpEntityIdReader
 
+    # You can set a handler object that takes the response for a failed SAML request and implements a #handle method
+    # This method can then redirect the user, return error messages, etc.
+    # config.saml_failed_callback = nil
+
     # Configure with your SAML settings (see [ruby-saml][] for more information).
     config.saml_configure do |settings|
       settings.assertion_consumer_service_url     = "http://localhost:3000/users/saml/auth"
