@@ -62,7 +62,7 @@ In config/initializers/devise.rb
 
     # You provide you own method to find the idp_entity_id in a SAML message in the case of multiple IdPs
     # by setting this to a custom reader class, or use the default.
-    # config.idp_entity_id_reader = DefaultIdpEntityIdReader
+    # config.idp_entity_id_reader = DeviseSamlAuthenticatable::DefaultIdpEntityIdReader
 
     # Configure with your SAML settings (see [ruby-saml][] for more information).
     config.saml_configure do |settings|
@@ -121,8 +121,9 @@ If you must support multiple Identity Providers you can implement an adapter cla
 ```ruby
 class IdPSettingsAdapter
   def self.settings(idp_entity_id)
-    settings = {
-      "http://www.example_idp_entity_id.com" => {
+    case idp_entity_id
+    when "http://www.example_idp_entity_id.com"
+      {
         assertion_consumer_service_url: "http://localhost:3000/users/saml/auth",
         assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
         name_identifier_format: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -132,8 +133,9 @@ class IdPSettingsAdapter
         idp_slo_target_url: "http://example_idp_slo_target_url.com",
         idp_sso_target_url: "http://example_idp_sso_target_url.com",
         idp_cert: "example_idp_cert"
-      },
-      "http://www.another_idp_entity_id.biz" => {
+      }
+    when "http://www.another_idp_entity_id.biz"
+      {
         assertion_consumer_service_url: "http://localhost:3000/users/saml/auth",
         assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
         name_identifier_format: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
@@ -144,10 +146,16 @@ class IdPSettingsAdapter
         idp_sso_target_url: "http://another_idp_sso_target_url.com",
         idp_cert: "another_idp_cert"
       }
-    }
+    else
+      {}
+    end
   end
 end
 ```
+
+Detecting the entity ID passed to the `settings` method is done by `config.idp_entity_id_reader`.
+By default this will find the `Issuer` in the SAML request.
+You can support more use cases by writing your own and implementing the `.entity_id` method.
 
 ## Identity Provider
 
