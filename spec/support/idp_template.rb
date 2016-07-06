@@ -24,7 +24,7 @@ route "get '/saml/logout' => 'saml_idp#logout'"
 route "get '/saml/sp_sign_out' => 'saml_idp#sp_sign_out'"
 
 if @valid_destination == "false"
-  template File.expand_path('../saml_idp_bad_recipient_controller.rb.erb', __FILE__), 'app/controllers/saml_idp_controller.rb'
+  template File.expand_path('../saml_idp_bad_destination_controller.rb.erb', __FILE__), 'app/controllers/saml_idp_controller.rb'
 else
   template File.expand_path('../saml_idp_controller.rb.erb', __FILE__), 'app/controllers/saml_idp_controller.rb'
 end
