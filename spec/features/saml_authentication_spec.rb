@@ -158,7 +158,39 @@ describe "SAML Authentication", type: :feature do
       visit 'http://localhost:8020/users/saml/sign_in/?entity_id=http%3A%2F%2Flocalhost%3A8020%2Fsaml%2Fmetadata'
       expect(current_url).to match(%r(\Ahttp://www.example.com/\?SAMLRequest=))
     end
+  end
+
+  context "when the saml_failed_callback is set" do
+    let(:valid_destination) { "true" }
+    before(:each) do
+      create_app('idp', 'INCLUDE_SUBJECT_IN_ATTRIBUTES' => "false", 'VALID_DESTINATION' => valid_destination)
+      create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "true", 'SAML_FAILED_CALLBACK' => "OurSamlFailedCallbackHandler")
+
+      @idp_pid = start_app('idp', idp_port)
+      @sp_pid  = start_app('sp',  sp_port)
+    end
+
+    after(:each) do
+      stop_app(@idp_pid)
+      stop_app(@sp_pid)
+    end
+
     it_behaves_like "it authenticates and creates users"
+
+    context "a bad SAML Request" do
+      let(:valid_destination) { "false" }
+      it "redirects to the callback handler's redirect destination" do
+        create_user("you@example.com")
+
+        visit 'http://localhost:8020/'
+        expect(current_url).to match(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
+        fill_in "Email", with: "you@example.com"
+        fill_in "Password", with: "asdf"
+        click_on "Sign in"
+        expect(page).to have_content("Example Domain This domain is established to be used for illustrative examples in documents. You may use this domain in examples without prior coordination or asking for permission.")
+        expect(current_url).to eq("http://www.example.com/")
+      end
+    end
   end
 
   def create_user(email)

@@ -33,6 +33,7 @@ create_file('app/lib/our_saml_failed_callback_handler.rb', <<-CALLBACKHANDLER)
 
 class OurSamlFailedCallbackHandler
   def handle(response, strategy)
+    strategy.redirect! "http://www.example.com"
   end
 end
 CALLBACKHANDLER
