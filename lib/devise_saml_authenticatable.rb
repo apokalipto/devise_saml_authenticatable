@@ -53,6 +53,10 @@ module Devise
   mattr_accessor :idp_entity_id_reader
   @@idp_entity_id_reader ||= ::DeviseSamlAuthenticatable::DefaultIdpEntityIdReader
 
+  # Implements a #handle method that takes the response and strategy as an argument
+  mattr_accessor :saml_failed_callback
+  @@saml_failed_callback
+
   mattr_accessor :saml_config
   @@saml_config = OneLogin::RubySaml::Settings.new
   def self.saml_configure

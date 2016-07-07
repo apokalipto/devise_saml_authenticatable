@@ -62,7 +62,7 @@ class SamlIdpController < SamlIdp::IdpController
 
     assertion_and_signature = assertion.sub(/Issuer\>\<Subject/, "Issuer>#{signature}<Subject")
 
-    xml = %[<samlp:Response ID="_#{response_id}" Version="2.0" IssueInstant="#{now.iso8601}" Destination="#{@saml_acs_url}" Consent="urn:oasis:names:tc:SAML:2.0:consent:unspecified" InResponseTo="#{@saml_request_id}" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"><Issuer xmlns="urn:oasis:names:tc:SAML:2.0:assertion">#{issuer_uri}</Issuer><samlp:Status><samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success" /></samlp:Status>#{assertion_and_signature}</samlp:Response>]
+    xml = %[<samlp:Response ID="_#{response_id}" Version="2.0" IssueInstant="#{now.iso8601}" Destination="#{destination(@saml_acs_url)}" Consent="urn:oasis:names:tc:SAML:2.0:consent:unspecified" InResponseTo="#{@saml_request_id}" xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"><Issuer xmlns="urn:oasis:names:tc:SAML:2.0:assertion">#{issuer_uri}</Issuer><samlp:Status><samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success" /></samlp:Status>#{assertion_and_signature}</samlp:Response>]
 
     Base64.encode64(xml)
   end
@@ -117,6 +117,14 @@ class SamlIdpController < SamlIdp::IdpController
 
   private
 
+  def destination(destination)
+  <% if @valid_destination == "false" %>
+    "{recipient}"
+  <% else %>
+    destination
+  <% end %>
+  end
+
   def validate_saml_slo_request(saml_request = params[:SAMLRequest])
     decode_SAML_SLO_Request(saml_request)
   end
@@ -151,7 +159,7 @@ class SamlIdpController < SamlIdp::IdpController
     ID="_#{response_id}"
     Version="2.0"
     IssueInstant="#{now.iso8601}"
-    Destination="#{@saml_slo_acs_url}"
+    Destination="#{destination(@saml_slo_acs_url)}"
     Consent="urn:oasis:names:tc:SAML:2.0:consent:unspecified"
     InResponseTo="#{@saml_slo_request_id}"
     xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
@@ -173,7 +181,7 @@ class SamlIdpController < SamlIdp::IdpController
     xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
     xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
     ID="_#{response_id}" Version="2.0"
-    Destination="#{@saml_slo_acs_url}"
+    Destination="#{destination(@saml_slo_acs_url)}"
     IssueInstant="#{now.iso8601}">
     <saml:Issuer >#{issuer_uri}</saml:Issuer>
     <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress">#{nameID}</saml:NameID>

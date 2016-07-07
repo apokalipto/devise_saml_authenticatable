@@ -4,6 +4,7 @@ saml_session_index_key = ENV.fetch('SAML_SESSION_INDEX_KEY', ":session_index")
 use_subject_to_authenticate = ENV.fetch('USE_SUBJECT_TO_AUTHENTICATE')
 idp_settings_adapter = ENV.fetch('IDP_SETTINGS_ADAPTER', "nil")
 idp_entity_id_reader = ENV.fetch('IDP_ENTITY_ID_READER', "DeviseSamlAuthenticatable::DefaultIdpEntityIdReader")
+saml_failed_callback = ENV.fetch('SAML_FAILED_CALLBACK', "nil")
 
 gem 'devise_saml_authenticatable', path: '../../..'
 gem 'thin'
@@ -28,6 +29,14 @@ create_file 'config/attribute-map.yml', <<-ATTRIBUTES
 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name":         name
 ATTRIBUTES
 
+create_file('app/lib/our_saml_failed_callback_handler.rb', <<-CALLBACKHANDLER)
+
+class OurSamlFailedCallbackHandler
+  def handle(response, strategy)
+    strategy.redirect! "http://www.example.com"
+  end
+end
+CALLBACKHANDLER
 
 create_file('app/lib/our_entity_id_reader.rb', <<-READER)
 
@@ -74,6 +83,7 @@ after_bundle do
   config.saml_update_user = true
   config.idp_settings_adapter = #{idp_settings_adapter}
   config.idp_entity_id_reader = #{idp_entity_id_reader}
+  config.saml_failed_callback = #{saml_failed_callback}
 
   config.saml_configure do |settings|
     settings.assertion_consumer_service_url = "http://localhost:8020/users/saml/auth"
