@@ -19,6 +19,7 @@ module Devise
           resource.after_saml_authentication(@response.sessionindex)
           success!(resource)
         else
+          DeviseSamlAuthenticatable::Logger.send("Auth errors: #{@response.errors.join(', ')}")
           fail!(:invalid)
           Devise.saml_failed_callback.new.handle(@response, self) if Devise.saml_failed_callback
         end
