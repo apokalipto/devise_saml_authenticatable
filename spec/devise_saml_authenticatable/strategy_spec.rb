@@ -88,7 +88,7 @@ describe Devise::Strategies::SamlAuthenticatable do
       end
 
       it 'logs the error' do
-        expect(DeviseSamlAuthenticatable::Logger).to receive(:send).with('Auth errors: Test1, Test2')
+        expect(DeviseSamlAuthenticatable::Logger).to receive(:send).with('Resource could not be found')
         strategy.authenticate!
       end
     end
