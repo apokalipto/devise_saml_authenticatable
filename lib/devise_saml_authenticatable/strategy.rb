@@ -32,22 +32,19 @@ module Devise
       def parse_saml_response
         @response = OneLogin::RubySaml::Response.new(params[:SAMLResponse], settings: saml_config(get_idp_entity_id(params)))
         unless @response.is_valid?
-          DeviseSamlAuthenticatable::Logger.send("Auth errors: #{@response.errors.join(', ')}")
-          fail!(:invalid)
-          Devise.saml_failed_callback.new.handle(@response, self) if Devise.saml_failed_callback
+          failed_auth("Auth errors: #{@response.errors.join(', ')}")
         end
       end
 
       def retrieve_resource
         @resource = mapping.to.authenticate_with_saml(@response)
         if @resource.nil?
-          DeviseSamlAuthenticatable::Logger.send("Resource could not be found")
-          fail!(:invalid)
-          Devise.saml_failed_callback.new.handle(@response, self) if Devise.saml_failed_callback
+          failed_auth("Resource could not be found")
         end
       end
 
-      def failed_auth
+      def failed_auth(msg)
+        DeviseSamlAuthenticatable::Logger.send(msg)
         fail!(:invalid)
         Devise.saml_failed_callback.new.handle(@response, self) if Devise.saml_failed_callback
       end
