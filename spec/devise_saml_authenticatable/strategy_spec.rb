@@ -3,8 +3,9 @@ require 'rails_helper'
 describe Devise::Strategies::SamlAuthenticatable do
   subject(:strategy) { described_class.new(env, :user) }
   let(:env) { {} }
+  let(:errors) { ["Test1", "Test2"] }
 
-  let(:response) { double(:response, issuers: [idp_entity_id], :settings= => nil, is_valid?: true, sessionindex: '123123123') }
+  let(:response) { double(:response, issuers: [idp_entity_id], :settings= => nil, is_valid?: true, sessionindex: '123123123', errors: errors) }
   let(:idp_entity_id) { "https://test/saml/metadata/123123" }
   before do
     allow(OneLogin::RubySaml::Response).to receive(:new).and_return(response)
@@ -85,6 +86,11 @@ describe Devise::Strategies::SamlAuthenticatable do
         expect(strategy).to receive(:fail!).with(:invalid)
         strategy.authenticate!
       end
+
+      it 'logs the error' do
+        expect(DeviseSamlAuthenticatable::Logger).to receive(:send).with('Resource could not be found')
+        strategy.authenticate!
+      end
     end
 
     context "and the SAML response is not valid" do
@@ -101,6 +107,11 @@ describe Devise::Strategies::SamlAuthenticatable do
 
       after do
         Devise.saml_failed_callback = @saml_failed_login
+      end
+
+      it 'logs the error' do
+        expect(DeviseSamlAuthenticatable::Logger).to receive(:send).with('Auth errors: Test1, Test2')
+        strategy.authenticate!
       end
 
       it "fails to authenticate" do
