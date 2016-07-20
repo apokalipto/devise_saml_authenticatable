@@ -12,9 +12,6 @@ group :test do
   gem 'capybara-webkit'
 
   # Lock down versions of gems for older versions of Ruby
-  if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.0")
-    gem 'mime-types', '~> 2.99'
-  end
   if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.1")
     gem 'devise', '~> 3.5'
   end
