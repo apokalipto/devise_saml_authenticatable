@@ -97,7 +97,7 @@ end
   route "resources :users, only: [:create]"
   create_file('app/controllers/users_controller.rb', <<-USERS)
 class UsersController < ApplicationController
-  skip_before_filter :verify_authenticity_token
+  skip_before_action :verify_authenticity_token
   def create
     User.create!(email: params[:email])
     render nothing: true, status: 201
