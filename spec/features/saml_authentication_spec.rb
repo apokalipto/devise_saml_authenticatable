@@ -3,8 +3,8 @@ require 'net/http'
 require 'timeout'
 require 'uri'
 require 'capybara/rspec'
-require 'capybara/webkit'
-Capybara.default_driver = :webkit
+require 'capybara/poltergeist'
+Capybara.default_driver = :poltergeist
 
 describe "SAML Authentication", type: :feature do
   let(:idp_port) { 8009 }

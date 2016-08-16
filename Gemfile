@@ -9,7 +9,8 @@ group :test do
   gem 'rails', '~> 5.0'
   gem 'rspec-rails'
   gem 'sqlite3'
-  gem 'capybara-webkit'
+  gem 'capybara'
+  gem 'poltergeist'
 
   # Lock down versions of gems for older versions of Ruby
   if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.0")
