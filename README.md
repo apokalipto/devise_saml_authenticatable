@@ -160,6 +160,7 @@ end
 Detecting the entity ID passed to the `settings` method is done by `config.idp_entity_id_reader`.
 By default this will find the `Issuer` in the SAML request.
 You can support more use cases by writing your own and implementing the `.entity_id` method.
+If you use encrypted assertions, your entity ID reader will need to understand how to decrypt the response from each of the possible IdPs.
 
 ## Identity Provider
 
