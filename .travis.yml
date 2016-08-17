@@ -5,9 +5,20 @@ rvm:
   - "2.1.9"
   - "2.2.5"
   - "2.3.1"
+gemfile:
+  - Gemfile
+  - spec/support/Gemfile.rails4
+matrix:
+  allow_failures:
+    - rvm: "1.9.3"
+      gemfile: Gemfile
+    - rvm: "2.0.0"
+      gemfile: Gemfile
+    - rvm: "2.1.9"
+      gemfile: Gemfile
 
 script:
-  - xvfb-run bundle exec rake
+  - bundle exec rake
 
 notifications:
   hipchat:
