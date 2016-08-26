@@ -25,7 +25,7 @@ module Devise
       # Any known way on how to let the IdP send the CSRF token along with the SAMLResponse ?
       # Please let me know!
       def store?
-        true
+        !mapping.to.skip_session_storage.include?(:saml_auth)
       end
 
       private
