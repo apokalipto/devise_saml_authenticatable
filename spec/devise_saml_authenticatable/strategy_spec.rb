@@ -12,7 +12,7 @@ describe Devise::Strategies::SamlAuthenticatable do
   end
 
   let(:mapping) { double(:mapping, to: user_class) }
-  let(:user_class) { double(:user_class, authenticate_with_saml: user) }
+  let(:user_class) { double(:user_class, authenticate_with_saml: user, skip_session_storage: []) }
   let(:user) { double(:user) }
   before do
     allow(strategy).to receive(:mapping).and_return(mapping)
@@ -132,5 +132,15 @@ describe Devise::Strategies::SamlAuthenticatable do
 
   it "is permanent" do
     expect(strategy).to be_store
+  end
+
+  context "when the user should not be stored in the session" do
+    before do
+      allow(user_class).to receive(:skip_session_storage).and_return([:saml_auth])
+    end
+
+    it "is not stored" do
+      expect(strategy).not_to be_store
+    end
   end
 end
