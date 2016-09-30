@@ -28,7 +28,7 @@ module Devise
       end
 
       module ClassMethods
-        def authenticate_with_saml(saml_response)
+        def authenticate_with_saml(saml_response, relay_state)
           key = Devise.saml_default_user_key
           attributes = saml_response.attributes
           if (Devise.saml_use_subject)

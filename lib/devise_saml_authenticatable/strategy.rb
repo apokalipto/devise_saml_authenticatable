@@ -37,7 +37,7 @@ module Devise
       end
 
       def retrieve_resource
-        @resource = mapping.to.authenticate_with_saml(@response)
+        @resource = mapping.to.authenticate_with_saml(@response, params[:RelayState])
         if @resource.nil?
           failed_auth("Resource could not be found")
         end
