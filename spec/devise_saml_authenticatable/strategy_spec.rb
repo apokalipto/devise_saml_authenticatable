@@ -33,11 +33,21 @@ describe Devise::Strategies::SamlAuthenticatable do
 
     it "authenticates with the response" do
       expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], anything)
-      expect(user_class).to receive(:authenticate_with_saml).with(response)
+      expect(user_class).to receive(:authenticate_with_saml).with(response, nil)
       expect(user).to receive(:after_saml_authentication).with(response.sessionindex)
 
       expect(strategy).to receive(:success!).with(user)
       strategy.authenticate!
+    end
+
+    context "and a RelayState parameter" do
+      let(:params) { super().merge(RelayState: "foo") }
+      it "authenticates with the response" do
+        expect(user_class).to receive(:authenticate_with_saml).with(response, params[:RelayState])
+
+        expect(strategy).to receive(:success!).with(user)
+        strategy.authenticate!
+      end
     end
 
     context "when saml config uses an idp_adapter" do
@@ -71,7 +81,7 @@ describe Devise::Strategies::SamlAuthenticatable do
       it "authenticates with the response for the corresponding idp" do
         expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], anything)
         expect(idp_providers_adapter).to receive(:settings).with(idp_entity_id)
-        expect(user_class).to receive(:authenticate_with_saml).with(response)
+        expect(user_class).to receive(:authenticate_with_saml).with(response, params[:RelayState])
         expect(user).to receive(:after_saml_authentication).with(response.sessionindex)
 
         expect(strategy).to receive(:success!).with(user)

@@ -57,6 +57,11 @@ module Devise
   mattr_accessor :saml_failed_callback
   @@saml_failed_callback
 
+  # lambda that generates the RelayState param for the SAML AuthRequest, takes request
+  # from SamlSessionsController#new action as an argument
+  mattr_accessor :saml_relay_state
+  @@saml_relay_state
+
   mattr_accessor :saml_config
   @@saml_config = OneLogin::RubySaml::Settings.new
   def self.saml_configure

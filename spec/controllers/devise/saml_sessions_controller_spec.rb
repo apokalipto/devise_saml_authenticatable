@@ -68,6 +68,16 @@ describe Devise::SamlSessionsController, type: :controller do
         do_get
       end
 
+      context "with a relay_state lambda defined" do
+        let(:relay_state) { ->(request) { "123" } }
+
+        it "includes the RelayState param in the request to the IdP" do
+          expect(Devise).to receive(:saml_relay_state).at_least(:once).and_return(relay_state)
+          do_get
+          expect(response).to redirect_to(%r(\Ahttp://idp_sso_url\?SAMLRequest=.*&RelayState=123))
+        end
+      end
+
       context "with a specified idp entity id reader" do
         class OurIdpEntityIdReader
           def self.entity_id(params)

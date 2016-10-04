@@ -8,7 +8,8 @@ class Devise::SamlSessionsController < Devise::SessionsController
   def new
     idp_entity_id = get_idp_entity_id(params)
     request = OneLogin::RubySaml::Authrequest.new
-    action = request.create(saml_config(idp_entity_id))
+    auth_params = { RelayState: relay_state } if relay_state
+    action = request.create(saml_config(idp_entity_id), auth_params || {})
     redirect_to action
   end
 
@@ -39,6 +40,12 @@ class Devise::SamlSessionsController < Devise::SessionsController
   end
 
   protected
+
+  def relay_state
+    @relay_state ||= if Devise.saml_relay_state.present?
+      Devise.saml_relay_state.call(request)
+    end
+  end
 
   # Override devise to send user to IdP logout for SLO
   def after_sign_out_path_for(_)
