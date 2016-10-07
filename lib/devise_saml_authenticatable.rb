@@ -62,6 +62,10 @@ module Devise
   mattr_accessor :saml_relay_state
   @@saml_relay_state
 
+  # Instead of storing the attribute_map in attribute-map.yml, store it in the database, or set it programatically ...
+  mattr_accessor :attribute_map
+  @@attribute_map
+
   mattr_accessor :saml_config
   @@saml_config = OneLogin::RubySaml::Settings.new
   def self.saml_configure
