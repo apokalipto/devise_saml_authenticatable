@@ -149,16 +149,33 @@ describe Devise::Models::SamlAuthenticatable do
     end
   end
 
-
   context "when configured with a case-insensitive key" do
-    before do
-      allow(Devise).to receive(:case_insensitive_keys).and_return([:email])
+    shared_examples "correct downcasing" do
+      before do
+        allow(Devise).to receive(:case_insensitive_keys).and_return([:email])
+      end
+
+      it "looks up the user with a downcased value" do
+        user = Model.new(new_record: false)
+        expect(Model).to receive(:where).with(email: 'upper@example.com').and_return([user])
+        expect(Model.authenticate_with_saml(response, nil)).to eq(user)
+      end
     end
 
-    it "looks up the user with a downcased value" do
-      user = Model.new(new_record: false)
-      expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
-      expect(Model.authenticate_with_saml(response, nil)).to eq(user)
+    context "when configured to use the subject" do
+      let(:name_id) { 'UPPER@example.com' }
+
+      before do
+        allow(Devise).to receive(:saml_use_subject).and_return(true)
+      end
+
+      include_examples "correct downcasing"
+    end
+
+    context "when using default user key" do
+      let(:attributes) { OneLogin::RubySaml::Attributes.new('saml-email-format' => ['UPPER@example.com']) }
+
+      include_examples "correct downcasing"
     end
   end
 end
