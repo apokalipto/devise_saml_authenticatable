@@ -39,6 +39,13 @@ module Devise
           end
           auth_value.try(:downcase!) if Devise.case_insensitive_keys.include?(key)
 
+          if Devise.saml_auth_value_validator
+            if not Devise.saml_auth_value_validator.new.validate(saml_response, auth_value)
+              logger.info("User(#{auth_value}) did not pass custom validation.")
+              return nil
+            end
+          end
+
           resource = where(key => auth_value).first
 
           if resource.nil?

@@ -62,6 +62,10 @@ module Devise
   mattr_accessor :saml_relay_state
   @@saml_relay_state
 
+  # Implements a #validate method that takes the response and auth value, and returns true if it's valid
+  mattr_accessor :saml_auth_value_validator
+  @@saml_auth_value_validator
+
   mattr_accessor :saml_config
   @@saml_config = OneLogin::RubySaml::Settings.new
   def self.saml_configure
