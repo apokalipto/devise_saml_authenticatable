@@ -1,5 +1,7 @@
 # Set up a SAML Service Provider
 
+require "onelogin/ruby-saml/version"
+
 saml_session_index_key = ENV.fetch('SAML_SESSION_INDEX_KEY', ":session_index")
 use_subject_to_authenticate = ENV.fetch('USE_SUBJECT_TO_AUTHENTICATE')
 idp_settings_adapter = ENV.fetch('IDP_SETTINGS_ADAPTER', "nil")
@@ -7,6 +9,7 @@ idp_entity_id_reader = ENV.fetch('IDP_ENTITY_ID_READER', "DeviseSamlAuthenticata
 saml_failed_callback = ENV.fetch('SAML_FAILED_CALLBACK', "nil")
 
 gem 'devise_saml_authenticatable', path: '../../..'
+gem 'ruby-saml', OneLogin::RubySaml::VERSION
 gem 'thin'
 
 insert_into_file('Gemfile', after: /\z/) {

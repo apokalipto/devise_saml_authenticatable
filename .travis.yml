@@ -8,14 +8,21 @@ rvm:
 gemfile:
   - Gemfile
   - spec/support/Gemfile.rails4
+  - spec/support/Gemfile.ruby-saml-1.3
 matrix:
   allow_failures:
     - rvm: "1.9.3"
       gemfile: Gemfile
+    - rvm: "1.9.3"
+      gemfile: spec/support/Gemfile.ruby-saml-1.3
     - rvm: "2.0.0"
       gemfile: Gemfile
+    - rvm: "2.0.0"
+      gemfile: spec/support/Gemfile.ruby-saml-1.3
     - rvm: "2.1.9"
       gemfile: Gemfile
+    - rvm: "2.1.9"
+      gemfile: spec/support/Gemfile.ruby-saml-1.3
 
 script:
   - bundle exec rake
@@ -27,4 +34,4 @@ notifications:
     template:
       - '%{repository}<a href="%{build_url}">#%{build_number}</a> (%{branch} - <a href="%{compare_url}">%{commit}</a> : %{author}): %{message}'
     format: html
-    on_pull_requests: false
+    on_pull_requests: true
