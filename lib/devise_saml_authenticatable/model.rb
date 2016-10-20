@@ -76,10 +76,14 @@ module Devise
 
         private
 
-        def set_user_saml_attributes(user,attributes)
-          attribute_map.each do |k,v|
-            Rails.logger.info "Setting: #{v}, #{attributes[k]}"
-            user.send "#{v}=", attributes[k]
+        def set_user_saml_attributes(user, attributes)
+          if defined?(Devise.set_user_saml_attributes_custom_function)
+            Devise.set_user_saml_attributes_custom_function.call(user, attributes)
+          else
+            attribute_map.each do |k, v|
+              Rails.logger.info "Setting: #{v}, #{attributes[k]}"
+              user.send "#{v}=", attributes[k]
+            end
           end
         end
 
