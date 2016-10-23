@@ -71,7 +71,7 @@ module Devise
         end
 
         def attribute_map
-          @attribute_map ||= Devise.attribute_map || attribute_map_for_environment
+          Devise.attribute_map || attribute_map_for_environment
         end
 
         private
