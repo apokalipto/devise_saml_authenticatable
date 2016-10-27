@@ -67,6 +67,16 @@ module Devise
   def self.saml_configure
     yield saml_config
   end
+
+  mattr_reader :saml_default_update_resource_hook
+  @@saml_default_update_resource_hook = Proc.new do |user, saml_response|
+    saml_response.attributes.resource_keys.each do |key|
+      user.send "#{key}=", saml_response.attribute_value_by_resource_key(key)
+    end
+  end
+
+  mattr_accessor :saml_update_resource_hook
+  @@saml_update_resource_hook = @@saml_default_update_resource_hook
 end
 
 # Add saml_authenticatable strategy to defaults.

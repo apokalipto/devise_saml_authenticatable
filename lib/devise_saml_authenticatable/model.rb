@@ -1,4 +1,5 @@
 require 'devise_saml_authenticatable/strategy'
+require 'devise_saml_authenticatable/saml_response'
 
 module Devise
   module Models
@@ -30,12 +31,14 @@ module Devise
       module ClassMethods
         def authenticate_with_saml(saml_response, relay_state)
           key = Devise.saml_default_user_key
-          attributes = saml_response.attributes
+          decorated_response = ::SamlAuthenticatable::SamlResponse.new(
+            saml_response,
+            attribute_map
+          )
           if (Devise.saml_use_subject)
             auth_value = saml_response.name_id
           else
-            inv_attr = attribute_map.invert
-            auth_value = attributes[inv_attr[key.to_s]]
+            auth_value = decorated_response.attribute_value_by_resource_key(key)
           end
           auth_value.try(:downcase!) if Devise.case_insensitive_keys.include?(key)
 
@@ -52,7 +55,7 @@ module Devise
           end
 
           if Devise.saml_update_user || (resource.new_record? && Devise.saml_create_user)
-            set_user_saml_attributes(resource, attributes)
+            Devise.saml_update_resource_hook.call(resource, decorated_response)
             if (Devise.saml_use_subject)
               resource.send "#{key}=", auth_value
             end
@@ -76,13 +79,6 @@ module Devise
         end
 
         private
-
-        def set_user_saml_attributes(user,attributes)
-          attribute_map.each do |k,v|
-            Rails.logger.info "Setting: #{v}, #{attributes[k]}"
-            user.send "#{v}=", attributes[k]
-          end
-        end
 
         def attribute_map_for_environment
           attribute_map = YAML.load(File.read("#{Rails.root}/config/attribute-map.yml"))
