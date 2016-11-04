@@ -66,10 +66,15 @@ module Devise
   mattr_accessor :attribute_map
   @@attribute_map
 
-  # Instead of storing the attribute_map in attribute-map.yml, store it in the database, or set it programatically ...
+  # Allow a block to be passed, to replace `set_user_saml_attributes` -- allowing more
+  # control over how the attributes are assigned to the user
   mattr_accessor :set_user_saml_attributes_custom_function
-  set_user_saml_attributes_custom_function
+  @@set_user_saml_attributes_custom_function
   
+  # Pass in a custom value for allowed_clock_drift
+  mattr_accessor :allowed_clock_drift_in_seconds
+  @@allowed_clock_drift_in_seconds
+
   mattr_accessor :saml_config
   @@saml_config = OneLogin::RubySaml::Settings.new
   def self.saml_configure
