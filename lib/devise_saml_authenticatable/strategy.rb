@@ -6,7 +6,7 @@ module Devise
       include DeviseSamlAuthenticatable::SamlConfig
       def valid?
         if params[:SAMLResponse]
-          OneLogin::RubySaml::Response.new(params[:SAMLResponse], allowed_clock_drift: (Devise.allowed_clock_drift_in_seconds || nil))
+          OneLogin::RubySaml::Response.new(params[:SAMLResponse], settings: saml_config(get_idp_entity_id(params)), allowed_clock_drift: (Devise.allowed_clock_drift_in_seconds || nil))
         else
           false
         end
