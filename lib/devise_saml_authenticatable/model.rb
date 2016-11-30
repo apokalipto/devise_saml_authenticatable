@@ -43,7 +43,7 @@ module Devise
           if resource.nil?
             if Devise.saml_create_user
               logger.info("Creating user(#{auth_value}).")
-              resource = new
+              resource = new(:username => auth_value)
             else
               logger.info("User(#{auth_value}) not found.  Not configured to create the user.")
               return nil
