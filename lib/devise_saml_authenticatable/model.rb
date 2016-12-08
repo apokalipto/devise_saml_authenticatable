@@ -41,9 +41,9 @@ module Devise
 
           # Check if auth_value is an email address and if so, match using case insensitivity.
           if auth_value.include?('@') && key.to_s.downcase.include?('email')
-            resource = where(key => auth_value).first
-          else
             resource = where("lower(#{key}) = ?", auth_value.downcase).first
+          else
+            resource = where(key => auth_value).first
           end
 
           if resource.nil?
