@@ -62,6 +62,10 @@ module Devise
   mattr_accessor :saml_relay_state
   @@saml_relay_state
 
+  # decode base64 encoded SAMLResponse attributes if true
+  mattr_accessor :saml_base64_attributes
+  @@saml_base64_attributes
+
   # Implements a #validate method that takes the retrieved resource and response right after retrieval,
   # and returns true if it's valid.  False will cause authentication to fail.
   mattr_accessor :saml_resource_validator
