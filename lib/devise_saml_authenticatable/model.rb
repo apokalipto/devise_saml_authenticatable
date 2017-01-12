@@ -86,7 +86,7 @@ module Devise
 
         def set_user_saml_attributes(user,attributes)
           attribute_map.each do |k,v|
-            if attributes.has_key?(k)
+            if attributes.include?(k)
               attribute_value = Devise.saml_base64_attributes ? Base64.decode64(attributes[k]) : attributes[k]
               Rails.logger.info "Setting: #{v}, #{attributes_value}"
               user.send "#{v}=", attributes_value
