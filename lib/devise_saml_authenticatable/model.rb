@@ -88,8 +88,8 @@ module Devise
           attribute_map.each do |k,v|
             if attributes.include?(k)
               attribute_value = Devise.saml_base64_attributes ? Base64.decode64(attributes[k]) : attributes[k]
-              Rails.logger.info "Setting: #{v}, #{attributes_value}"
-              user.send "#{v}=", attributes_value
+              Rails.logger.info "Setting: #{v}, #{attribute_value}"
+              user.send "#{v}=", attribute_value
             end
           end
         end
