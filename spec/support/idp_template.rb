@@ -11,6 +11,7 @@ insert_into_file('Gemfile', after: /\z/) {
 # Lock down versions of gems for older versions of Ruby
 if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.1")
   gem 'devise', '~> 3.5'
+  gem 'nokogiri', '~> 1.6.8'
 end
   GEMFILE
 }
