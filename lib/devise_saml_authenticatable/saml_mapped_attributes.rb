@@ -6,11 +6,11 @@ module SamlAuthenticatable
       @inverted_attribute_map = @attribute_map.invert
     end
 
-    def saml_attribute_keys()
+    def saml_attribute_keys
       @attribute_map.keys
     end
 
-    def resource_keys()
+    def resource_keys
       @attribute_map.values
     end
 
