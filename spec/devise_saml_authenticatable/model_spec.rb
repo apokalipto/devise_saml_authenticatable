@@ -179,6 +179,39 @@ describe Devise::Models::SamlAuthenticatable do
     end
   end
 
+  context "when configured with a resource validator" do
+    let(:validator_class) { double("validator_class") }
+    let(:validator) { double("validator") }
+    let(:user) { Model.new(new_record: false) }
+
+    before do
+      allow(Devise).to receive(:saml_resource_validator).and_return(validator_class)
+      allow(validator_class).to receive(:new).and_return(validator)
+    end
+
+    context "and sent a valid value" do
+      before do
+        allow(validator).to receive(:validate).with(user, response).and_return(true)
+      end
+
+      it "returns the user" do
+        expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
+        expect(Model.authenticate_with_saml(response, nil)).to eq(user)
+      end
+    end
+
+    context "and sent an invalid value" do
+      before do
+        allow(validator).to receive(:validate).with(user, response).and_return(false)
+      end
+
+      it "returns nil" do
+        expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
+        expect(Model.authenticate_with_saml(response, nil)).to be_nil
+      end
+    end
+  end
+
   context "when configured to use a custom update hook" do
     it "can replicate the default behaviour in a custom hook" do
       configure_hook do |user, saml_response|

@@ -44,6 +44,13 @@ module Devise
 
           resource = where(key => auth_value).first
 
+          if Devise.saml_resource_validator
+            if not Devise.saml_resource_validator.new.validate(resource, saml_response)
+              logger.info("User(#{auth_value}) did not pass custom validation.")
+              return nil
+            end
+          end
+
           if resource.nil?
             if Devise.saml_create_user
               logger.info("Creating user(#{auth_value}).")

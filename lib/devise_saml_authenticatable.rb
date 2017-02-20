@@ -62,6 +62,11 @@ module Devise
   mattr_accessor :saml_relay_state
   @@saml_relay_state
 
+  # Implements a #validate method that takes the retrieved resource and response right after retrieval,
+  # and returns true if it's valid.  False will cause authentication to fail.
+  mattr_accessor :saml_resource_validator
+  @@saml_resource_validator
+
   mattr_accessor :saml_config
   @@saml_config = OneLogin::RubySaml::Settings.new
   def self.saml_configure
