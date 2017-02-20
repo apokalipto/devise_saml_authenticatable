@@ -62,11 +62,7 @@ module Devise
           end
 
           if Devise.saml_update_user || (resource.new_record? && Devise.saml_create_user)
-            Devise.saml_update_resource_hook.call(resource, decorated_response)
-            if (Devise.saml_use_subject)
-              resource.send "#{key}=", auth_value
-            end
-            resource.save!
+            Devise.saml_update_resource_hook.call(resource, decorated_response, auth_value)
           end
 
           resource

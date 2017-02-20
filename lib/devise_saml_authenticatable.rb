@@ -74,10 +74,16 @@ module Devise
   end
 
   mattr_reader :saml_default_update_resource_hook
-  @@saml_default_update_resource_hook = Proc.new do |user, saml_response|
+  @@saml_default_update_resource_hook = Proc.new do |user, saml_response, auth_value|
     saml_response.attributes.resource_keys.each do |key|
       user.send "#{key}=", saml_response.attribute_value_by_resource_key(key)
     end
+
+    if (Devise.saml_use_subject)
+      user.send "#{Devise.saml_default_user_key}=", auth_value
+    end
+
+    user.save!
   end
 
   mattr_accessor :saml_update_resource_hook
