@@ -42,7 +42,7 @@ module Devise
           end
           auth_value.try(:downcase!) if Devise.case_insensitive_keys.include?(key)
 
-          resource = where(key => auth_value).first
+          resource = Devise.saml_resource_locator.call(self, decorated_response, auth_value)
 
           if Devise.saml_resource_validator
             if not Devise.saml_resource_validator.new.validate(resource, saml_response)
