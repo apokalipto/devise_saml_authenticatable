@@ -74,7 +74,7 @@ module Devise
   end
 
   # Default update resource hook. Updates each attribute on the model that is mapped, updates the
-  # saml_default_user_key if saml_use subject is true and saves the user model.
+  # saml_default_user_key if saml_use_subject is true and saves the user model.
   # See saml_update_resource_hook for more information.
   mattr_reader :saml_default_update_resource_hook
   @@saml_default_update_resource_hook = Proc.new do |user, saml_response, auth_value|
