@@ -72,6 +72,28 @@ module Devise
   def self.saml_configure
     yield saml_config
   end
+
+  # Default update resource hook. Updates each attribute on the model that is mapped, updates the
+  # saml_default_user_key if saml_use_subject is true and saves the user model.
+  # See saml_update_resource_hook for more information.
+  mattr_reader :saml_default_update_resource_hook
+  @@saml_default_update_resource_hook = Proc.new do |user, saml_response, auth_value|
+    saml_response.attributes.resource_keys.each do |key|
+      user.send "#{key}=", saml_response.attribute_value_by_resource_key(key)
+    end
+
+    if (Devise.saml_use_subject)
+      user.send "#{Devise.saml_default_user_key}=", auth_value
+    end
+
+    user.save!
+  end
+
+  # Proc that is called if Devise.saml_update_user and/or Devise.saml_create_user are true.
+  # Recieves the user object, saml_response and auth_value, and defines how the object's values are
+  # updated with regards to the SAML response. See saml_default_update_resource_hook for an example.
+  mattr_accessor :saml_update_resource_hook
+  @@saml_update_resource_hook = @@saml_default_update_resource_hook
 end
 
 # Add saml_authenticatable strategy to defaults.

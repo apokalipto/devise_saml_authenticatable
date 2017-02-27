@@ -211,4 +211,51 @@ describe Devise::Models::SamlAuthenticatable do
       end
     end
   end
+
+  context "when configured to use a custom update hook" do
+    it "can replicate the default behaviour in a custom hook" do
+      configure_hook do |user, saml_response|
+        Devise.saml_default_update_resource_hook.call(user, saml_response)
+      end
+
+      new_user = Model.authenticate_with_saml(response, nil)
+
+      expect(new_user.name).to eq(attributes['saml-name-format'])
+      expect(new_user.email).to eq(attributes['saml-email-format'])
+    end
+
+    it "can extend the default behaviour with custom transformations" do
+      configure_hook do |user, saml_response|
+        Devise.saml_default_update_resource_hook.call(user, saml_response)
+
+        user.email = "ext+#{user.email}"
+      end
+
+      new_user = Model.authenticate_with_saml(response, nil)
+
+      expect(new_user.name).to eq(attributes['saml-name-format'])
+      expect(new_user.email).to eq("ext+#{attributes['saml-email-format']}")
+    end
+
+    it "can extend the default behaviour using information from the saml response" do
+      configure_hook do |user, saml_response|
+        Devise.saml_default_update_resource_hook.call(user, saml_response)
+
+        name_id = saml_response.raw_response.name_id
+        user.name += "@#{name_id}"
+      end
+
+      new_user = Model.authenticate_with_saml(response, nil)
+
+      expect(new_user.name).to eq("#{attributes['saml-name-format']}@#{response.name_id}")
+      expect(new_user.email).to eq(attributes['saml-email-format'])
+    end
+
+    def configure_hook(&block)
+      allow(Model).to receive(:where).with(email: 'user@example.com').and_return([])
+      allow(Devise).to receive(:saml_default_user_key).and_return(:email)
+      allow(Devise).to receive(:saml_create_user).and_return(true)
+      allow(Devise).to receive(:saml_update_resource_hook).and_return(block)
+    end
+  end
 end
