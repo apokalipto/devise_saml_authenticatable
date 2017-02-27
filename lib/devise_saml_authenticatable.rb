@@ -95,7 +95,7 @@ module Devise
   mattr_accessor :saml_update_resource_hook
   @@saml_update_resource_hook = @@saml_default_update_resource_hook
 
-  # Default resource locator. Uses saml_default_user_key and auth_value to resove user.
+  # Default resource locator. Uses saml_default_user_key and auth_value to resolve user.
   # See saml_resource_locator for more information.
   mattr_reader :saml_default_resource_locator
   @@saml_default_resource_locator = Proc.new do |model, saml_response, auth_value|
