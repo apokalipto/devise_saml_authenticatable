@@ -42,7 +42,12 @@ module Devise
           end
           auth_value.try(:downcase!) if Devise.case_insensitive_keys.include?(key)
 
-          resource = where(key => auth_value).first
+          # Check if auth_value is an email address and if so, match using case insensitivity.
+          if auth_value.include?('@') && key.to_s.downcase.include?('email')
+            resource = where("lower(#{key}) = ?", auth_value.downcase).first
+          else
+            resource = where(key => auth_value).first
+          end
 
           if Devise.saml_resource_validator
             if not Devise.saml_resource_validator.new.validate(resource, saml_response)
