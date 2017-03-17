@@ -94,6 +94,20 @@ module Devise
   # updated with regards to the SAML response. See saml_default_update_resource_hook for an example.
   mattr_accessor :saml_update_resource_hook
   @@saml_update_resource_hook = @@saml_default_update_resource_hook
+
+  # Default resource locator. Uses saml_default_user_key and auth_value to resolve user.
+  # See saml_resource_locator for more information.
+  mattr_reader :saml_default_resource_locator
+  @@saml_default_resource_locator = Proc.new do |model, saml_response, auth_value|
+    model.where(Devise.saml_default_user_key => auth_value).first
+  end
+
+  # Proc that is called to resolve the saml_response and auth_value into the correct user object.
+  # Recieves a copy of the ActiveRecord::Model, saml_response and auth_value. Is expected to return
+  # one instance of the provided model that is the matched account, or nil if none exists.
+  # See saml_default_resource_locator above for an example.
+  mattr_accessor :saml_resource_locator
+  @@saml_resource_locator = @@saml_default_resource_locator
 end
 
 # Add saml_authenticatable strategy to defaults.
