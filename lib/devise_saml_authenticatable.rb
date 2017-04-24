@@ -67,6 +67,10 @@ module Devise
   mattr_accessor :saml_resource_validator
   @@saml_resource_validator
 
+  # Custom value for ruby-saml allowed_clock_drift
+  mattr_accessor :allowed_clock_drift_in_seconds
+  @@allowed_clock_drift_in_seconds
+
   mattr_accessor :saml_config
   @@saml_config = OneLogin::RubySaml::Settings.new
   def self.saml_configure
