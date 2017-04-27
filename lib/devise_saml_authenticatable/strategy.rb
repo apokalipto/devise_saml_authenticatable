@@ -6,7 +6,10 @@ module Devise
       include DeviseSamlAuthenticatable::SamlConfig
       def valid?
         if params[:SAMLResponse]
-          OneLogin::RubySaml::Response.new(params[:SAMLResponse])
+          OneLogin::RubySaml::Response.new(
+            params[:SAMLResponse],
+            allowed_clock_drift: Devise.allowed_clock_drift_in_seconds,
+          )
         else
           false
         end
@@ -30,7 +33,11 @@ module Devise
 
       private
       def parse_saml_response
-        @response = OneLogin::RubySaml::Response.new(params[:SAMLResponse], settings: saml_config(get_idp_entity_id(params)))
+        @response = OneLogin::RubySaml::Response.new(
+          params[:SAMLResponse],
+          settings: saml_config(get_idp_entity_id(params)),
+          allowed_clock_drift: Devise.allowed_clock_drift_in_seconds,
+        )
         unless @response.is_valid?
           failed_auth("Auth errors: #{@response.errors.join(', ')}")
         end

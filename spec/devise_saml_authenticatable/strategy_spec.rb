@@ -134,6 +134,24 @@ describe Devise::Strategies::SamlAuthenticatable do
         strategy.authenticate!
       end
     end
+
+    context "when allowed_clock_drift is configured" do
+      before do
+        allow(Devise).to receive(:allowed_clock_drift_in_seconds).and_return(30)
+      end
+
+      it "is valid with the configured clock drift" do
+        expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(allowed_clock_drift: 30))
+        expect(strategy).to be_valid
+      end
+
+      it "authenticates with the configured clock drift" do
+        expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(allowed_clock_drift: 30))
+
+        expect(strategy).to receive(:success!).with(user)
+        strategy.authenticate!
+      end
+    end
   end
 
   it "is not valid without a SAMLResponse parameter" do
