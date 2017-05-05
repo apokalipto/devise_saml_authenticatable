@@ -3,6 +3,8 @@
 @include_subject_in_attributes = ENV.fetch('INCLUDE_SUBJECT_IN_ATTRIBUTES')
 @valid_destination = ENV.fetch('VALID_DESTINATION', "true")
 
+gsub_file 'config/secrets.yml', /secret_key_base:.*$/, 'secret_key_base: "34814fd41f91c493b89aa01ac73c44d241a31245b5bc5542fa4b7317525e1dcfa60ba947b3d085e4e229456fdee0d8af6aac6a63cf750d807ea6fe5d853dff4a"'
+
 gem 'ruby-saml-idp'
 gem 'thin'
 

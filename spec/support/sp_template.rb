@@ -8,6 +8,8 @@ idp_settings_adapter = ENV.fetch('IDP_SETTINGS_ADAPTER', "nil")
 idp_entity_id_reader = ENV.fetch('IDP_ENTITY_ID_READER', "DeviseSamlAuthenticatable::DefaultIdpEntityIdReader")
 saml_failed_callback = ENV.fetch('SAML_FAILED_CALLBACK', "nil")
 
+gsub_file 'config/secrets.yml', /secret_key_base:.*$/, 'secret_key_base: "8b5889df1fcf03f76c7d66da02d8776bcc85b06bed7d9c592f076d9c8a5455ee6d4beae45986c3c030b40208db5e612f2a6ef8283036a352e3fae83c5eda36be"'
+
 gem 'devise_saml_authenticatable', path: '../../..'
 gem 'ruby-saml', OneLogin::RubySaml::VERSION
 gem 'thin'
@@ -76,6 +78,8 @@ after_bundle do
   # Configure for our SAML IdP
   generate 'devise:install'
   gsub_file 'config/initializers/devise.rb', /^end$/, <<-CONFIG
+  config.secret_key = 'adc7cd73792f5d20055a0ac749ce8cdddb2e0f0d3ea7fe7855eec3d0f81833b9a4ac31d12e05f232d40ae86ca492826a6fc5a65228c6e16752815316e2d5b38d'
+
   config.saml_default_user_key = :email
   config.saml_session_index_key = #{saml_session_index_key}
 
@@ -111,6 +115,8 @@ end
 
   rake "db:create"
   rake "db:migrate"
+  rake "db:create", env: "production"
+  rake "db:migrate", env: "production"
 end
 
 create_file 'public/stylesheets/application.css', ''

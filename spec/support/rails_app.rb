@@ -24,7 +24,7 @@ def start_app(name, port, options = {})
   pid = nil
   Bundler.with_clean_env do
     Dir.chdir(File.expand_path("../../support/#{name}", __FILE__)) do
-      pid = Process.spawn("bundle exec rails server -p #{port}")
+      pid = Process.spawn({"RAILS_ENV" => "production"}, "bundle exec rails server -p #{port} -e production", out: "log/#{name}.log", err: "log/#{name}.err.log")
       sleep 1 until app_ready?(pid, port)
       if app_ready?(pid, port)
         puts "Launched #{name} on port #{port} (pid #{pid})..."
