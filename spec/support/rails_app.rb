@@ -1,4 +1,8 @@
 require 'open3'
+require 'socket'
+require 'timeout'
+
+APP_READY_TIMEOUT ||= 30
 
 def sh!(cmd)
   unless system(cmd)
@@ -7,8 +11,9 @@ def sh!(cmd)
 end
 
 def app_ready?(pid, port)
-  Process.getpgid(pid) &&
-    system("lsof -i:#{port}", out: '/dev/null')
+  Process.getpgid(pid) && port_open?(port)
+rescue Errno::ESRCH
+  false
 end
 
 def create_app(name, env = {})
@@ -25,15 +30,25 @@ def start_app(name, port, options = {})
   Bundler.with_clean_env do
     Dir.chdir(File.expand_path("../../support/#{name}", __FILE__)) do
       pid = Process.spawn({"RAILS_ENV" => "production"}, "bundle exec rails server -p #{port} -e production", out: "log/#{name}.log", err: "log/#{name}.err.log")
-      sleep 1 until app_ready?(pid, port)
-      if app_ready?(pid, port)
-        puts "Launched #{name} on port #{port} (pid #{pid})..."
-      else
+      begin
+        Timeout::timeout(APP_READY_TIMEOUT) do
+          sleep 1 until app_ready?(pid, port)
+        end
+        if app_ready?(pid, port)
+          puts "Launched #{name} on port #{port} (pid #{pid})..."
+        else
+          raise "#{name} failed after starting"
+        end
+      rescue Timeout::Error
         raise "#{name} failed to start"
       end
     end
   end
   pid
+rescue RuntimeError => e
+  $stdout.puts "#{File.read(File.expand_path("../../support/#{name}/log/#{name}.log", __FILE__))}"
+  $stderr.puts "#{File.read(File.expand_path("../../support/#{name}/log/#{name}.err.log", __FILE__))}"
+  raise e
 end
 
 def stop_app(pid)
@@ -41,4 +56,25 @@ def stop_app(pid)
     Process.kill(:INT, pid)
     Process.wait(pid)
   end
+end
+
+def port_open?(port)
+  Timeout::timeout(1) do
+    begin
+      s = TCPSocket.new('localhost', port)
+      s.close
+      return true
+    rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
+      # try 127.0.0.1
+    end
+    begin
+      s = TCPSocket.new('127.0.0.1', port)
+      s.close
+      return true
+    rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
+      return false
+    end
+  end
+rescue Timeout::Error
+  false
 end
