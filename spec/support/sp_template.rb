@@ -108,7 +108,7 @@ class UsersController < ApplicationController
   skip_before_action :verify_authenticity_token
   def create
     User.create!(email: params[:email])
-    render nothing: true, status: 201
+    head 201
   end
 end
   USERS
