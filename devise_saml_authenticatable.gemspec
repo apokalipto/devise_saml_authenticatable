@@ -7,6 +7,7 @@ Gem::Specification.new do |gem|
   gem.description   = %q{SAML Authentication for devise}
   gem.summary       = %q{SAML Authentication for devise }
   gem.homepage      = ""
+  gem.license     = "MIT"
 
   gem.files         = `git ls-files`.split($\)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
