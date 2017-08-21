@@ -71,11 +71,51 @@ module Devise
   mattr_accessor :saml_resource_validator
   @@saml_resource_validator
 
+  # Custom value for ruby-saml allowed_clock_drift
+  mattr_accessor :allowed_clock_drift_in_seconds
+  @@allowed_clock_drift_in_seconds
+
   mattr_accessor :saml_config
   @@saml_config = OneLogin::RubySaml::Settings.new
   def self.saml_configure
     yield saml_config
   end
+
+  # Default update resource hook. Updates each attribute on the model that is mapped, updates the
+  # saml_default_user_key if saml_use_subject is true and saves the user model.
+  # See saml_update_resource_hook for more information.
+  mattr_reader :saml_default_update_resource_hook
+  @@saml_default_update_resource_hook = Proc.new do |user, saml_response, auth_value|
+    saml_response.attributes.resource_keys.each do |key|
+      user.send "#{key}=", saml_response.attribute_value_by_resource_key(key)
+    end
+
+    if (Devise.saml_use_subject)
+      user.send "#{Devise.saml_default_user_key}=", auth_value
+    end
+
+    user.save!
+  end
+
+  # Proc that is called if Devise.saml_update_user and/or Devise.saml_create_user are true.
+  # Recieves the user object, saml_response and auth_value, and defines how the object's values are
+  # updated with regards to the SAML response. See saml_default_update_resource_hook for an example.
+  mattr_accessor :saml_update_resource_hook
+  @@saml_update_resource_hook = @@saml_default_update_resource_hook
+
+  # Default resource locator. Uses saml_default_user_key and auth_value to resolve user.
+  # See saml_resource_locator for more information.
+  mattr_reader :saml_default_resource_locator
+  @@saml_default_resource_locator = Proc.new do |model, saml_response, auth_value|
+    model.where(Devise.saml_default_user_key => auth_value).first
+  end
+
+  # Proc that is called to resolve the saml_response and auth_value into the correct user object.
+  # Recieves a copy of the ActiveRecord::Model, saml_response and auth_value. Is expected to return
+  # one instance of the provided model that is the matched account, or nil if none exists.
+  # See saml_default_resource_locator above for an example.
+  mattr_accessor :saml_resource_locator
+  @@saml_resource_locator = @@saml_default_resource_locator
 end
 
 # Add saml_authenticatable strategy to defaults.

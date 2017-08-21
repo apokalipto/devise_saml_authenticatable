@@ -29,14 +29,14 @@ class SamlIdpController < SamlIdp::IdpController
 
   def session_index
     Rails.cache.fetch('session_key') {
-      UUID.generate
+      SecureRandom.uuid
     }
   end
 
 
   def encode_SAMLResponse(nameID, opts = {})
     now = Time.now.utc
-    response_id = UUID.generate
+    response_id = SecureRandom.uuid
     audience_uri = opts[:audience_uri] || "#{saml_acs_url[/^(.*?\/\/.*?\/)/, 1]}saml/metadata"
     issuer_uri = opts[:issuer_uri] || (defined?(request) && request.url) || "http://example.com"
 
@@ -72,8 +72,13 @@ class SamlIdpController < SamlIdp::IdpController
   end
 
   # == SLO functionality, see https://github.com/lawrencepit/ruby-saml-idp/pull/10
+  <% if Rails::VERSION::MAJOR < 5 %>
   skip_before_filter :validate_saml_request, :only => [:logout, :sp_sign_out]
   before_filter :validate_saml_slo_request, :only => [:logout]
+  <% else %>
+  skip_before_action :validate_saml_request, :only => [:logout, :sp_sign_out]
+  before_action :validate_saml_slo_request, :only => [:logout]
+  <% end %>
 
   public
 
@@ -139,7 +144,7 @@ class SamlIdpController < SamlIdp::IdpController
 
   def encode_SAML_SLO_Response(nameID, opts = {})
     now = Time.now.utc
-    response_id = UUID.generate
+    response_id = SecureRandom.uuid
     audience_uri = opts[:audience_uri] || (@saml_slo_acs_url && @saml_slo_acs_url[/^(.*?\/\/.*?\/)/, 1])
     issuer_uri = opts[:issuer_uri] || (defined?(request) && request.url.split("?")[0]) || "http://example.com"
 
@@ -175,7 +180,7 @@ class SamlIdpController < SamlIdp::IdpController
 
   def encode_SAML_SLO_Request(nameID, opts = {})
     now = Time.now.utc
-    response_id = UUID.generate
+    response_id = SecureRandom.uuid
     issuer_uri = opts[:issuer_uri] || (defined?(request) && request.url.split("?")[0]) || "http://example.com"
     xml = %[<samlp:LogoutRequest
     xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"

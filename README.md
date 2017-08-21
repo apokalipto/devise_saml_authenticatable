@@ -2,7 +2,7 @@
 # DeviseSamlAuthenticatable
 
 Devise Saml Authenticatable is a Single-Sign-On authentication strategy for devise that relies on SAML.
-It uses [ruby-saml][] to handle all SAML related stuff.
+It uses [ruby-saml][] to handle all SAML-related stuff.
 
 ## Installation
 
@@ -21,6 +21,7 @@ Or install it yourself as:
 ## Usage
 
 In `app/models/<YOUR_MODEL>.rb` set the `:saml_authenticatable` strategy.
+
 In the example the model is `user.rb`:
 
 ```ruby
@@ -31,7 +32,7 @@ In the example the model is `user.rb`:
   end
 ```
 
-In config/initializers/devise.rb
+In `config/initializers/devise.rb`:
 
 ```ruby
   Devise.setup do |config|
@@ -52,8 +53,8 @@ In config/initializers/devise.rb
     # for the user's session to facilitate an IDP initiated logout request.
     config.saml_session_index_key = :session_index
 
-    # You can set this value to use Subject or SAML assertation as info to which email will be compared
-    # If you don't set it then email will be extracted from SAML assertation attributes
+    # You can set this value to use Subject or SAML assertation as info to which email will be compared.
+    # If you don't set it then email will be extracted from SAML assertation attributes.
     config.saml_use_subject = true
 
     # You can support multiple IdPs by setting this value to a class that implements a #settings method which takes
@@ -99,7 +100,7 @@ In config/initializers/devise.rb
   end
 ```
 
-In config directory create a YAML file (`attribute-map.yml`) that maps SAML attributes with your model's fields:
+In the config directory, create a YAML file (`attribute-map.yml`) that maps SAML attributes with your model's fields:
 
 ```yaml
   # attribute-map.yml
@@ -112,15 +113,17 @@ In config directory create a YAML file (`attribute-map.yml`) that maps SAML attr
 
 The attribute mappings are very dependent on the way the IdP encodes the attributes.
 In this example the attributes are given in URN style.
-Other IdPs might provide them as OID's or other means.
+Other IdPs might provide them as OID's, or by other means.
 
 You are now ready to test it against an IdP.
-When the user goes to `/users/saml/sign_in` he will be redirected to the login page of the IdP.
-Upon successful login the user is redirected to devise `user_root_path`.
+
+When the user visits `/users/saml/sign_in` they will be redirected to the login page of the IdP.
+
+Upon successful login the user is redirected to the Devise `user_root_path`.
 
 ## Supporting Multiple IdPs
 
-If you must support multiple Identity Providers you can implement an adapter class with a `#settings` method that takes an IdP entity id and returns a hash of settings for the corresponding IdP. The `config.idp_settings_adapter` then must be set to point to your adapter in config/initializers/devise.rb. The implementation of the adapter is up to you. A simple example may look like this:
+If you must support multiple Identity Providers you can implement an adapter class with a `#settings` method that takes an IdP entity id and returns a hash of settings for the corresponding IdP. The `config.idp_settings_adapter` then must be set to point to your adapter in `config/initializers/devise.rb`. The implementation of the adapter is up to you. A simple example may look like this:
 
 ```ruby
 class IdPSettingsAdapter
@@ -158,21 +161,26 @@ end
 ```
 
 Detecting the entity ID passed to the `settings` method is done by `config.idp_entity_id_reader`.
+
 By default this will find the `Issuer` in the SAML request.
+
 You can support more use cases by writing your own and implementing the `.entity_id` method.
+
 If you use encrypted assertions, your entity ID reader will need to understand how to decrypt the response from each of the possible IdPs.
 
 ## Identity Provider
 
-If you don't have an identity provider an you would like to test the authentication against your app there are some options:
+If you don't have an identity provider and you would like to test the authentication against your app, there are some options:
 
-1. Use [ruby-saml-idp](https://github.com/lawrencepit/ruby-saml-idp). You can add your own logic to your IdP, or you can also set it as a dummy IdP that always sends a valid authentication response to your app.
-2. Use an online service that can act as an IdP. Onelogin, Salesforce, Okta and some others provide you with this functionality
+1. Use [ruby-saml-idp](https://github.com/lawrencepit/ruby-saml-idp). You can add your own logic to your IdP, or you can also set it up as a dummy IdP that always sends a valid authentication response to your app.
+2. Use an online service that can act as an IdP. OneLogin, Salesforce, Okta and some others provide you with this functionality.
 3. Install your own IdP.
 
-There are numerous IdPs that support SAML 2.0, there are propietary (like Microsoft ADFS 2.0 or Ping federate) and there are also open source solutions like Shibboleth and simplesamlphp.
+There are numerous IdPs that support SAML 2.0, there are propietary (like Microsoft ADFS 2.0 or Ping federate) and there are also open source solutions like Shibboleth and [SimpleSAMLphp].
 
-[SimpleSAMLphp](http://simplesamlphp.org/) was my choice for development since it is a production-ready SAML solution, that is also really easy to install, configure and use.
+[SimpleSAMLphp] was my choice for development since it is a production-ready SAML solution, that is also really easy to install, configure and use.
+
+[SimpleSAMLphp]: http://simplesamlphp.org/
 
 ## Logout
 
@@ -180,18 +188,20 @@ Logout support is included by immediately terminating the local session and then
 
 ## Logout Request
 
-Logout requests from the IDP are supported by the `idp_sign_out` end point.  Directing logout requests to `users/saml/idp_sign_out` will logout the respective user by invalidating their current sessions.
+Logout requests from the IDP are supported by the `idp_sign_out` endpoint.  Directing logout requests to `users/saml/idp_sign_out` will log out the respective user by invalidating their current sessions.
+
 `saml_session_index_key` must be configured to support this feature.
 
 ## Signing and Encrypting Authentication Requests
 
-ruby-saml 1.0.0 supports signature and decrypt. Teh only requirement is to place the public certificate and the private key. Please reffer to these features in the ruby-saml documentation [here](https://github.com/onelogin/ruby-saml#signing)
+ruby-saml 1.0.0 supports signature and decrypt. The only requirement is to set the public certificate and the private key. For more information, see [the ruby-saml documentation](https://github.com/onelogin/ruby-saml#signing).
 
 ## Thanks
 
 The continued maintenance of this gem could not have been possible without the hard work of [Adam Stegman](https://github.com/adamstegman) and [Mitch Lindsay](https://github.com/mitch-lindsay). Thank you guys for keeping this project alive.
 
 Thanks to all other contributors that have also helped us make this software better.
+
 ## Contributing
 
 1. Fork it
