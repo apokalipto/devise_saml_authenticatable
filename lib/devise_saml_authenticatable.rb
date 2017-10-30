@@ -94,7 +94,7 @@ module Devise
   end
 
   # Proc that is called if Devise.saml_update_user and/or Devise.saml_create_user are true.
-  # Recieves the user object, saml_response and auth_value, and defines how the object's values are
+  # Receives the user object, saml_response and auth_value, and defines how the object's values are
   # updated with regards to the SAML response. See saml_default_update_resource_hook for an example.
   mattr_accessor :saml_update_resource_hook
   @@saml_update_resource_hook = @@saml_default_update_resource_hook
@@ -107,7 +107,7 @@ module Devise
   end
 
   # Proc that is called to resolve the saml_response and auth_value into the correct user object.
-  # Recieves a copy of the ActiveRecord::Model, saml_response and auth_value. Is expected to return
+  # Receives a copy of the ActiveRecord::Model, saml_response and auth_value. Is expected to return
   # one instance of the provided model that is the matched account, or nil if none exists.
   # See saml_default_resource_locator above for an example.
   mattr_accessor :saml_resource_locator
