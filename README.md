@@ -69,8 +69,9 @@ In `config/initializers/devise.rb`:
     # and implements a #handle method. This method can then redirect the user, return error messages, etc.
     # config.saml_failed_callback = nil
 
-    # Configure with your SAML settings (see [ruby-saml][] for more information).
+    # Configure with your SAML settings (see ruby-saml's README for more information: https://github.com/onelogin/ruby-saml).
     config.saml_configure do |settings|
+      # assertion_consumer_service_url is required starting with ruby-saml 1.4.3: https://github.com/onelogin/ruby-saml#updating-from-142-to-143
       settings.assertion_consumer_service_url     = "http://localhost:3000/users/saml/auth"
       settings.assertion_consumer_service_binding = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
       settings.name_identifier_format             = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
