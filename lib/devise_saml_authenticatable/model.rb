@@ -83,6 +83,16 @@ module Devise
 
         private
 
+        def set_user_saml_attributes(user,attributes)
+          attribute_map.each do |k,v|
+            if attributes.include?(k)
+              attribute_value = Devise.saml_base64_attributes ? Base64.decode64(attributes[k]) : attributes[k]
+              Rails.logger.info "Setting: #{v}, #{attribute_value}"
+              user.send "#{v}=", attribute_value
+            end
+          end
+        end
+
         def attribute_map_for_environment
           attribute_map = YAML.load(File.read("#{Rails.root}/config/attribute-map.yml"))
           if attribute_map.has_key?(Rails.env)
