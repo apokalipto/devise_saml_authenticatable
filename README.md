@@ -163,6 +163,7 @@ class IdPSettingsAdapter
   end
 end
 ```
+Settings specified in the adapter will override settings in `config/initializers/devise.rb`. This is useful for establishing common settings or defaults across all IdPs.
 
 Detecting the entity ID passed to the `settings` method is done by `config.idp_entity_id_reader`.
 
@@ -196,9 +197,11 @@ Logout requests from the IDP are supported by the `idp_sign_out` endpoint.  Dire
 
 `saml_session_index_key` must be configured to support this feature.
 
-## Signing and Encrypting Authentication Requests
+## Signing and Encrypting Authentication Requests and Assertions
 
 ruby-saml 1.0.0 supports signature and decrypt. The only requirement is to set the public certificate and the private key. For more information, see [the ruby-saml documentation](https://github.com/onelogin/ruby-saml#signing).
+
+If you have multiple IdPs, the certificate and private key must be in the shared settings in `config/initializers/devise.rb`.
 
 ## Thanks
 
