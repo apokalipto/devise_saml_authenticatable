@@ -1,8 +1,11 @@
-[![Build Status](https://travis-ci.org/apokalipto/devise_saml_authenticatable.svg?branch=master)](https://travis-ci.org/apokalipto/devise_saml_authenticatable)
 # DeviseSamlAuthenticatable
 
 Devise Saml Authenticatable is a Single-Sign-On authentication strategy for devise that relies on SAML.
 It uses [ruby-saml][] to handle all SAML-related stuff.
+
+## This fork exists to address [the original's issue #73](https://github.com/apokalipto/devise_saml_authenticatable/issues/73)
+
+It uses essentially the same changes proposed there.
 
 ## Installation
 
