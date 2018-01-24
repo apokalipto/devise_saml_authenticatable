@@ -33,6 +33,9 @@ module DeviseSamlAuthenticatable
     end
 
     def get_idp_entity_id(params)
+      if Devise.idp_entity_id_reader.is_a? Proc
+        return Devise.idp_entity_id_reader.call(params)
+      end
       Devise.idp_entity_id_reader.entity_id(params)
     end
   end
