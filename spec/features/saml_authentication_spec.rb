@@ -138,7 +138,6 @@ describe "SAML Authentication", type: :feature do
   end
 
   context "when the idp_settings_adapter key is set" do
-
     before(:each) do
       create_app('idp', 'INCLUDE_SUBJECT_IN_ATTRIBUTES' => "false")
       create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "true", 'IDP_SETTINGS_ADAPTER' => "IdpSettingsAdapter", 'IDP_ENTITY_ID_READER' => "OurEntityIdReader")
@@ -156,7 +155,24 @@ describe "SAML Authentication", type: :feature do
       create_user("you@example.com")
 
       visit 'http://localhost:8020/users/saml/sign_in/?entity_id=http%3A%2F%2Flocalhost%3A8020%2Fsaml%2Fmetadata'
-      expect(current_url).to match(%r(\Ahttp://www.example.com/\?SAMLRequest=))
+      expect(current_url).to match(%r(\Ahttp://www.example.com/sso\?SAMLRequest=))
+    end
+
+    it "logs a user out of the IdP via the SP" do
+      sign_in
+
+      # prove user is still signed in
+      visit 'http://localhost:8020/'
+      expect(page).to have_content("you@example.com")
+      expect(current_url).to eq("http://localhost:8020/")
+
+      click_on "Log out"
+      #confirm the logout response redirected to the SP which in turn attempted to sign th e
+      expect(current_url).to match(%r(\Ahttp://www.example.com/slo\?SAMLRequest=))
+
+      # prove user is now signed out
+      visit 'http://localhost:8020/users/saml/sign_in/?entity_id=http%3A%2F%2Flocalhost%3A8020%2Fsaml%2Fmetadata'
+      expect(current_url).to match(%r(\Ahttp://www.example.com/sso\?SAMLRequest=))
     end
   end
 
