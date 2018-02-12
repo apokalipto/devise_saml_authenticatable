@@ -68,7 +68,7 @@ after_bundle do
   insert_into_file('app/views/home/index.html.erb', after: /\z/) {
     <<-HOME
 <%= current_user.email %> <%= current_user.name %>
-<%= form_tag destroy_user_session_path, method: :delete do %>
+<%= form_tag destroy_user_session_path(entity_id: "http://localhost:8020/saml/metadata"), method: :delete do %>
   <%= submit_tag "Log out" %>
 <% end %>
     HOME

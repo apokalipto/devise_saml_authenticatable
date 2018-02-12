@@ -66,6 +66,7 @@ describe Devise::SamlSessionsController, type: :controller do
       it "uses the DefaultIdpEntityIdReader" do
         expect(DeviseSamlAuthenticatable::DefaultIdpEntityIdReader).to receive(:entity_id)
         do_get
+        expect(idp_providers_adapter).to have_received(:settings).with(nil)
       end
 
       context "with a relay_state lambda defined" do
@@ -104,6 +105,7 @@ describe Devise::SamlSessionsController, type: :controller do
 
         it "redirects to the associated IdP SSO target url" do
           do_get
+          expect(idp_providers_adapter).to have_received(:settings).with("http://www.example.com")
           expect(response).to redirect_to(%r(\Ahttp://idp_sso_url\?SAMLRequest=))
         end
       end
@@ -147,10 +149,57 @@ describe Devise::SamlSessionsController, type: :controller do
   end
 
   describe '#destroy' do
-    it 'signs out and redirects to the IdP' do
-      expect(controller).to receive(:sign_out)
-      delete :destroy
-      expect(response).to redirect_to(%r(\Ahttp://localhost:8009/saml/logout\?SAMLRequest=))
+    context "when using the default saml config" do
+      it 'signs out and redirects to the IdP' do
+        expect(controller).to receive(:sign_out)
+        delete :destroy
+        expect(response).to redirect_to(%r(\Ahttp://localhost:8009/saml/logout\?SAMLRequest=))
+      end
+    end
+
+    context "with a specified idp" do
+      before do
+        Devise.idp_settings_adapter = idp_providers_adapter
+      end
+
+      it "redirects to the associated IdP SSO target url" do
+        expect(controller).to receive(:sign_out)
+        expect(DeviseSamlAuthenticatable::DefaultIdpEntityIdReader).to receive(:entity_id)
+        delete :destroy
+        expect(response).to redirect_to(%r(\Ahttp://idp_slo_url\?SAMLRequest=))
+      end
+
+      context "with a specified idp entity id reader" do
+        class OurIdpEntityIdReader
+          def self.entity_id(params)
+            params[:entity_id]
+          end
+        end
+
+        subject(:do_delete) {
+          if Rails::VERSION::MAJOR > 4
+            delete :destroy, params: {entity_id: "http://www.example.com"}
+          else
+            delete :destroy, entity_id: "http://www.example.com"
+          end
+        }
+
+        before do
+          @default_reader = Devise.idp_entity_id_reader
+          Devise.idp_entity_id_reader = OurIdpEntityIdReader # which will have some different behavior
+        end
+
+        after do
+          Devise.idp_entity_id_reader = @default_reader
+        end
+
+        it "redirects to the associated IdP SLO target url" do
+          expect(controller).to receive(:sign_out)
+          do_delete
+          expect(idp_providers_adapter).to have_received(:settings).with("http://www.example.com")
+          expect(response).to redirect_to(%r(\Ahttp://idp_slo_url\?SAMLRequest=))
+        end
+      end
     end
   end
 

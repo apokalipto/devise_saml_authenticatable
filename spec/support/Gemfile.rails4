@@ -4,7 +4,6 @@ source 'https://rubygems.org'
 gemspec path: '../..'
 
 group :test do
-  gem 'rake'
   gem 'rspec', '~> 3.0'
   gem 'rails', '~> 4.0'
   gem 'rspec-rails'
@@ -17,8 +16,12 @@ group :test do
     gem 'addressable', '~> 2.4.0'
     gem 'mime-types', '~> 2.99'
     gem 'public_suffix', '~> 1.4.6'
+    gem 'rake', '~> 12.2.0'
   elsif Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.1")
     gem 'public_suffix', '~> 2.0.5'
+    gem 'rake'
+  else
+    gem 'rake'
   end
 
   if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.1")
