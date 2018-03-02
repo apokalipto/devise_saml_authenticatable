@@ -22,7 +22,7 @@ module DeviseSamlAuthenticatable
     def locator_based_config(idp_entity_id)
       record   = Devise.idp_record_locator.call(idp_entity_id)
       settings = record.settings
-      return config_wit_settings(settings)
+      return config_with_settings(settings)
     end
 
     def adapter_based_config(idp_entity_id)
