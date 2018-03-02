@@ -4,7 +4,7 @@ module DeviseSamlAuthenticatable
     def saml_config(idp_entity_id = nil)
       return file_based_config if file_based_config
       return adapter_based_config(idp_entity_id) if Devise.idp_settings_adapter
-
+      return locator_based_config(idp_entity_id) if Devise.idp_record_locator
       Devise.saml_config
     end
 
@@ -19,16 +19,26 @@ module DeviseSamlAuthenticatable
       end
     end
 
-    def adapter_based_config(idp_entity_id)
-      config = Marshal.load(Marshal.dump(Devise.saml_config))
+    def locator_based_config(idp_entity_id)
+      record   = Devise.idp_record_locator.call(idp_entity_id)
+      settings = record.settings
+      return config_wit_settings(settings)
+    end
 
+    def adapter_based_config(idp_entity_id)
       if Devise.idp_settings_adapter.is_a? Proc
         settings = Devise.idp_settings_adapter.call(idp_entity_id)
       else
         settings = Devise.idp_settings_adapter.settings(idp_entity_id)
       end
 
-      settings.each do |k,v|
+      return config_with_settings(settings)
+    end
+
+    def config_with_settings(settings)
+      config = Marshal.load(Marshal.dump(Devise.saml_config))
+
+      settings.each do |k, v|
         acc = "#{k.to_s}=".to_sym
 
         if config.respond_to? acc
