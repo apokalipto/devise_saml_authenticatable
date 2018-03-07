@@ -45,7 +45,7 @@ module DeviseSamlAuthenticatable
           config.send(acc, v)
         end
       end
-      config
+      {config: config, settings: settings}
     end
 
     def get_idp_entity_id(params)
