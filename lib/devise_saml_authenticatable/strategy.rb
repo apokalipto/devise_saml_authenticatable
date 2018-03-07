@@ -50,7 +50,7 @@ module Devise
           .to
           .authenticate_with_saml(
             @response, params[:RelayState],
-            saml_config(get_idp_entity_id(params))[:settings]
+            saml_config(get_idp_entity_id(params))[:idp_provider_record]
           )
         if @resource.nil?
           failed_auth("Resource could not be found")

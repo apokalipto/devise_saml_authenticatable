@@ -13,7 +13,7 @@ class Devise::SamlSessionsController < Devise::SessionsController
     idp_entity_id = get_idp_entity_id(params)
     request = OneLogin::RubySaml::Authrequest.new
     auth_params = { RelayState: relay_state } if relay_state
-    action = request.create(saml_config(idp_entity_id), auth_params || {})
+    action = request.create(saml_config(idp_entity_id)[:config], auth_params || {})
     redirect_to action
   end
 
