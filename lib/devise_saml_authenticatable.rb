@@ -49,6 +49,10 @@ module Devise
   mattr_accessor :idp_settings_adapter
   @@idp_settings_adapter
 
+  # Record based configuration
+  mattr_accessor :idp_record_locator
+  @@idp_record_locator
+
   # Reader that can parse entity id from a SAMLMessage
   mattr_accessor :idp_entity_id_reader
   @@idp_entity_id_reader ||= ::DeviseSamlAuthenticatable::DefaultIdpEntityIdReader
@@ -73,6 +77,7 @@ module Devise
 
   mattr_accessor :saml_config
   @@saml_config = OneLogin::RubySaml::Settings.new
+
   def self.saml_configure
     yield saml_config
   end
@@ -117,7 +122,7 @@ end
 # Add saml_authenticatable strategy to defaults.
 #
 Devise.add_module(:saml_authenticatable,
-                  :route => :saml_authenticatable,
+                  :route      => :saml_authenticatable,
                   :strategy   => true,
                   :controller => :saml_sessions,
-                  :model  => 'devise_saml_authenticatable/model')
+                  :model      => 'devise_saml_authenticatable/model')
