@@ -29,11 +29,14 @@ module Devise
       end
 
       module ClassMethods
-        def authenticate_with_saml(saml_response, relay_state)
+        def authenticate_with_saml(saml_response, relay_state, idp_provider_record=nil)
           key = Devise.saml_default_user_key
+
+          map = idp_provider_record ? idp_provider_record.attribute_map : attribute_map
+
           decorated_response = ::SamlAuthenticatable::SamlResponse.new(
             saml_response,
-            attribute_map
+            map
           )
           if (Devise.saml_use_subject)
             auth_value = saml_response.name_id
@@ -80,6 +83,7 @@ module Devise
         def attribute_map
           @attribute_map ||= attribute_map_for_environment
         end
+
 
         private
 
