@@ -220,7 +220,7 @@ describe "SAML Authentication", type: :feature do
     fill_in "Email", with: "you@example.com"
     fill_in "Password", with: "asdf"
     click_on "Sign in"
-    Timeout.timeout(Capybara.default_wait_time) do
+    Timeout.timeout(Capybara.default_max_wait_time) do
       loop do
         sleep 0.1
         break if current_url == "http://localhost:8020/"

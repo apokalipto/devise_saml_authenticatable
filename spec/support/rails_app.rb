@@ -17,7 +17,7 @@ rescue Errno::ESRCH
 end
 
 def create_app(name, env = {})
-  rails_new_options = %w(-T -J -S --skip-spring --skip-listen)
+  rails_new_options = %w(-T -J -S --skip-spring --skip-listen --skip-bootsnap)
   rails_new_options << "-O" if name == 'idp'
   Dir.chdir(File.expand_path('../../support', __FILE__)) do
     FileUtils.rm_rf(name)
