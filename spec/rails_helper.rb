@@ -8,7 +8,11 @@ require 'rspec/rails'
 
 ActiveRecord::Migration.verbose = false
 ActiveRecord::Base.logger = Logger.new(nil)
-ActiveRecord::Migrator.migrate(File.expand_path("../support/sp/db/migrate/", __FILE__))
+if ActiveRecord::Base.connection.respond_to?(:migration_context)
+  ActiveRecord::Base.connection.migration_context.migrate
+else
+  ActiveRecord::Migrator.migrate(File.expand_path("../support/sp/db/migrate/", __FILE__))
+end
 
 RSpec.configure do |config|
   config.use_transactional_fixtures = true

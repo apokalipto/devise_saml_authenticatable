@@ -9,6 +9,7 @@ rvm:
   - "2.5.0"
 gemfile:
   - Gemfile
+  - spec/support/Gemfile.rails5.1
   - spec/support/Gemfile.rails5
   - spec/support/Gemfile.rails4
 matrix:
@@ -17,14 +18,20 @@ matrix:
       gemfile: Gemfile
     - rvm: "1.9.3"
       gemfile: spec/support/Gemfile.rails5
+    - rvm: "1.9.3"
+      gemfile: spec/support/Gemfile.rails5.1
     - rvm: "2.0.0"
       gemfile: Gemfile
     - rvm: "2.0.0"
       gemfile: spec/support/Gemfile.rails5
+    - rvm: "2.0.0"
+      gemfile: spec/support/Gemfile.rails5.1
     - rvm: "2.1.10"
       gemfile: Gemfile
     - rvm: "2.1.10"
       gemfile: spec/support/Gemfile.rails5
+    - rvm: "2.1.10"
+      gemfile: spec/support/Gemfile.rails5.1
 
 before_install:
   # update bundler to avoid https://github.com/travis-ci/travis-ci/issues/5239
