@@ -44,6 +44,8 @@ In `config/routes.rb` add `devise_for` to set up helper methods and routes:
 devise_for :users
 ```
 
+The named routes can be customized in the initializer config file.
+
 ### Configuring the IdP
 
 An extra step in SAML SSO setup is adding your application to your identity provider. The required setup is specific to each IdP, but we have some examples in [our wiki](https://github.com/apokalipto/devise_saml_authenticatable/wiki). You'll need to tell your IdP how to send requests and responses to your application.
@@ -54,7 +56,7 @@ An extra step in SAML SSO setup is adding your application to your identity prov
     - IdPs may call this the "audience."
 - Single Logout: `/users/saml/idp_sign_out`
     - if desired, you can ask the IdP to send a Logout request to this endpoint to sign the user out of your application when they sign out of the IdP itself.
-    
+
 Your IdP should give you some information you need to configure in [ruby-saml](https://github.com/onelogin/ruby-saml), as in the next section:
 
 - Issuer (`idp_entity_id`)
@@ -101,6 +103,12 @@ In `config/initializers/devise.rb`:
     # You can set a handler object that takes the response for a failed SAML request and the strategy,
     # and implements a #handle method. This method can then redirect the user, return error messages, etc.
     # config.saml_failed_callback = nil
+
+    # You can customize the named routes generated in case of named route collisions with
+    # other Devise modules or libraries. Set the route_helper_prefix to a string that will
+    # be appended to the named route.
+    # If route_helper_prefix = 'saml' then the new_user_session route becomes new_saml_user_session
+    # config.route_helper_prefix = 'saml'
 
     # Configure with your SAML settings (see ruby-saml's README for more information: https://github.com/onelogin/ruby-saml).
     config.saml_configure do |settings|
