@@ -3,10 +3,11 @@ rvm:
   - "1.9.3"
   - "2.0.0"
   - "2.1.10"
-  - "2.2.9"
-  - "2.3.6"
-  - "2.4.3"
-  - "2.5.0"
+  - "2.2.10"
+  - "2.3.8"
+  - "2.4.5"
+  - "2.5.3"
+  - "2.6.0"
 gemfile:
   - Gemfile
   - spec/support/Gemfile.rails5.1
@@ -32,10 +33,12 @@ matrix:
       gemfile: spec/support/Gemfile.rails5
     - rvm: "2.1.10"
       gemfile: spec/support/Gemfile.rails5.1
+    - rvm: "2.6.0"
+      gemfile: spec/support/Gemfile.rails4
 
 before_install:
   # update bundler to avoid https://github.com/travis-ci/travis-ci/issues/5239
-  - gem install bundler
+  - command -v bundle || gem install bundler -v '~> 1.17.3'
 
 script:
   - bundle exec rake
