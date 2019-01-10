@@ -105,10 +105,10 @@ In `config/initializers/devise.rb`:
     # config.saml_failed_callback = nil
 
     # You can customize the named routes generated in case of named route collisions with
-    # other Devise modules or libraries. Set the route_helper_prefix to a string that will
+    # other Devise modules or libraries. Set the saml_route_helper_prefix to a string that will
     # be appended to the named route.
-    # If route_helper_prefix = 'saml' then the new_user_session route becomes new_saml_user_session
-    # config.route_helper_prefix = 'saml'
+    # If saml_route_helper_prefix = 'saml' then the new_user_session route becomes new_saml_user_session
+    # config.saml_route_helper_prefix = 'saml'
 
     # Configure with your SAML settings (see ruby-saml's README for more information: https://github.com/onelogin/ruby-saml).
     config.saml_configure do |settings|

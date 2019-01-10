@@ -1,8 +1,8 @@
 ActionDispatch::Routing::Mapper.class_eval do
   protected
   def devise_saml_authenticatable(mapping, controllers)
-    if ::Devise.route_helper_prefix
-      prefix = ::Devise.route_helper_prefix
+    if ::Devise.saml_route_helper_prefix
+      prefix = ::Devise.saml_route_helper_prefix
       resource :session, only: [], controller: controllers[:saml_sessions], path: '' do
         get :new, path: 'saml/sign_in', as: "new_#{prefix}"
         post :create, path: 'saml/auth', as: prefix
