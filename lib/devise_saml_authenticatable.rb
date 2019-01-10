@@ -19,6 +19,10 @@ end
 
 # Get saml information from config/saml.yml now
 module Devise
+  # Allow route customization to avoid collision
+  mattr_accessor :saml_route_helper_prefix
+  @@saml_route_helper_prefix
+
   # Allow logging
   mattr_accessor :saml_logger
   @@saml_logger = true
