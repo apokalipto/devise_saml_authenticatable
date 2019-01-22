@@ -68,8 +68,16 @@ module Devise
 
   # Implements a #validate method that takes the retrieved resource and response right after retrieval,
   # and returns true if it's valid.  False will cause authentication to fail.
+  # Only one of saml_resource_validator and saml_resource_validator_hook may be used.
   mattr_accessor :saml_resource_validator
   @@saml_resource_validator
+
+  # Proc that determines whether a technically correct SAML response is valid per some custom logic.
+  # Receives the user object (or nil, if no match was found), decorated saml_response and
+  # auth_value, inspects the combination for acceptability of login (or create+login, if enabled),
+  # and returns true if it's valid.  False will cause authentication to fail.
+  mattr_accessor :saml_resource_validator_hook
+  @@saml_resource_validator_hook
 
   # Custom value for ruby-saml allowed_clock_drift
   mattr_accessor :allowed_clock_drift_in_seconds
