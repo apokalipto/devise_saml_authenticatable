@@ -44,8 +44,12 @@ module Devise
 
           resource = Devise.saml_resource_locator.call(self, decorated_response, auth_value)
 
-          if Devise.saml_resource_validator
-            if not Devise.saml_resource_validator.new.validate(resource, saml_response)
+          raise "Only one validator configuration can be used at a time" if Devise.saml_resource_validator && Devise.saml_resource_validator_hook
+          if Devise.saml_resource_validator || Devise.saml_resource_validator_hook
+            valid = if Devise.saml_resource_validator then Devise.saml_resource_validator.new.validate(resource, saml_response)
+                    else Devise.saml_resource_validator_hook.call(resource, decorated_response, auth_value)
+                    end
+            if !valid
               logger.info("User(#{auth_value}) did not pass custom validation.")
               return nil
             end
