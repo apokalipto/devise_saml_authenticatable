@@ -25,6 +25,8 @@ if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.1")
 end
   GEMFILE
 }
+# sqlite3 is hard-coded in Rails to v1.3.x
+gsub_file 'Gemfile', /^gem 'sqlite3'.*$/, "gem 'sqlite3', '~> 1.3.6'"
 
 template File.expand_path('../idp_settings_adapter.rb.erb', __FILE__), 'app/lib/idp_settings_adapter.rb'
 
