@@ -6,9 +6,9 @@ gemspec
 group :test do
   gem 'rake'
   gem 'rspec', '~> 3.0'
-  gem 'rails', '~> 5.1'
+  gem 'rails', '~> 5.2'
   gem 'rspec-rails'
-  gem 'sqlite3'
+  gem 'sqlite3', '~> 1.3.6'
   gem 'capybara'
   gem 'poltergeist'
 end
