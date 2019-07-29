@@ -1,13 +1,12 @@
 language: ruby
 rvm:
-  - "1.9.3"
   - "2.0.0"
   - "2.1.10"
   - "2.2.10"
   - "2.3.8"
-  - "2.4.5"
-  - "2.5.3"
-  - "2.6.0"
+  - "2.4.6"
+  - "2.5.5"
+  - "2.6.3"
 gemfile:
   - Gemfile
   - spec/support/Gemfile.rails5.1
@@ -15,12 +14,6 @@ gemfile:
   - spec/support/Gemfile.rails4
 matrix:
   allow_failures:
-    - rvm: "1.9.3"
-      gemfile: Gemfile
-    - rvm: "1.9.3"
-      gemfile: spec/support/Gemfile.rails5
-    - rvm: "1.9.3"
-      gemfile: spec/support/Gemfile.rails5.1
     - rvm: "2.0.0"
       gemfile: Gemfile
     - rvm: "2.0.0"
@@ -33,21 +26,11 @@ matrix:
       gemfile: spec/support/Gemfile.rails5
     - rvm: "2.1.10"
       gemfile: spec/support/Gemfile.rails5.1
-    - rvm: "2.6.0"
+    - rvm: "2.6.3"
       gemfile: spec/support/Gemfile.rails4
 
 before_install:
-  # update bundler to avoid https://github.com/travis-ci/travis-ci/issues/5239
   - command -v bundle || gem install bundler -v '~> 1.17.3'
 
 script:
   - bundle exec rake
-
-notifications:
-  hipchat:
-    rooms:
-      secure: cuDak5a6fBeg+sp61COqxQfzdcFEsjwCqtwvCISso0RNh5SR8v+uVYKcA8rlK+GE1l9uR7tLRHeHF3ZmzvFSOat07NvpScvjZXi+OSpWlc6rwQ6Pl6bBP6gu6sREiKVe0eT/uGrvJloyWKZaXIhiiBzQ+ZERx/ssGA9WMmNkhlwy1OgGnPNurNNHZLBjEZn1V6kdyxiXx6QPASNpjNEgN1G8dUh3qzcWUGVQGNZSJk65A6ie1MveNyecTjDhw+ADBU8nS28Ja4y6ohRm4FzofSgespYrvfygIZ5rYF0HPMj5FW1ZDWtM5355ojCk8RLT+ZkuhssCn1OJk7ogaOVjnYcOFRxEfpu3eIbjtMmUz3j4umatFqbgas+6SXMVIPkr5HUoTrP8HNFssIpcEBOnPwAF8QCpx+daHc0r2cc8lGuXhtJfpW0P2F0dmwJNiQ7//nz2y2xs84x4Gb7MV9tEDYp0FqEClMuFBkPNizBljarm04PkiLSrqvR52aMDfQz7YAX2oXAvFjPzI1GC0K8x7xX8TuHT9yuHy7fI+rUSNivZYLKO+IEZqPPDdJpXISUbVwanZoNvmQYk5PZV21MfDSGwQrz8eO/uFiAblj18yIlNbAfb2hdZDVYsm4EvWxELJtfaTxgrj6M3Y3m/KbCbCoDp+2jE307M2rxL0Gum2gk=
-    template:
-      - '%{repository}<a href="%{build_url}">#%{build_number}</a> (%{branch} - <a href="%{compare_url}">%{commit}</a> : %{author}): %{message}'
-    format: html
-    on_pull_requests: true
