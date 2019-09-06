@@ -59,7 +59,7 @@ class Devise::SamlSessionsController < Devise::SessionsController
   def store_info_for_sp_initiated_logout
     return if Devise.saml_config.name_identifier_format == 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'
     @name_identifier_value_for_sp_initiated_logout = current_user.send(Devise.saml_default_user_key)
-    @sessionindex_for_sp_initiated_logout = current_user.send(Devise.saml_session_index_key)
+    @sessionindex_for_sp_initiated_logout = Devise.saml_session_index_key ? current_user.send(Devise.saml_session_index_key) : nil
   end
 
   # Override devise to send user to IdP logout for SLO
