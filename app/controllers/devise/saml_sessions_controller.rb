@@ -66,15 +66,13 @@ class Devise::SamlSessionsController < Devise::SessionsController
   def after_sign_out_path_for(_)
     idp_entity_id = get_idp_entity_id(params)
     request = OneLogin::RubySaml::Logoutrequest.new
-    saml_settings = saml_config(idp_entity_id)
+    saml_settings = saml_config(idp_entity_id).dup
 
     # Add attributes to saml_settings which will later be used to create the SP
     # initiated logout request
     unless Devise.saml_config.name_identifier_format == 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'
       saml_settings.name_identifier_value = @name_identifier_value_for_sp_initiated_logout
       saml_settings.sessionindex = @sessionindex_for_sp_initiated_logout
-      @name_identifier_value_for_sp_initiated_logout = nil
-      @sessionindex_for_sp_initiated_logout = nil
     end
 
     request.create(saml_settings)

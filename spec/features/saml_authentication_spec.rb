@@ -57,7 +57,7 @@ describe "SAML Authentication", type: :feature do
       expect(current_url).to eq("http://localhost:8020/")
 
       click_on "Log out"
-      #confirm the logout response redirected to the SP which in turn attempted to sign th e
+      #confirm the logout response redirected to the SP which in turn attempted to sign the user back in
       expect(current_url).to match(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
 
       # prove user is now signed out
@@ -204,7 +204,7 @@ describe "SAML Authentication", type: :feature do
         fill_in "Email", with: "you@example.com"
         fill_in "Password", with: "asdf"
         click_on "Sign in"
-        expect(page).to have_content(:all, "Example Domain This domain is established to be used for illustrative examples in documents. You may use this domain in examples without prior coordination or asking for permission.")
+        expect(page).to have_content(:all, "Example Domain This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.")
         expect(current_url).to eq("http://www.example.com/")
       end
     end
