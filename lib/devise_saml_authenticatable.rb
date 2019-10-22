@@ -124,6 +124,14 @@ module Devise
   # See saml_default_resource_locator above for an example.
   mattr_accessor :saml_resource_locator
   @@saml_resource_locator = @@saml_default_resource_locator
+
+  # Proc that is called to resolve the name identifier to use in a LogoutRequest for the current user.
+  # Receives the logged-in user.
+  # Is expected to return the identifier the IdP understands for this user, e.g. email address or username.
+  mattr_accessor :saml_name_identifier_retriever
+  @@saml_name_identifier_retriever = Proc.new do |current_user|
+    current_user.public_send(Devise.saml_default_user_key)
+  end
 end
 
 # Add saml_authenticatable strategy to defaults.

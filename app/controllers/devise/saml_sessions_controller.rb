@@ -5,8 +5,10 @@ class Devise::SamlSessionsController < Devise::SessionsController
   unloadable if Rails::VERSION::MAJOR < 4
   if Rails::VERSION::MAJOR < 5
     skip_before_filter :verify_authenticity_token
+    prepend_before_filter :store_info_for_sp_initiated_logout, only: :destroy
   else
     skip_before_action :verify_authenticity_token, raise: false
+    prepend_before_action :store_info_for_sp_initiated_logout, only: :destroy
   end
 
   def new
@@ -51,11 +53,29 @@ class Devise::SamlSessionsController < Devise::SessionsController
     end
   end
 
+  # For non transient name ID, save info to identify user for logout purpose
+  # before that user's session got destroyed. These info are used in the
+  # `after_sign_out_path_for` method below.
+  def store_info_for_sp_initiated_logout
+    return if Devise.saml_config.name_identifier_format == "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
+    @name_identifier_value_for_sp_initiated_logout = Devise.saml_name_identifier_retriever.call(current_user)
+    @sessionindex_for_sp_initiated_logout = current_user.public_send(Devise.saml_session_index_key) if Devise.saml_session_index_key
+  end
+
   # Override devise to send user to IdP logout for SLO
   def after_sign_out_path_for(_)
     idp_entity_id = get_idp_entity_id(params)
     request = OneLogin::RubySaml::Logoutrequest.new
-    request.create(saml_config(idp_entity_id))
+    saml_settings = saml_config(idp_entity_id).dup
+
+    # Add attributes to saml_settings which will later be used to create the SP
+    # initiated logout request
+    unless Devise.saml_config.name_identifier_format == 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'
+      saml_settings.name_identifier_value = @name_identifier_value_for_sp_initiated_logout
+      saml_settings.sessionindex = @sessionindex_for_sp_initiated_logout
+    end
+
+    request.create(saml_settings)
   end
 
   def generate_idp_logout_response(saml_config, logout_request_id)
