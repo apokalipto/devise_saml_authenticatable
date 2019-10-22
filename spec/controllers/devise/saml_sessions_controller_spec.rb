@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-class Devise::SessionsController < ActionController::Base
+Devise::SessionsController.class_eval do
   attr_accessor :current_user
 
   # The important parts from devise
@@ -15,13 +15,15 @@ class Devise::SessionsController < ActionController::Base
 
   def require_no_authentication
   end
+
+  def verify_signed_out_user
+  end
 end
 
 require_relative '../../../app/controllers/devise/saml_sessions_controller'
 
 describe Devise::SamlSessionsController, type: :controller do
   let(:idp_providers_adapter) { spy("Stub IDPSettings Adaptor") }
-
   before do
     allow(idp_providers_adapter).to receive(:settings).and_return({
       assertion_consumer_service_url: "acs_url",
@@ -36,15 +38,15 @@ describe Devise::SamlSessionsController, type: :controller do
     })
   end
 
+  before do
+    @request.env["devise.mapping"] = Devise.mappings[:user]
+  end
+
   describe '#new' do
     let(:saml_response) { File.read(File.join(File.dirname(__FILE__), '../../support', 'response_encrypted_nameid.xml.base64')) }
 
     subject(:do_get) {
-      if Rails::VERSION::MAJOR > 4
-        get :new, params: {"SAMLResponse" => saml_response}
-      else
-        get :new, "SAMLResponse" => saml_response
-      end
+      get :new, params: {"SAMLResponse" => saml_response}
     }
 
     context "when using the default saml config" do
@@ -88,11 +90,7 @@ describe Devise::SamlSessionsController, type: :controller do
         end
 
         subject(:do_get) {
-          if Rails::VERSION::MAJOR > 4
-            get :new, params: {entity_id: "http://www.example.com"}
-          else
-            get :new, entity_id: "http://www.example.com"
-          end
+          get :new, params: {entity_id: "http://www.example.com"}
         }
 
         before do
@@ -114,7 +112,7 @@ describe Devise::SamlSessionsController, type: :controller do
   end
 
   describe '#metadata' do
-    let(:saml_config) { Devise.saml_config.dup }
+    let(:saml_config) { Devise.saml_config }
 
     context "with the default configuration" do
       it 'generates metadata' do
@@ -204,11 +202,7 @@ describe Devise::SamlSessionsController, type: :controller do
         end
 
         subject(:do_delete) {
-          if Rails::VERSION::MAJOR > 4
-            delete :destroy, params: {entity_id: "http://www.example.com"}
-          else
-            delete :destroy, entity_id: "http://www.example.com"
-          end
+          delete :destroy, params: {entity_id: "http://www.example.com"}
         }
 
         before do
@@ -246,11 +240,7 @@ describe Devise::SamlSessionsController, type: :controller do
 
     context "when receiving a logout response from the IdP after redirecting an SP logout request" do
       subject(:do_post) {
-        if Rails::VERSION::MAJOR > 4
-          post :idp_sign_out, params: {SAMLResponse: "stubbed_response"}
-        else
-          post :idp_sign_out, SAMLResponse: "stubbed_response"
-        end
+        post :idp_sign_out, params: {SAMLResponse: "stubbed_response"}
       }
 
       it 'accepts a LogoutResponse and redirects sign_in' do
@@ -275,18 +265,16 @@ describe Devise::SamlSessionsController, type: :controller do
 
     context "when receiving an IdP logout request" do
       subject(:do_post) {
-        if Rails::VERSION::MAJOR > 4
-          post :idp_sign_out, params: {SAMLRequest: "stubbed_logout_request"}
-        else
-          post :idp_sign_out, SAMLRequest: "stubbed_logout_request"
-        end
+        post :idp_sign_out, params: {SAMLRequest: "stubbed_logout_request"}
       }
 
-      let(:saml_request) { double(:slo_logoutrequest, {
-        id: 42,
-        name_id: name_id,
-        issuer: "http://www.example.com"
-      }) }
+      let(:saml_request) {
+        instance_double("OneLogin::RubySaml::SloLogoutrequest",
+          id: 42,
+          name_id: name_id,
+          issuer: "http://www.example.com",
+        )
+      }
       let(:name_id) { '12312312' }
       before do
         allow(OneLogin::RubySaml::SloLogoutrequest).to receive(:new).and_return(saml_request)

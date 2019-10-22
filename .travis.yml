@@ -1,36 +1,26 @@
 language: ruby
 rvm:
-  - "2.0.0"
-  - "2.1.10"
   - "2.2.10"
   - "2.3.8"
-  - "2.4.6"
-  - "2.5.5"
-  - "2.6.3"
+  - "2.4.9"
+  - "2.5.7"
+  - "2.6.5"
 gemfile:
   - Gemfile
+  - spec/support/Gemfile.rails5.2
   - spec/support/Gemfile.rails5.1
   - spec/support/Gemfile.rails5
-  - spec/support/Gemfile.rails4
 matrix:
   allow_failures:
-    - rvm: "2.0.0"
+    - rvm: "2.2.10"
       gemfile: Gemfile
-    - rvm: "2.0.0"
-      gemfile: spec/support/Gemfile.rails5
-    - rvm: "2.0.0"
-      gemfile: spec/support/Gemfile.rails5.1
-    - rvm: "2.1.10"
+    - rvm: "2.3.8"
       gemfile: Gemfile
-    - rvm: "2.1.10"
-      gemfile: spec/support/Gemfile.rails5
-    - rvm: "2.1.10"
-      gemfile: spec/support/Gemfile.rails5.1
-    - rvm: "2.6.3"
-      gemfile: spec/support/Gemfile.rails4
+    - rvm: "2.4.9"
+      gemfile: Gemfile
 
 before_install:
-  - command -v bundle || gem install bundler -v '~> 1.17.3'
+  - command -v bundle || gem install bundler
 
 script:
   - bundle exec rake
