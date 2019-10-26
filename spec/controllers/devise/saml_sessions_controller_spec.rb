@@ -290,12 +290,13 @@ describe Devise::SamlSessionsController, type: :controller do
       let(:name_id) { '12312312' }
       before do
         allow(OneLogin::RubySaml::SloLogoutrequest).to receive(:new).and_return(saml_request)
+        allow(User).to receive(:reset_session_key_for)
       end
 
       it 'direct the resource to reset the session key' do
-        expect(User).to receive(:reset_session_key_for).with(name_id)
         do_post
         expect(response).to redirect_to response_url
+        expect(User).to have_received(:reset_session_key_for).with(name_id)
       end
 
       context "with a specified idp" do

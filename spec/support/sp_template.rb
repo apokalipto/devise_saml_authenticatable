@@ -22,6 +22,8 @@ insert_into_file('Gemfile', after: /\z/) {
 if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.1")
   gem 'devise', '~> 3.5'
   gem 'nokogiri', '~> 1.6.8'
+elsif Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.4")
+  gem 'responders', '~> 2.4'
 end
   GEMFILE
 }
@@ -122,6 +124,9 @@ end
   rake "db:migrate"
   rake "db:create", env: "production"
   rake "db:migrate", env: "production"
+
+  # Remove any specs so that future RSpec runs don't try to also run these
+  run 'rm -rf spec'
 end
 
 create_file 'public/stylesheets/application.css', ''
