@@ -28,4 +28,8 @@ group :test do
     gem 'devise', '~> 3.5'
     gem 'nokogiri', '~> 1.6.8'
   end
+
+  if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.4")
+    gem 'responders', '~> 2.4'
+  end
 end

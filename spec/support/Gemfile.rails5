@@ -11,4 +11,9 @@ group :test do
   gem 'sqlite3', '~> 1.3.6'
   gem 'capybara'
   gem 'poltergeist'
+
+  # Lock down versions of gems for older versions of Ruby
+  if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.4")
+    gem 'responders', '~> 2.4'
+  end
 end
