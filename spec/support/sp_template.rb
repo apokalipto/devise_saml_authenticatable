@@ -8,7 +8,7 @@ idp_settings_adapter = ENV.fetch('IDP_SETTINGS_ADAPTER', "nil")
 idp_entity_id_reader = ENV.fetch('IDP_ENTITY_ID_READER', "DeviseSamlAuthenticatable::DefaultIdpEntityIdReader")
 saml_failed_callback = ENV.fetch('SAML_FAILED_CALLBACK', "nil")
 
-if Rails::VERSION::MAJOR < 5 || (Rails::VERSION::MAJOR == 5 && Rails::VERSION::MINOR < 2)
+if Rails::VERSION::MAJOR == 5 && Rails::VERSION::MINOR < 2
   gsub_file 'config/secrets.yml', /secret_key_base:.*$/, 'secret_key_base: "8b5889df1fcf03f76c7d66da02d8776bcc85b06bed7d9c592f076d9c8a5455ee6d4beae45986c3c030b40208db5e612f2a6ef8283036a352e3fae83c5eda36be"'
 end
 
@@ -27,8 +27,10 @@ elsif Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.4")
 end
   GEMFILE
 }
-# sqlite3 is hard-coded in Rails to v1.3.x
-gsub_file 'Gemfile', /^gem 'sqlite3'.*$/, "gem 'sqlite3', '~> 1.3.6'"
+if Rails::VERSION::MAJOR < 6
+  # sqlite3 is hard-coded in Rails <6 to v1.3.x
+  gsub_file 'Gemfile', /^gem 'sqlite3'.*$/, "gem 'sqlite3', '~> 1.3.6'"
+end
 
 template File.expand_path('../idp_settings_adapter.rb.erb', __FILE__), 'app/lib/idp_settings_adapter.rb'
 
@@ -107,7 +109,7 @@ after_bundle do
 end
   CONFIG
 
-  generate :devise, "user", "email:string", "name:string", "session_index:string"
+  generate :devise, "user", "name:string", "session_index:string"
   gsub_file 'app/models/user.rb', /database_authenticatable.*\n.*/, 'saml_authenticatable'
   route "resources :users, only: [:create]"
   create_file('app/controllers/users_controller.rb', <<-USERS)
