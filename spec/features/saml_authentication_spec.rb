@@ -57,7 +57,7 @@ describe "SAML Authentication", type: :feature do
       expect(current_url).to eq("http://localhost:8020/")
 
       click_on "Log out"
-      #confirm the logout response redirected to the SP which in turn attempted to sign the user back in
+      # confirm the logout response redirected to the SP which in turn attempted to sign the user back in
       expect(current_url).to match(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
 
       # prove user is now signed out
@@ -143,7 +143,8 @@ describe "SAML Authentication", type: :feature do
       create_app('idp', 'INCLUDE_SUBJECT_IN_ATTRIBUTES' => "false")
       create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "true", 'IDP_SETTINGS_ADAPTER' => "IdpSettingsAdapter", 'IDP_ENTITY_ID_READER' => "OurEntityIdReader")
 
-      @idp_pid = start_app('idp', idp_port)
+      # use a different port for this entity ID; configured in spec/support/idp_settings_adapter.rb.erb
+      @idp_pid = start_app('idp', 8010)
       @sp_pid  = start_app('sp',  sp_port)
     end
 
@@ -156,24 +157,7 @@ describe "SAML Authentication", type: :feature do
       create_user("you@example.com")
 
       visit 'http://localhost:8020/users/saml/sign_in/?entity_id=http%3A%2F%2Flocalhost%3A8020%2Fsaml%2Fmetadata'
-      expect(current_url).to match(%r(\Ahttp://www.example.com/sso\?SAMLRequest=))
-    end
-
-    it "logs a user out of the IdP via the SP" do
-      sign_in
-
-      # prove user is still signed in
-      visit 'http://localhost:8020/'
-      expect(page).to have_content("you@example.com")
-      expect(current_url).to eq("http://localhost:8020/")
-
-      click_on "Log out"
-      #confirm the logout response redirected to the SP which in turn attempted to sign th e
-      expect(current_url).to match(%r(\Ahttp://www.example.com/slo\?SAMLRequest=))
-
-      # prove user is now signed out
-      visit 'http://localhost:8020/users/saml/sign_in/?entity_id=http%3A%2F%2Flocalhost%3A8020%2Fsaml%2Fmetadata'
-      expect(current_url).to match(%r(\Ahttp://www.example.com/sso\?SAMLRequest=))
+      expect(current_url).to match(%r(\Ahttp://localhost:8010/saml/auth\?SAMLRequest=))
     end
   end
 
@@ -215,9 +199,8 @@ describe "SAML Authentication", type: :feature do
     expect(response.code).to eq('201')
   end
 
-  def sign_in
-    visit 'http://localhost:8020/'
-    expect(current_url).to match(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
+  def sign_in(entity_id: "")
+    visit "http://localhost:8020/users/saml/sign_in/?entity_id=#{URI.escape(entity_id)}"
     fill_in "Email", with: "you@example.com"
     fill_in "Password", with: "asdf"
     click_on "Sign in"
