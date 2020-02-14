@@ -32,16 +32,16 @@ class Devise::SamlSessionsController < Devise::SessionsController
 
       redirect_to generate_idp_logout_response(saml_config, logout_request.id)
     elsif params[:SAMLResponse]
-      #Currently Devise handles the session invalidation when the request is made.
-      #To support a true SP initiated logout response, the request ID would have to be tracked and session invalidated
-      #based on that.
+      # Currently Devise handles the session invalidation when the request is made.
+      # To support a true SP initiated logout response, the request ID would have to be tracked and session invalidated
+      # based on that.
       if Devise.saml_sign_out_success_url
         redirect_to Devise.saml_sign_out_success_url
       else
         redirect_to action: :new
       end
     else
-      head :invalid_request
+      head 500
     end
   end
 

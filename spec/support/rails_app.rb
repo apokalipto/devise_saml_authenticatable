@@ -22,7 +22,7 @@ def create_app(name, env = {})
   Bundler.with_clean_env do
     Dir.chdir(File.expand_path('../../support', __FILE__)) do
       FileUtils.rm_rf(name)
-      system(env, "rails", "new", name, *rails_new_options, "-m", "#{name}_template.rb")
+      system(env, "rails", "_#{Rails.version}_", "new", name, *rails_new_options, "-m", "#{name}_template.rb")
     end
   end
 end
