@@ -1,19 +1,24 @@
 require 'rails_helper'
 
-class Devise::SessionsController < ActionController::Base
+# The important parts from devise
+class DeviseController < ApplicationController
   attr_accessor :current_user
 
-  # The important parts from devise
   def resource_class
     User
   end
 
+  def require_no_authentication
+  end
+end
+class Devise::SessionsController < DeviseController
   def destroy
     sign_out
     redirect_to after_sign_out_path_for(:user)
   end
 
-  def require_no_authentication
+  def verify_signed_out_user
+    # no-op for these tests
   end
 end
 
@@ -23,6 +28,7 @@ describe Devise::SamlSessionsController, type: :controller do
   let(:idp_providers_adapter) { spy("Stub IDPSettings Adaptor") }
 
   before do
+    @request.env["devise.mapping"] = Devise.mappings[:user]
     allow(idp_providers_adapter).to receive(:settings).and_return({
       assertion_consumer_service_url: "acs_url",
       assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
@@ -34,6 +40,20 @@ describe Devise::SamlSessionsController, type: :controller do
       idp_sso_target_url: "http://idp_sso_url",
       idp_cert: "idp_cert"
     })
+  end
+
+  before do
+    if Rails::VERSION::MAJOR < 5 && Gem::Version.new(RUBY_VERSION) > Gem::Version.new("2.6")
+      # we still want to support Rails 4
+      # patch tests using snippet from https://github.com/rails/rails/issues/34790#issuecomment-483607370
+      class ActionController::TestResponse < ActionDispatch::TestResponse
+        def recycle!
+          @mon_mutex_owner_object_id = nil
+          @mon_mutex = nil
+          initialize
+        end
+      end
+    end
   end
 
   describe '#new' do

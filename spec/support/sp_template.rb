@@ -27,8 +27,10 @@ elsif Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.4")
 end
   GEMFILE
 }
-# sqlite3 is hard-coded in Rails to v1.3.x
-gsub_file 'Gemfile', /^gem 'sqlite3'.*$/, "gem 'sqlite3', '~> 1.3.6'"
+if Rails::VERSION::MAJOR < 6
+  # sqlite3 is hard-coded in Rails < 6 to v1.3.x
+  gsub_file 'Gemfile', /^gem 'sqlite3'.*$/, "gem 'sqlite3', '~> 1.3.6'"
+end
 
 template File.expand_path('../idp_settings_adapter.rb.erb', __FILE__), 'app/lib/idp_settings_adapter.rb'
 
@@ -107,7 +109,12 @@ after_bundle do
 end
   CONFIG
 
-  generate :devise, "user", "email:string", "name:string", "session_index:string"
+  if Rails::VERSION::MAJOR < 6
+    generate :devise, "user", "email:string", "name:string", "session_index:string"
+  else
+    # devise seems to add `email` by default in Rails 6
+    generate :devise, "user", "name:string", "session_index:string"
+  end
   gsub_file 'app/models/user.rb', /database_authenticatable.*\n.*/, 'saml_authenticatable'
   route "resources :users, only: [:create]"
   create_file('app/controllers/users_controller.rb', <<-USERS)
