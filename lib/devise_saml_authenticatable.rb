@@ -66,6 +66,10 @@ module Devise
   mattr_accessor :saml_relay_state
   @@saml_relay_state
 
+  # Instead of storing the attribute_map in attribute-map.yml, store it in the database, or set it programatically
+  mattr_accessor :saml_attribute_map
+  @@saml_attribute_map
+
   # Implements a #validate method that takes the retrieved resource and response right after retrieval,
   # and returns true if it's valid.  False will cause authentication to fail.
   # Only one of saml_resource_validator and saml_resource_validator_hook may be used.

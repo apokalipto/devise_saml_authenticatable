@@ -82,7 +82,7 @@ module Devise
         end
 
         def attribute_map
-          @attribute_map ||= attribute_map_for_environment
+          Devise.saml_attribute_map || attribute_map_for_environment
         end
 
         private
