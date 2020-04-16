@@ -8,7 +8,7 @@ module DeviseSamlAuthenticatable
       end
 
       def attribute_map_for_environment
-        attribute_map = YAML.safe_load(File.read("#{Rails.root}/config/attribute-map.yml"))
+        attribute_map = YAML.load(File.read("#{Rails.root}/config/attribute-map.yml"))
         if attribute_map.key?(Rails.env)
           attribute_map[Rails.env]
         else

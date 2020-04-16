@@ -32,6 +32,7 @@ describe Devise::Models::SamlAuthenticatable do
   end
 
   before do
+    allow(Devise).to receive(:saml_attribute_map).and_return(attributemap)
     allow(Devise).to receive(:saml_default_user_key).and_return(:email)
     allow(Devise).to receive(:saml_create_user).and_return(false)
     allow(Devise).to receive(:saml_use_subject).and_return(false)
@@ -39,15 +40,12 @@ describe Devise::Models::SamlAuthenticatable do
 
   before do
     allow(Rails).to receive(:root).and_return("/railsroot")
-    allow(File).to receive(:read).with("/railsroot/config/attribute-map.yml").and_return(attributemap)
   end
 
-  let(:attributemap) {<<-ATTRIBUTEMAP
----
-"saml-email-format": email
-"saml-name-format":  name
-      ATTRIBUTEMAP
-  }
+  let(:attributemap) { {
+    'saml-email-format' => 'email',
+    'saml-name-format' => 'name',
+  } }
   let(:response) { double(:response, attributes: attributes, name_id: name_id) }
   let(:attributes) {
     OneLogin::RubySaml::Attributes.new(
@@ -217,12 +215,12 @@ describe Devise::Models::SamlAuthenticatable do
 
   context "when configured with a resource validator hook" do
     let(:validator_hook) { double("validator_hook") }
-    let(:decorated_response) { ::SamlAuthenticatable::SamlResponse.new(response, YAML.load(attributemap)) }
+    let(:decorated_response) { ::SamlAuthenticatable::SamlResponse.new(response, attributemap) }
     let(:user) { Model.new(new_record: false) }
 
     before do
       allow(Devise).to receive(:saml_resource_validator_hook).and_return(validator_hook)
-      allow(::SamlAuthenticatable::SamlResponse).to receive(:new).with(response, YAML.load(attributemap)).and_return(decorated_response)
+      allow(::SamlAuthenticatable::SamlResponse).to receive(:new).with(response, attributemap).and_return(decorated_response)
     end
 
     context "and sent a valid value" do
