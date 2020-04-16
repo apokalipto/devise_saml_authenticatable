@@ -19,7 +19,7 @@ end
 def create_app(name, env = {})
   rails_new_options = %w(-T -J -S --skip-spring --skip-listen --skip-bootsnap)
   rails_new_options << "-O" if name == 'idp'
-  Bundler.with_clean_env do
+  with_clean_env do
     Dir.chdir(File.expand_path('../../support', __FILE__)) do
       FileUtils.rm_rf(name)
       system(env, "rails", "_#{Rails.version}_", "new", name, *rails_new_options, "-m", "#{name}_template.rb")
@@ -29,7 +29,7 @@ end
 
 def start_app(name, port, options = {})
   pid = nil
-  Bundler.with_clean_env do
+  with_clean_env do
     Dir.chdir(File.expand_path("../../support/#{name}", __FILE__)) do
       pid = Process.spawn({"RAILS_ENV" => "production"}, "bundle exec rails server -p #{port} -e production", out: "log/#{name}.log", err: "log/#{name}.err.log")
       begin
@@ -79,4 +79,12 @@ def port_open?(port)
   end
 rescue Timeout::Error
   false
+end
+
+def with_clean_env(&blk)
+  if Bundler.respond_to?(:with_original_env)
+    Bundler.with_original_env(&blk)
+  else
+    Bundler.with_clean_env(&blk)
+  end
 end
