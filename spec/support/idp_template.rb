@@ -1,5 +1,7 @@
 # Set up a SAML IdP
 
+@email_address_attribute_key = ENV.fetch("EMAIL_ADDRESS_ATTRIBUTE_KEY", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")
+@name_attribute_key = ENV.fetch("NAME_ATTRIBUTE_KEY", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")
 @include_subject_in_attributes = ENV.fetch('INCLUDE_SUBJECT_IN_ATTRIBUTES')
 @valid_destination = ENV.fetch('VALID_DESTINATION', "true")
 

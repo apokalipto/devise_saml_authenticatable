@@ -194,6 +194,33 @@ describe "SAML Authentication", type: :feature do
     end
   end
 
+  context "when the saml_attribute_map is set" do
+    before(:each) do
+      create_app(
+        "idp",
+        "EMAIL_ADDRESS_ATTRIBUTE_KEY" => "myemailaddress",
+        "NAME_ATTRIBUTE_KEY" => "myname",
+        "INCLUDE_SUBJECT_IN_ATTRIBUTES" => "false",
+      )
+      create_app(
+        "sp",
+        "SAML_ATTRIBUTE_MAP" => {
+          "myemailaddress" => "email",
+          "myname" => "name",
+        }.inspect,
+        "USE_SUBJECT_TO_AUTHENTICATE" => "true",
+      )
+      @idp_pid = start_app("idp", idp_port)
+      @sp_pid  = start_app("sp", sp_port)
+    end
+    after(:each) do
+      stop_app(@idp_pid)
+      stop_app(@sp_pid)
+    end
+
+    it_behaves_like "it authenticates and creates users"
+  end
+
   def create_user(email)
     response = Net::HTTP.post_form(URI('http://localhost:8020/users'), email: email)
     expect(response.code).to eq('201')

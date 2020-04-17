@@ -17,10 +17,10 @@ class SamlIdpController < SamlIdp::IdpController
 
   def idp_make_saml_response(_)
     attributes = {
-      "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name" => "A User",
+      name_attribute_key => "A User",
     }
     if include_subject_in_attributes
-      attributes["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"] = "you@example.com"
+      attributes[email_address_attribute_key] = "you@example.com"
     end
     encode_SAMLResponse("you@example.com", attributes: attributes)
   end
@@ -33,6 +33,13 @@ class SamlIdpController < SamlIdp::IdpController
     }
   end
 
+  def email_address_attribute_key
+    "<%= @email_address_attribute_key %>"
+  end
+
+  def name_attribute_key
+    "<%= @name_attribute_key %>"
+  end
 
   def encode_SAMLResponse(nameID, opts = {})
     now = Time.now.utc
@@ -115,7 +122,7 @@ class SamlIdpController < SamlIdp::IdpController
   def idp_make_saml_slo_response(person)
     attributes = {}
     if include_subject_in_attributes
-      attributes["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"] = "you@example.com"
+      attributes[email_address_attribute_key] = "you@example.com"
     end
     encode_SAML_SLO_Response("you@example.com", attributes: attributes)
   end
@@ -148,7 +155,7 @@ class SamlIdpController < SamlIdp::IdpController
     audience_uri = opts[:audience_uri] || (@saml_slo_acs_url && @saml_slo_acs_url[/^(.*?\/\/.*?\/)/, 1])
     issuer_uri = opts[:issuer_uri] || (defined?(request) && request.url.split("?")[0]) || "http://example.com"
 
-    assertion = %[<Assertion xmlns="urn:oasis:names:tc:SAML:2.0:assertion" ID="_#{session_index}" IssueInstant="#{now.iso8601}" Version="2.0"><Issuer2>#{issuer_uri}</Issuer2><Subject><NameID Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">#{nameID}</NameID><SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer"><SubjectConfirmationData InResponseTo="#{@saml_slo_request_id}" NotOnOrAfter="#{(now+3*60).iso8601}" Recipient="#{@saml_slo_acs_url}"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore="#{(now-5).iso8601}" NotOnOrAfter="#{(now+60*60).iso8601}"><AudienceRestriction><Audience>#{audience_uri}</Audience></AudienceRestriction></Conditions><AttributeStatement><Attribute Name="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"><AttributeValue>#{nameID}</AttributeValue></Attribute></AttributeStatement><AuthnStatement AuthnInstant="#{now.iso8601}" SessionIndex="_#{session_index}"><AuthnContext><AuthnContextClassRef>urn:federation:authentication:windows</AuthnContextClassRef></AuthnContext></AuthnStatement></Assertion>]
+    assertion = %[<Assertion xmlns="urn:oasis:names:tc:SAML:2.0:assertion" ID="_#{session_index}" IssueInstant="#{now.iso8601}" Version="2.0"><Issuer2>#{issuer_uri}</Issuer2><Subject><NameID Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">#{nameID}</NameID><SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer"><SubjectConfirmationData InResponseTo="#{@saml_slo_request_id}" NotOnOrAfter="#{(now+3*60).iso8601}" Recipient="#{@saml_slo_acs_url}"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore="#{(now-5).iso8601}" NotOnOrAfter="#{(now+60*60).iso8601}"><AudienceRestriction><Audience>#{audience_uri}</Audience></AudienceRestriction></Conditions><AttributeStatement><Attribute Name="#{email_address_attribute_key}"><AttributeValue>#{nameID}</AttributeValue></Attribute></AttributeStatement><AuthnStatement AuthnInstant="#{now.iso8601}" SessionIndex="_#{session_index}"><AuthnContext><AuthnContextClassRef>urn:federation:authentication:windows</AuthnContextClassRef></AuthnContext></AuthnStatement></Assertion>]
 
     digest_value = Base64.encode64(algorithm.digest(assertion)).gsub(/\n/, '')
 

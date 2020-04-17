@@ -30,7 +30,7 @@ end
 def start_app(name, port, options = {})
   pid = nil
   with_clean_env do
-    Dir.chdir(File.expand_path("../../support/#{name}", __FILE__)) do
+    from_app_dir(name) do
       pid = Process.spawn({"RAILS_ENV" => "production"}, "bundle exec rails server -p #{port} -e production", out: "log/#{name}.log", err: "log/#{name}.err.log")
       begin
         Timeout::timeout(APP_READY_TIMEOUT) do
@@ -79,6 +79,10 @@ def port_open?(port)
   end
 rescue Timeout::Error
   false
+end
+
+def from_app_dir(name, &blk)
+  Dir.chdir(File.expand_path("../../support/#{name}", __FILE__), &blk)
 end
 
 def with_clean_env(&blk)

@@ -2,6 +2,7 @@
 
 require "onelogin/ruby-saml/version"
 
+saml_attribute_map = ENV.fetch("SAML_ATTRIBUTE_MAP", "nil")
 saml_session_index_key = ENV.fetch('SAML_SESSION_INDEX_KEY', ":session_index")
 use_subject_to_authenticate = ENV.fetch('USE_SUBJECT_TO_AUTHENTICATE')
 idp_settings_adapter = ENV.fetch('IDP_SETTINGS_ADAPTER', "nil")
@@ -34,11 +35,13 @@ end
 
 template File.expand_path('../idp_settings_adapter.rb.erb', __FILE__), 'app/lib/idp_settings_adapter.rb'
 
-create_file 'config/attribute-map.yml', <<-ATTRIBUTES
+if ENV["SAML_ATTRIBUTE_MAP"].blank?
+  create_file 'config/attribute-map.yml', <<-ATTRIBUTES
 ---
 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress": email
 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name":         name
-ATTRIBUTES
+  ATTRIBUTES
+end
 
 create_file('app/lib/our_saml_failed_callback_handler.rb', <<-CALLBACKHANDLER)
 
@@ -67,22 +70,6 @@ end
 READER
 
 after_bundle do
-  generate :controller, 'home', 'index'
-  insert_into_file('app/controllers/home_controller.rb', after: "class HomeController < ApplicationController\n") {
-    <<-AUTHENTICATE
-    before_action :authenticate_user!
-    AUTHENTICATE
-  }
-  insert_into_file('app/views/home/index.html.erb', after: /\z/) {
-    <<-HOME
-<%= current_user.email %> <%= current_user.name %>
-<%= form_tag destroy_user_session_path(entity_id: "http://localhost:8020/saml/metadata"), method: :delete do %>
-  <%= submit_tag "Log out" %>
-<% end %>
-    HOME
-  }
-  route "root to: 'home#index'"
-
   # Configure for our SAML IdP
   generate 'devise:install'
   gsub_file 'config/initializers/devise.rb', /^end$/, <<-CONFIG
@@ -91,6 +78,9 @@ after_bundle do
   config.saml_default_user_key = :email
   config.saml_session_index_key = #{saml_session_index_key}
 
+  if #{saml_attribute_map}
+    config.saml_attribute_map = #{saml_attribute_map}
+  end
   config.saml_use_subject = #{use_subject_to_authenticate}
   config.saml_create_user = true
   config.saml_update_user = true
@@ -108,6 +98,22 @@ after_bundle do
   end
 end
   CONFIG
+
+  generate :controller, 'home', 'index'
+  insert_into_file('app/controllers/home_controller.rb', after: "class HomeController < ApplicationController\n") {
+    <<-AUTHENTICATE
+    before_action :authenticate_user!
+    AUTHENTICATE
+  }
+  insert_into_file('app/views/home/index.html.erb', after: /\z/) {
+    <<-HOME
+<%= current_user.email %> <%= current_user.name %>
+<%= form_tag destroy_user_session_path(entity_id: "http://localhost:8020/saml/metadata"), method: :delete do %>
+  <%= submit_tag "Log out" %>
+<% end %>
+    HOME
+  }
+  route "root to: 'home#index'"
 
   if Rails::VERSION::MAJOR < 6
     generate :devise, "user", "email:string", "name:string", "session_index:string"

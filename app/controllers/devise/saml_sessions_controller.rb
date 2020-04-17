@@ -48,9 +48,7 @@ class Devise::SamlSessionsController < Devise::SessionsController
   protected
 
   def relay_state
-    @relay_state ||= if Devise.saml_relay_state.present?
-      Devise.saml_relay_state.call(request)
-    end
+    @relay_state ||= Devise.saml_relay_state&.call(request)
   end
 
   # For non transient name ID, save info to identify user for logout purpose
@@ -81,8 +79,8 @@ class Devise::SamlSessionsController < Devise::SessionsController
   def generate_idp_logout_response(saml_config, logout_request_id)
 
     params = {}
-    if Devise.saml_relay_state.present?
-      params['RelayState'] = relay_state
+    if relay_state
+      params[:RelayState] = relay_state
     end
 
     OneLogin::RubySaml::SloLogoutresponse.new.create(saml_config, logout_request_id, nil, params)
