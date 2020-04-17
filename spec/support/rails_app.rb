@@ -1,6 +1,6 @@
-require 'open3'
-require 'socket'
-require 'timeout'
+require "open3"
+require "socket"
+require "timeout"
 
 APP_READY_TIMEOUT ||= 30
 
@@ -17,27 +17,32 @@ rescue Errno::ESRCH
 end
 
 def create_app(name, env = {})
-  rails_new_options = %w(-T -J -S --skip-spring --skip-listen --skip-bootsnap)
-  rails_new_options << "-O" if name == 'idp'
+  puts "[#{name}] Creating Rails app"
+  rails_new_options = %w[-T -J -S --skip-spring --skip-listen --skip-bootsnap]
+  rails_new_options << "-O" if name == "idp"
   with_clean_env do
-    Dir.chdir(File.expand_path('../../support', __FILE__)) do
+    Dir.chdir(working_directory) do
       FileUtils.rm_rf(name)
-      system(env, "rails", "_#{Rails.version}_", "new", name, *rails_new_options, "-m", "#{name}_template.rb")
+      puts("rails _#{Rails.version}_ new #{name} #{rails_new_options.join(" ")} -m #{File.expand_path("../#{name}_template.rb", __FILE__)}")
+      system(env, "rails", "_#{Rails.version}_", "new", name, *rails_new_options, "-m", File.expand_path("../#{name}_template.rb", __FILE__))
     end
   end
 end
 
 def start_app(name, port, options = {})
+  puts "[#{name}] Starting Rails app"
   pid = nil
+  app_bundle_install(name)
+
   with_clean_env do
-    from_app_dir(name) do
-      pid = Process.spawn({"RAILS_ENV" => "production"}, "bundle exec rails server -p #{port} -e production", out: "log/#{name}.log", err: "log/#{name}.err.log")
+    Dir.chdir(app_dir(name)) do
+      pid = Process.spawn(app_env(name), "bundle exec rails server -p #{port} -e production", chdir: app_dir(name), out: "log/#{name}.log", err: "log/#{name}.err.log")
       begin
-        Timeout::timeout(APP_READY_TIMEOUT) do
+        Timeout.timeout(APP_READY_TIMEOUT) do
           sleep 1 until app_ready?(pid, port)
         end
         if app_ready?(pid, port)
-          puts "Launched #{name} on port #{port} (pid #{pid})..."
+          puts "[#{name}] Launched #{name} on port #{port} (pid #{pid})..."
         else
           raise "#{name} failed after starting"
         end
@@ -48,8 +53,10 @@ def start_app(name, port, options = {})
   end
   pid
 rescue RuntimeError => e
-  $stdout.puts "#{File.read(File.expand_path("../../support/#{name}/log/#{name}.log", __FILE__))}"
-  $stderr.puts "#{File.read(File.expand_path("../../support/#{name}/log/#{name}.err.log", __FILE__))}"
+  Dir.chdir(app_dir(name)) do
+    puts File.read("log/#{name}.log")
+    warn File.read("log/#{name}.err.log")
+  end
   raise e
 end
 
@@ -81,8 +88,29 @@ rescue Timeout::Error
   false
 end
 
-def from_app_dir(name, &blk)
-  Dir.chdir(File.expand_path("../../support/#{name}", __FILE__), &blk)
+def app_bundle_install(name)
+  with_clean_env do
+    Open3.popen3(app_env(name), "bundle install", chdir: app_dir(name)) do |stdin, stdout, stderr, thread|
+      stdin.close
+      exit_status = thread.value
+
+      puts stdout.read
+      warn stderr.read
+      raise "bundle install failed" unless exit_status.success?
+    end
+  end
+end
+
+def app_dir(name)
+  File.join(working_directory, name)
+end
+
+def app_env(name)
+  {"BUNDLE_GEMFILE" => File.join(app_dir(name), "Gemfile"), "RAILS_ENV" => "production"}
+end
+
+def working_directory
+  $working_directory ||= Dir.mktmpdir("dsa_test")
 end
 
 def with_clean_env(&blk)

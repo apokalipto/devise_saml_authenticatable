@@ -48,7 +48,9 @@ class Devise::SamlSessionsController < Devise::SessionsController
   protected
 
   def relay_state
-    @relay_state ||= Devise.saml_relay_state&.call(request)
+    @relay_state ||= if Devise.saml_relay_state.present?
+      Devise.saml_relay_state.call(request)
+    end
   end
 
   # For non transient name ID, save info to identify user for logout purpose
