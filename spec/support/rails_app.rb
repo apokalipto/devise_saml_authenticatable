@@ -54,8 +54,8 @@ def start_app(name, port, options = {})
   pid
 rescue RuntimeError => e
   Dir.chdir(app_dir(name)) do
-    puts File.read("log/#{name}.log")
-    warn File.read("log/#{name}.err.log")
+    puts File.read("log/#{name}.log") if File.exist?("log/#{name}.log")
+    warn File.read("log/#{name}.err.log") if File.exist?("log/#{name}.err.log")
   end
   raise e
 end
