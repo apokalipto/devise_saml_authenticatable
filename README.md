@@ -130,7 +130,44 @@ In `config/initializers/devise.rb`:
   end
 ```
 
-In the config directory, create a YAML file (`attribute-map.yml`) that maps SAML attributes with your model's fields:
+#### Attributes
+
+There are two ways to map SAML attributes to User attributes:
+
+- [initializer](#attribute-map-initializer)
+- [config file](#attribute-map-config-file)
+
+The attribute mappings are very dependent on the way the IdP encodes the attributes.
+In these examples the attributes are given in URN style.
+Other IdPs might provide them as OID's, or by other means.
+
+You are now ready to test it against an IdP.
+
+When the user visits `/users/saml/sign_in` they will be redirected to the login page of the IdP.
+
+Upon successful login the user is redirected to the Devise `user_root_path`.
+
+##### Attribute map initializer
+
+In `config/initializers/devise.rb` (see above), add an attribute map setting:
+
+```ruby
+  Devise.setup do |config|
+    ...
+    # ==> Configuration for :saml_authenticatable
+
+    config.saml_attribute_map = {
+      "urn:mace:dir:attribute-def:uid" => "user_name",
+      "urn:mace:dir:attribute-def:email" => "email",
+      "urn:mace:dir:attribute-def:name" => "last_name",
+      "urn:mace:dir:attribute-def:givenName" => "name",
+    }
+  end
+```
+
+##### Attribute map config file
+
+Create a YAML file (`config/attribute-map.yml`) that maps SAML attributes with your model's fields:
 
 ```yaml
   # attribute-map.yml
@@ -140,16 +177,6 @@ In the config directory, create a YAML file (`attribute-map.yml`) that maps SAML
   "urn:mace:dir:attribute-def:name": "last_name"
   "urn:mace:dir:attribute-def:givenName": "name"
 ```
-
-The attribute mappings are very dependent on the way the IdP encodes the attributes.
-In this example the attributes are given in URN style.
-Other IdPs might provide them as OID's, or by other means.
-
-You are now ready to test it against an IdP.
-
-When the user visits `/users/saml/sign_in` they will be redirected to the login page of the IdP.
-
-Upon successful login the user is redirected to the Devise `user_root_path`.
 
 ## Supporting Multiple IdPs
 
