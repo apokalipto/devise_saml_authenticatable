@@ -147,24 +147,6 @@ When the user visits `/users/saml/sign_in` they will be redirected to the login 
 
 Upon successful login the user is redirected to the Devise `user_root_path`.
 
-##### Attribute map initializer
-
-In `config/initializers/devise.rb` (see above), add an attribute map setting:
-
-```ruby
-  Devise.setup do |config|
-    ...
-    # ==> Configuration for :saml_authenticatable
-
-    config.saml_attribute_map = {
-      "urn:mace:dir:attribute-def:uid" => "user_name",
-      "urn:mace:dir:attribute-def:email" => "email",
-      "urn:mace:dir:attribute-def:name" => "last_name",
-      "urn:mace:dir:attribute-def:givenName" => "name",
-    }
-  end
-```
-
 ##### Attribute map config file
 
 Create a YAML file (`config/attribute-map.yml`) that maps SAML attributes with your model's fields:
@@ -176,6 +158,40 @@ Create a YAML file (`config/attribute-map.yml`) that maps SAML attributes with y
   "urn:mace:dir:attribute-def:email": "email"
   "urn:mace:dir:attribute-def:name": "last_name"
   "urn:mace:dir:attribute-def:givenName": "name"
+```
+
+##### Attribute map initializer
+
+In `config/initializers/devise.rb` (see above), add an attribute map resolver.
+The resolver gets the [SAML response from the IdP](https://github.com/onelogin/ruby-saml/blob/master/lib/onelogin/ruby-saml/response.rb) so it can decide which attribute map to load.
+If you only have one IdP, you can use the config file above, or just return a single hash.
+
+```ruby
+  # config/initializers/devise.rb
+  Devise.setup do |config|
+    ...
+    # ==> Configuration for :saml_authenticatable
+
+    config.saml_attribute_map_resolver = MyAttributeMapResolver
+  end
+```
+
+```ruby
+  # app/lib/my_attribute_map_resolver
+  class MyAttributeMapResolver < DeviseSamlAuthenticatable::DefaultAttributeMapResolver
+    def attribute_map
+      issuer = saml_response.issuers.first
+      case issuer
+      when "idp_entity_id"
+        {
+          "urn:mace:dir:attribute-def:uid" => "user_name",
+          "urn:mace:dir:attribute-def:email" => "email",
+          "urn:mace:dir:attribute-def:name" => "last_name",
+          "urn:mace:dir:attribute-def:givenName" => "name",
+        }
+      end
+    end
+  end
 ```
 
 ## Supporting Multiple IdPs

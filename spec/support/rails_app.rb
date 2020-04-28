@@ -53,14 +53,19 @@ def start_app(name, port, options = {})
   end
   pid
 rescue RuntimeError => e
+  warn "=== #{name}"
   Dir.chdir(app_dir(name)) do
-    puts File.read("log/#{name}.log") if File.exist?("log/#{name}.log")
+    warn File.read("log/#{name}.log") if File.exist?("log/#{name}.log")
     warn File.read("log/#{name}.err.log") if File.exist?("log/#{name}.err.log")
   end
   raise e
 end
 
-def stop_app(pid)
+def stop_app(name, pid:)
+  puts "=== #{name}"
+  Dir.chdir(app_dir(name)) do
+    puts File.read("log/production.log") if File.exist?("log/production.log")
+  end
   if pid
     Process.kill(:INT, pid)
     Process.wait(pid)

@@ -2,7 +2,7 @@
 
 require "onelogin/ruby-saml/version"
 
-saml_attribute_map = ENV.fetch("SAML_ATTRIBUTE_MAP", "nil")
+attribute_map_resolver = ENV.fetch("ATTRIBUTE_MAP_RESOLVER", "nil")
 saml_session_index_key = ENV.fetch('SAML_SESSION_INDEX_KEY', ":session_index")
 use_subject_to_authenticate = ENV.fetch('USE_SUBJECT_TO_AUTHENTICATE')
 idp_settings_adapter = ENV.fetch('IDP_SETTINGS_ADAPTER', "nil")
@@ -33,9 +33,10 @@ if Rails::VERSION::MAJOR < 6
   gsub_file 'Gemfile', /^gem 'sqlite3'.*$/, "gem 'sqlite3', '~> 1.3.6'"
 end
 
+template File.expand_path('../attribute_map_resolver.rb.erb', __FILE__), 'app/lib/attribute_map_resolver.rb'
 template File.expand_path('../idp_settings_adapter.rb.erb', __FILE__), 'app/lib/idp_settings_adapter.rb'
 
-if ENV["SAML_ATTRIBUTE_MAP"].blank?
+if attribute_map_resolver == "nil"
   create_file 'config/attribute-map.yml', <<-ATTRIBUTES
 ---
 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress": email
@@ -78,8 +79,8 @@ after_bundle do
   config.saml_default_user_key = :email
   config.saml_session_index_key = #{saml_session_index_key}
 
-  if #{saml_attribute_map}
-    config.saml_attribute_map = #{saml_attribute_map}
+  if #{attribute_map_resolver}
+    config.saml_attribute_map_resolver = #{attribute_map_resolver}
   end
   config.saml_use_subject = #{use_subject_to_authenticate}
   config.saml_create_user = true

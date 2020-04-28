@@ -32,7 +32,7 @@ describe Devise::Models::SamlAuthenticatable do
   end
 
   before do
-    allow(Devise).to receive(:saml_attribute_map).and_return(attributemap)
+    allow(Devise).to receive(:saml_attribute_map_resolver).and_return(attribute_map_resolver)
     allow(Devise).to receive(:saml_default_user_key).and_return(:email)
     allow(Devise).to receive(:saml_create_user).and_return(false)
     allow(Devise).to receive(:saml_use_subject).and_return(false)
@@ -42,10 +42,17 @@ describe Devise::Models::SamlAuthenticatable do
     allow(Rails).to receive(:root).and_return("/railsroot")
   end
 
-  let(:attributemap) { {
-    'saml-email-format' => 'email',
-    'saml-name-format' => 'name',
-  } }
+  let(:attribute_map_resolver) {
+    Class.new(::DeviseSamlAuthenticatable::DefaultAttributeMapResolver) do
+      def attribute_map
+        {
+          "saml-email-format" => "email",
+          "saml-name-format" => "name",
+        }
+      end
+    end
+  }
+  let(:attributemap) { attribute_map_resolver.new(nil).attribute_map }
   let(:response) { double(:response, attributes: attributes, name_id: name_id) }
   let(:attributes) {
     OneLogin::RubySaml::Attributes.new(

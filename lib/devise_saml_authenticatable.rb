@@ -3,9 +3,9 @@ require "devise"
 require "devise_saml_authenticatable/version"
 require "devise_saml_authenticatable/exception"
 require "devise_saml_authenticatable/logger"
-require "devise_saml_authenticatable/railties"
 require "devise_saml_authenticatable/routes"
 require "devise_saml_authenticatable/saml_config"
+require "devise_saml_authenticatable/default_attribute_map_resolver"
 require "devise_saml_authenticatable/default_idp_entity_id_reader"
 
 begin
@@ -68,8 +68,8 @@ module Devise
   @@saml_relay_state
 
   # Instead of storing the attribute_map in attribute-map.yml, store it in the database, or set it programatically
-  mattr_accessor :saml_attribute_map
-  @@saml_attribute_map
+  mattr_accessor :saml_attribute_map_resolver
+  @@saml_attribute_map_resolver ||= ::DeviseSamlAuthenticatable::DefaultAttributeMapResolver
 
   # Implements a #validate method that takes the retrieved resource and response right after retrieval,
   # and returns true if it's valid.  False will cause authentication to fail.

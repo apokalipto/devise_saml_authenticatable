@@ -33,7 +33,7 @@ module Devise
           key = Devise.saml_default_user_key
           decorated_response = ::SamlAuthenticatable::SamlResponse.new(
             saml_response,
-            Devise.saml_attribute_map,
+            Devise.saml_attribute_map_resolver.new(saml_response).attribute_map,
           )
           if Devise.saml_use_subject
             auth_value = saml_response.name_id
