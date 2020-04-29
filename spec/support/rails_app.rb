@@ -61,7 +61,7 @@ rescue RuntimeError => e
   raise e
 end
 
-def stop_app(name, pid:)
+def stop_app(name, pid)
   puts "=== #{name}"
   Dir.chdir(app_dir(name)) do
     puts File.read("log/production.log") if File.exist?("log/production.log")

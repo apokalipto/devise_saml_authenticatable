@@ -85,8 +85,8 @@ describe "SAML Authentication", type: :feature do
       @sp_pid  = start_app('sp',  sp_port)
     end
     after(:each) do
-      stop_app("idp", pid: @idp_pid)
-      stop_app("sp", pid: @sp_pid)
+      stop_app("idp", @idp_pid)
+      stop_app("sp", @sp_pid)
     end
 
     it_behaves_like "it authenticates and creates users"
@@ -100,8 +100,8 @@ describe "SAML Authentication", type: :feature do
       @sp_pid  = start_app('sp',  sp_port)
     end
     after(:each) do
-      stop_app("idp", pid: @idp_pid)
-      stop_app("sp", pid: @sp_pid)
+      stop_app("idp", @idp_pid)
+      stop_app("sp", @sp_pid)
     end
 
     it_behaves_like "it authenticates and creates users"
@@ -115,8 +115,8 @@ describe "SAML Authentication", type: :feature do
       @sp_pid  = start_app('sp',  sp_port)
     end
     after(:each) do
-      stop_app("idp", pid: @idp_pid)
-      stop_app("sp", pid: @sp_pid)
+      stop_app("idp", @idp_pid)
+      stop_app("sp", @sp_pid)
     end
 
     it_behaves_like "it authenticates and creates users"
@@ -131,8 +131,8 @@ describe "SAML Authentication", type: :feature do
       @sp_pid  = start_app('sp',  sp_port)
     end
     after(:each) do
-      stop_app("idp", pid: @idp_pid)
-      stop_app("sp", pid: @sp_pid)
+      stop_app("idp", @idp_pid)
+      stop_app("sp", @sp_pid)
     end
 
     it_behaves_like "it authenticates and creates users"
@@ -149,8 +149,8 @@ describe "SAML Authentication", type: :feature do
     end
 
     after(:each) do
-      stop_app("idp", pid: @idp_pid)
-      stop_app("sp", pid: @sp_pid)
+      stop_app("idp", @idp_pid)
+      stop_app("sp", @sp_pid)
     end
 
     it "authenticates an existing user on a SP via an IdP" do
@@ -172,8 +172,8 @@ describe "SAML Authentication", type: :feature do
     end
 
     after(:each) do
-      stop_app("idp", pid: @idp_pid)
-      stop_app("sp", pid: @sp_pid)
+      stop_app("idp", @idp_pid)
+      stop_app("sp", @sp_pid)
     end
 
     it_behaves_like "it authenticates and creates users"
@@ -211,8 +211,8 @@ describe "SAML Authentication", type: :feature do
       @sp_pid  = start_app("sp", sp_port)
     end
     after(:each) do
-      stop_app("idp", pid: @idp_pid)
-      stop_app("sp", pid: @sp_pid)
+      stop_app("idp", @idp_pid)
+      stop_app("sp", @sp_pid)
     end
 
     it_behaves_like "it authenticates and creates users"
