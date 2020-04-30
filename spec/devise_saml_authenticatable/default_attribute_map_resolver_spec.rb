@@ -8,11 +8,11 @@ describe DeviseSamlAuthenticatable::DefaultAttributeMapResolver do
 
   let(:saml_response) { instance_double("OneLogin::RubySaml::Response") }
   let(:file_contents) {
-    <<~YAML
-    ---
-    firstname: first_name
-    lastname: last_name
-    YAML
+    <<YAML
+---
+firstname: first_name
+lastname: last_name
+YAML
   }
   before do
     allow(File).to receive(:exist?).and_return(true)
