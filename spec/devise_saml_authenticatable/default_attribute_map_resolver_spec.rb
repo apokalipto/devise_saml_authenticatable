@@ -30,12 +30,12 @@ YAML
 
     context "when the attribute map is broken down by environment" do
       let(:file_contents) {
-        <<~YAML
-        ---
-        test:
-          first: first_name
-          last: last_name
-        YAML
+        <<YAML
+---
+test:
+  first: first_name
+  last: last_name
+YAML
       }
       it "reads the attribute map from the environment key" do
         expect(described_class.new(saml_response).attribute_map).to eq(
