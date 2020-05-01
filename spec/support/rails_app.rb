@@ -1,5 +1,6 @@
 require "open3"
 require "socket"
+require "tempfile"
 require "timeout"
 
 APP_READY_TIMEOUT ||= 30
