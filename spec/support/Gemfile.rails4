@@ -20,7 +20,7 @@ group :test do
 
   if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.1")
     gem 'devise', '~> 3.5'
-    gem 'minitest', '~> 4.0'
+    gem 'minitest', '~> 5.11.0'
     gem 'nokogiri', '~> 1.6.8'
     gem 'public_suffix', '~> 2.0.5'
   end

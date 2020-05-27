@@ -63,13 +63,23 @@ rescue RuntimeError => e
 end
 
 def stop_app(name, pid)
-  puts "=== #{name}"
-  Dir.chdir(app_dir(name)) do
-    puts File.read("log/production.log") if File.exist?("log/production.log")
-  end
   if pid
     Process.kill(:INT, pid)
     Process.wait(pid)
+  end
+  Dir.chdir(app_dir(name)) do
+    if File.exist?("log/#{name}.log")
+      puts "=== [#{name}] stdout"
+      puts File.read("log/#{name}.log")
+    end
+    if File.exist?("log/#{name}.err.log")
+      warn "=== [#{name}] stderr"
+      warn File.read("log/#{name}.err.log")
+    end
+    if File.exist?("log/production.log")
+      puts "=== [#{name}] Rails logs"
+      puts File.read("log/production.log")
+    end
   end
 end
 
@@ -79,7 +89,7 @@ def port_open?(port)
       s = TCPSocket.new('localhost', port)
       s.close
       return true
-    rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
+    rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Errno::EADDRNOTAVAIL
       # try 127.0.0.1
     end
     begin

@@ -38,4 +38,5 @@ end
 
 require 'support/rails_app'
 
+require "action_controller" # https://github.com/heartcombo/responders/pull/95
 require 'devise_saml_authenticatable'
