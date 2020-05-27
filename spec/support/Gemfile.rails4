@@ -6,30 +6,28 @@ gemspec path: '../..'
 group :test do
   gem 'rspec', '~> 3.0'
   gem 'rails', '~> 4.0'
-  gem 'rspec-rails'
+  gem 'rspec-rails', '~> 3.9'
   gem 'sqlite3', '~> 1.3.6'
   gem 'capybara'
   gem 'poltergeist'
 
   # Lock down versions of gems for older versions of Ruby
-  if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.0")
-    gem 'addressable', '~> 2.4.0'
-    gem 'mime-types', '~> 2.99'
-    gem 'public_suffix', '~> 1.4.6'
-    gem 'rake', '~> 12.2.0'
-  elsif Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.1")
-    gem 'public_suffix', '~> 2.0.5'
-    gem 'rake'
+  if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.1")
+    gem 'rake', '~> 12.2'
   else
     gem 'rake'
   end
 
   if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.1")
     gem 'devise', '~> 3.5'
+    gem 'minitest', '~> 5.11.0'
     gem 'nokogiri', '~> 1.6.8'
+    gem 'public_suffix', '~> 2.0.5'
   end
 
-  if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.4")
-    gem 'responders', '~> 2.4'
+  if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.1")
+    gem 'responders', '~> 1.0'
+  elsif Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.4")
+    gem 'responders', '~> 2.0'
   end
 end

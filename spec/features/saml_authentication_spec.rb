@@ -85,8 +85,8 @@ describe "SAML Authentication", type: :feature do
       @sp_pid  = start_app('sp',  sp_port)
     end
     after(:each) do
-      stop_app(@idp_pid)
-      stop_app(@sp_pid)
+      stop_app("idp", @idp_pid)
+      stop_app("sp", @sp_pid)
     end
 
     it_behaves_like "it authenticates and creates users"
@@ -100,8 +100,8 @@ describe "SAML Authentication", type: :feature do
       @sp_pid  = start_app('sp',  sp_port)
     end
     after(:each) do
-      stop_app(@idp_pid)
-      stop_app(@sp_pid)
+      stop_app("idp", @idp_pid)
+      stop_app("sp", @sp_pid)
     end
 
     it_behaves_like "it authenticates and creates users"
@@ -115,8 +115,8 @@ describe "SAML Authentication", type: :feature do
       @sp_pid  = start_app('sp',  sp_port)
     end
     after(:each) do
-      stop_app(@idp_pid)
-      stop_app(@sp_pid)
+      stop_app("idp", @idp_pid)
+      stop_app("sp", @sp_pid)
     end
 
     it_behaves_like "it authenticates and creates users"
@@ -131,8 +131,8 @@ describe "SAML Authentication", type: :feature do
       @sp_pid  = start_app('sp',  sp_port)
     end
     after(:each) do
-      stop_app(@idp_pid)
-      stop_app(@sp_pid)
+      stop_app("idp", @idp_pid)
+      stop_app("sp", @sp_pid)
     end
 
     it_behaves_like "it authenticates and creates users"
@@ -149,8 +149,8 @@ describe "SAML Authentication", type: :feature do
     end
 
     after(:each) do
-      stop_app(@idp_pid)
-      stop_app(@sp_pid)
+      stop_app("idp", @idp_pid)
+      stop_app("sp", @sp_pid)
     end
 
     it "authenticates an existing user on a SP via an IdP" do
@@ -172,8 +172,8 @@ describe "SAML Authentication", type: :feature do
     end
 
     after(:each) do
-      stop_app(@idp_pid)
-      stop_app(@sp_pid)
+      stop_app("idp", @idp_pid)
+      stop_app("sp", @sp_pid)
     end
 
     it_behaves_like "it authenticates and creates users"
@@ -192,6 +192,30 @@ describe "SAML Authentication", type: :feature do
         expect(current_url).to eq("http://www.example.com/")
       end
     end
+  end
+
+  context "when the saml_attribute_map is set" do
+    before(:each) do
+      create_app(
+        "idp",
+        "EMAIL_ADDRESS_ATTRIBUTE_KEY" => "myemailaddress",
+        "NAME_ATTRIBUTE_KEY" => "myname",
+        "INCLUDE_SUBJECT_IN_ATTRIBUTES" => "false",
+      )
+      create_app(
+        "sp",
+        "ATTRIBUTE_MAP_RESOLVER" => "AttributeMapResolver",
+        "USE_SUBJECT_TO_AUTHENTICATE" => "true",
+      )
+      @idp_pid = start_app("idp", idp_port)
+      @sp_pid  = start_app("sp", sp_port)
+    end
+    after(:each) do
+      stop_app("idp", @idp_pid)
+      stop_app("sp", @sp_pid)
+    end
+
+    it_behaves_like "it authenticates and creates users"
   end
 
   def create_user(email)

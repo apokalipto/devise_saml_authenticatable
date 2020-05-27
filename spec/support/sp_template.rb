@@ -2,6 +2,7 @@
 
 require "onelogin/ruby-saml/version"
 
+attribute_map_resolver = ENV.fetch("ATTRIBUTE_MAP_RESOLVER", "nil")
 saml_session_index_key = ENV.fetch('SAML_SESSION_INDEX_KEY', ":session_index")
 use_subject_to_authenticate = ENV.fetch('USE_SUBJECT_TO_AUTHENTICATE')
 idp_settings_adapter = ENV.fetch('IDP_SETTINGS_ADAPTER', "nil")
@@ -12,7 +13,7 @@ if Rails::VERSION::MAJOR < 5 || (Rails::VERSION::MAJOR == 5 && Rails::VERSION::M
   gsub_file 'config/secrets.yml', /secret_key_base:.*$/, 'secret_key_base: "8b5889df1fcf03f76c7d66da02d8776bcc85b06bed7d9c592f076d9c8a5455ee6d4beae45986c3c030b40208db5e612f2a6ef8283036a352e3fae83c5eda36be"'
 end
 
-gem 'devise_saml_authenticatable', path: '../../..'
+gem 'devise_saml_authenticatable', path: File.expand_path("../../..", __FILE__)
 gem 'ruby-saml', OneLogin::RubySaml::VERSION
 gem 'thin'
 
@@ -32,13 +33,16 @@ if Rails::VERSION::MAJOR < 6
   gsub_file 'Gemfile', /^gem 'sqlite3'.*$/, "gem 'sqlite3', '~> 1.3.6'"
 end
 
+template File.expand_path('../attribute_map_resolver.rb.erb', __FILE__), 'app/lib/attribute_map_resolver.rb'
 template File.expand_path('../idp_settings_adapter.rb.erb', __FILE__), 'app/lib/idp_settings_adapter.rb'
 
-create_file 'config/attribute-map.yml', <<-ATTRIBUTES
+if attribute_map_resolver == "nil"
+  create_file 'config/attribute-map.yml', <<-ATTRIBUTES
 ---
 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress": email
 "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name":         name
-ATTRIBUTES
+  ATTRIBUTES
+end
 
 create_file('app/lib/our_saml_failed_callback_handler.rb', <<-CALLBACKHANDLER)
 
@@ -67,22 +71,6 @@ end
 READER
 
 after_bundle do
-  generate :controller, 'home', 'index'
-  insert_into_file('app/controllers/home_controller.rb', after: "class HomeController < ApplicationController\n") {
-    <<-AUTHENTICATE
-    before_action :authenticate_user!
-    AUTHENTICATE
-  }
-  insert_into_file('app/views/home/index.html.erb', after: /\z/) {
-    <<-HOME
-<%= current_user.email %> <%= current_user.name %>
-<%= form_tag destroy_user_session_path(entity_id: "http://localhost:8020/saml/metadata"), method: :delete do %>
-  <%= submit_tag "Log out" %>
-<% end %>
-    HOME
-  }
-  route "root to: 'home#index'"
-
   # Configure for our SAML IdP
   generate 'devise:install'
   gsub_file 'config/initializers/devise.rb', /^end$/, <<-CONFIG
@@ -91,6 +79,9 @@ after_bundle do
   config.saml_default_user_key = :email
   config.saml_session_index_key = #{saml_session_index_key}
 
+  if #{attribute_map_resolver}
+    config.saml_attribute_map_resolver = #{attribute_map_resolver}
+  end
   config.saml_use_subject = #{use_subject_to_authenticate}
   config.saml_create_user = true
   config.saml_update_user = true
@@ -108,6 +99,22 @@ after_bundle do
   end
 end
   CONFIG
+
+  generate :controller, 'home', 'index'
+  insert_into_file('app/controllers/home_controller.rb', after: "class HomeController < ApplicationController\n") {
+    <<-AUTHENTICATE
+    before_action :authenticate_user!
+    AUTHENTICATE
+  }
+  insert_into_file('app/views/home/index.html.erb', after: /\z/) {
+    <<-HOME
+<%= current_user.email %> <%= current_user.name %>
+<%= form_tag destroy_user_session_path(entity_id: "http://localhost:8020/saml/metadata"), method: :delete do %>
+  <%= submit_tag "Log out" %>
+<% end %>
+    HOME
+  }
+  route "root to: 'home#index'"
 
   if Rails::VERSION::MAJOR < 6
     generate :devise, "user", "email:string", "name:string", "session_index:string"

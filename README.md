@@ -130,7 +130,26 @@ In `config/initializers/devise.rb`:
   end
 ```
 
-In the config directory, create a YAML file (`attribute-map.yml`) that maps SAML attributes with your model's fields:
+#### Attributes
+
+There are two ways to map SAML attributes to User attributes:
+
+- [initializer](#attribute-map-initializer)
+- [config file](#attribute-map-config-file)
+
+The attribute mappings are very dependent on the way the IdP encodes the attributes.
+In these examples the attributes are given in URN style.
+Other IdPs might provide them as OID's, or by other means.
+
+You are now ready to test it against an IdP.
+
+When the user visits `/users/saml/sign_in` they will be redirected to the login page of the IdP.
+
+Upon successful login the user is redirected to the Devise `user_root_path`.
+
+##### Attribute map config file
+
+Create a YAML file (`config/attribute-map.yml`) that maps SAML attributes with your model's fields:
 
 ```yaml
   # attribute-map.yml
@@ -141,15 +160,39 @@ In the config directory, create a YAML file (`attribute-map.yml`) that maps SAML
   "urn:mace:dir:attribute-def:givenName": "name"
 ```
 
-The attribute mappings are very dependent on the way the IdP encodes the attributes.
-In this example the attributes are given in URN style.
-Other IdPs might provide them as OID's, or by other means.
+##### Attribute map initializer
 
-You are now ready to test it against an IdP.
+In `config/initializers/devise.rb` (see above), add an attribute map resolver.
+The resolver gets the [SAML response from the IdP](https://github.com/onelogin/ruby-saml/blob/master/lib/onelogin/ruby-saml/response.rb) so it can decide which attribute map to load.
+If you only have one IdP, you can use the config file above, or just return a single hash.
 
-When the user visits `/users/saml/sign_in` they will be redirected to the login page of the IdP.
+```ruby
+  # config/initializers/devise.rb
+  Devise.setup do |config|
+    ...
+    # ==> Configuration for :saml_authenticatable
 
-Upon successful login the user is redirected to the Devise `user_root_path`.
+    config.saml_attribute_map_resolver = MyAttributeMapResolver
+  end
+```
+
+```ruby
+  # app/lib/my_attribute_map_resolver
+  class MyAttributeMapResolver < DeviseSamlAuthenticatable::DefaultAttributeMapResolver
+    def attribute_map
+      issuer = saml_response.issuers.first
+      case issuer
+      when "idp_entity_id"
+        {
+          "urn:mace:dir:attribute-def:uid" => "user_name",
+          "urn:mace:dir:attribute-def:email" => "email",
+          "urn:mace:dir:attribute-def:name" => "last_name",
+          "urn:mace:dir:attribute-def:givenName" => "name",
+        }
+      end
+    end
+  end
+```
 
 ## Supporting Multiple IdPs
 

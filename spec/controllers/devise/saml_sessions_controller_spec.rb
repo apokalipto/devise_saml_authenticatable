@@ -333,6 +333,16 @@ describe Devise::SamlSessionsController, type: :controller do
         end
       end
 
+      context "with a relay_state lambda defined" do
+        let(:relay_state) { ->(request) { "123" } }
+
+        it "includes the RelayState param in the request to the IdP" do
+          expect(Devise).to receive(:saml_relay_state).at_least(:once).and_return(relay_state)
+          do_post
+          expect(saml_response).to have_received(:create).with(Devise.saml_config, saml_request.id, nil, {RelayState: "123"})
+        end
+      end
+
       context 'when saml_session_index_key is not configured' do
         before do
           Devise.saml_session_index_key = nil

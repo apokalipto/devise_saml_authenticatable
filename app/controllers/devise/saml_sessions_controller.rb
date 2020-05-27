@@ -79,6 +79,12 @@ class Devise::SamlSessionsController < Devise::SessionsController
   end
 
   def generate_idp_logout_response(saml_config, logout_request_id)
-    OneLogin::RubySaml::SloLogoutresponse.new.create(saml_config, logout_request_id, nil)
+
+    params = {}
+    if relay_state
+      params[:RelayState] = relay_state
+    end
+
+    OneLogin::RubySaml::SloLogoutresponse.new.create(saml_config, logout_request_id, nil, params)
   end
 end

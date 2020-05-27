@@ -33,9 +33,9 @@ module Devise
           key = Devise.saml_default_user_key
           decorated_response = ::SamlAuthenticatable::SamlResponse.new(
             saml_response,
-            attribute_map
+            Devise.saml_attribute_map_resolver.new(saml_response).attribute_map,
           )
-          if (Devise.saml_use_subject)
+          if Devise.saml_use_subject
             auth_value = saml_response.name_id
           else
             auth_value = decorated_response.attribute_value_by_resource_key(key)
@@ -79,21 +79,6 @@ module Devise
 
         def find_for_shibb_authentication(conditions)
           find_for_authentication(conditions)
-        end
-
-        def attribute_map
-          @attribute_map ||= attribute_map_for_environment
-        end
-
-        private
-
-        def attribute_map_for_environment
-          attribute_map = YAML.load(File.read("#{Rails.root}/config/attribute-map.yml"))
-          if attribute_map.has_key?(Rails.env)
-            attribute_map[Rails.env]
-          else
-            attribute_map
-          end
         end
       end
     end

@@ -1,5 +1,7 @@
 # Set up a SAML IdP
 
+@email_address_attribute_key = ENV.fetch("EMAIL_ADDRESS_ATTRIBUTE_KEY", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")
+@name_attribute_key = ENV.fetch("NAME_ATTRIBUTE_KEY", "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name")
 @include_subject_in_attributes = ENV.fetch('INCLUDE_SUBJECT_IN_ATTRIBUTES')
 @valid_destination = ENV.fetch('VALID_DESTINATION', "true")
 
@@ -7,7 +9,7 @@ if Rails::VERSION::MAJOR < 5 || (Rails::VERSION::MAJOR == 5 && Rails::VERSION::M
   gsub_file 'config/secrets.yml', /secret_key_base:.*$/, 'secret_key_base: "34814fd41f91c493b89aa01ac73c44d241a31245b5bc5542fa4b7317525e1dcfa60ba947b3d085e4e229456fdee0d8af6aac6a63cf750d807ea6fe5d853dff4a"'
 end
 
-gem 'ruby-saml-idp', git: "https://github.com/lawrencepit/ruby-saml-idp.git", ref: "ec715b252e849105c7a96df27b731c6e7f725a51"
+gem 'ruby-saml-idp', '~> 0.3.3'
 gem 'thin'
 
 insert_into_file('Gemfile', after: /\z/) {
