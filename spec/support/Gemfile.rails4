@@ -28,6 +28,7 @@ group :test do
   if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.1")
     gem 'responders', '~> 1.0'
   elsif Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.4")
+    gem 'byebug', '~> 11.0.0'
     gem 'responders', '~> 2.0'
   end
 end
