@@ -6,17 +6,14 @@ It uses [ruby-saml][] to handle all SAML-related stuff.
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Add this gem to your application's Gemfile:
 
-    gem 'devise_saml_authenticatable'
+    git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
+    gem "devise_saml_authenticatable", github: "apokalipto/devise_saml_authenticatable"
 
 And then execute:
 
     $ bundle
-
-Or install it yourself as:
-
-    $ gem install devise_saml_authenticatable
 
 ## Usage
 
