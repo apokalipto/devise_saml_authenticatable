@@ -14,6 +14,7 @@ group :test do
 
   # Lock down versions of gems for older versions of Ruby
   if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.4")
+    gem 'byebug', '~> 11.0.0'
     gem 'responders', '~> 2.4'
   end
 end
