@@ -20,8 +20,9 @@ class Devise::SamlSessionsController < Devise::SessionsController
   end
 
   def metadata
+    idp_entity_id = params[:idp_entity_id]
     meta = OneLogin::RubySaml::Metadata.new
-    render :xml => meta.generate(saml_config)
+    render :xml => meta.generate(saml_config(idp_entity_id))
   end
 
   def idp_sign_out
