@@ -104,6 +104,12 @@ describe Devise::Models::SamlAuthenticatable do
         expect(model.name).to  eq('A User')
         expect(model.saved).to be(true)
       end
+
+      it "returns nil if it fails to create a user" do
+        expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
+        expect(Devise).to receive(:saml_update_resource_hook).and_raise(StandardError.new)
+        expect(Model.authenticate_with_saml(response, nil)).to be_nil
+      end
     end
 
     context "when configured to update a user and the user is found" do
@@ -118,6 +124,13 @@ describe Devise::Models::SamlAuthenticatable do
         expect(model.email).to eq('user@example.com')
         expect(model.name).to  eq('A User')
         expect(model.saved).to be(true)
+      end
+
+      it "returns nil if it fails to update a user" do
+        user = Model.new(new_record: false)
+        expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
+        expect(Devise).to receive(:saml_update_resource_hook).and_raise(StandardError.new)
+        expect(Model.authenticate_with_saml(response, nil)).to be_nil
       end
     end
   end

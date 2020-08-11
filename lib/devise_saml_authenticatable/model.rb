@@ -66,7 +66,12 @@ module Devise
           end
 
           if Devise.saml_update_user || (resource.new_record? && Devise.saml_create_user)
-            Devise.saml_update_resource_hook.call(resource, decorated_response, auth_value)
+            begin
+              Devise.saml_update_resource_hook.call(resource, decorated_response, auth_value)
+            rescue
+              logger.info("User(#{auth_value}) failed to create or update.")
+              return nil
+            end
           end
 
           resource
