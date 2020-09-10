@@ -385,4 +385,10 @@ describe Devise::Models::SamlAuthenticatable do
       allow(Devise).to receive(:saml_resource_locator).and_return(block)
     end
   end
+
+  describe "::attribute_map" do
+    it "returns the attribute map" do
+      expect(Model.attribute_map).to eq(attributemap)
+    end
+  end
 end
