@@ -33,7 +33,7 @@ module Devise
           key = Devise.saml_default_user_key
           decorated_response = ::SamlAuthenticatable::SamlResponse.new(
             saml_response,
-            Devise.saml_attribute_map_resolver.new(saml_response).attribute_map,
+            attribute_map(saml_response),
           )
           if Devise.saml_use_subject
             auth_value = saml_response.name_id
@@ -84,6 +84,10 @@ module Devise
 
         def find_for_shibb_authentication(conditions)
           find_for_authentication(conditions)
+        end
+
+        def attribute_map(saml_response = nil)
+          Devise.saml_attribute_map_resolver.new(saml_response).attribute_map
         end
       end
     end
