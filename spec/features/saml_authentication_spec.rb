@@ -141,7 +141,7 @@ describe "SAML Authentication", type: :feature do
   context "when the idp_settings_adapter key is set" do
     before(:each) do
       create_app('idp', 'INCLUDE_SUBJECT_IN_ATTRIBUTES' => "false")
-      create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "true", 'IDP_SETTINGS_ADAPTER' => "IdpSettingsAdapter", 'IDP_ENTITY_ID_READER' => "OurEntityIdReader")
+      create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "true", 'IDP_SETTINGS_ADAPTER' => '"IdpSettingsAdapter"', 'IDP_ENTITY_ID_READER' => '"OurEntityIdReader"')
 
       # use a different port for this entity ID; configured in spec/support/idp_settings_adapter.rb.erb
       @idp_pid = start_app('idp', 8010)
@@ -204,7 +204,7 @@ describe "SAML Authentication", type: :feature do
       )
       create_app(
         "sp",
-        "ATTRIBUTE_MAP_RESOLVER" => "AttributeMapResolver",
+        "ATTRIBUTE_MAP_RESOLVER" => '"AttributeMapResolver"',
         "USE_SUBJECT_TO_AUTHENTICATE" => "true",
       )
       @idp_pid = start_app("idp", idp_port)
