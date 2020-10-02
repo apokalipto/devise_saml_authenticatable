@@ -56,7 +56,7 @@ module Devise
 
   # Reader that can parse entity id from a SAMLMessage
   mattr_accessor :idp_entity_id_reader
-  @@idp_entity_id_reader ||= ::DeviseSamlAuthenticatable::DefaultIdpEntityIdReader
+  @@idp_entity_id_reader ||= "::DeviseSamlAuthenticatable::DefaultIdpEntityIdReader"
 
   # Implements a #handle method that takes the response and strategy as an argument
   mattr_accessor :saml_failed_callback
@@ -69,7 +69,7 @@ module Devise
 
   # Instead of storing the attribute_map in attribute-map.yml, store it in the database, or set it programatically
   mattr_accessor :saml_attribute_map_resolver
-  @@saml_attribute_map_resolver ||= ::DeviseSamlAuthenticatable::DefaultAttributeMapResolver
+  @@saml_attribute_map_resolver ||= "::DeviseSamlAuthenticatable::DefaultAttributeMapResolver"
 
   # Implements a #validate method that takes the retrieved resource and response right after retrieval,
   # and returns true if it's valid.  False will cause authentication to fail.

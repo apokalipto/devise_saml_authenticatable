@@ -82,7 +82,15 @@ module Devise
         end
 
         def attribute_map(saml_response = nil)
-          Devise.saml_attribute_map_resolver.new(saml_response).attribute_map
+          attribute_map_resolver.new(saml_response).attribute_map
+        end
+
+        def attribute_map_resolver
+          if Devise.saml_attribute_map_resolver.respond_to?(:new)
+            Devise.saml_attribute_map_resolver
+          else
+            Devise.saml_attribute_map_resolver.constantize
+          end
         end
       end
     end
