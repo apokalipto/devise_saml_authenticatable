@@ -3,6 +3,7 @@
 require "onelogin/ruby-saml/version"
 
 attribute_map_resolver = ENV.fetch("ATTRIBUTE_MAP_RESOLVER", "nil")
+database_authenticatable = ENV.fetch("DATABASE_AUTHENTICATABLE", nil)
 saml_session_index_key = ENV.fetch('SAML_SESSION_INDEX_KEY', ":session_index")
 use_subject_to_authenticate = ENV.fetch('USE_SUBJECT_TO_AUTHENTICATE')
 idp_settings_adapter = ENV.fetch('IDP_SETTINGS_ADAPTER', "nil")
@@ -99,6 +100,17 @@ after_bundle do
   end
 end
   CONFIG
+  if database_authenticatable
+  gsub_file 'config/initializers/devise.rb', /^end$/, <<-CONFIG
+
+  config.saml_route_helper_prefix = 'saml'
+  config.saml_update_resource_hook = ->(user, response, auth_value) {
+    user.assign_attributes(password: 'A_P4ssw0rd') # pass validatable validations
+    Devise.saml_default_update_resource_hook.call(user, response, auth_value)
+  }
+end
+  CONFIG
+  end
 
   generate :controller, 'home', 'index'
   insert_into_file('app/controllers/home_controller.rb', after: "class HomeController < ApplicationController\n") {
@@ -122,13 +134,17 @@ end
     # devise seems to add `email` by default in Rails 6
     generate :devise, "user", "name:string", "session_index:string"
   end
-  gsub_file 'app/models/user.rb', /database_authenticatable.*\n.*/, 'saml_authenticatable'
+  if database_authenticatable
+    gsub_file 'app/models/user.rb', /database_authenticatable.*\n.*/, "database_authenticatable, :validatable, :saml_authenticatable"
+  else
+    gsub_file 'app/models/user.rb', /database_authenticatable.*\n.*/, "saml_authenticatable"
+  end
   route "resources :users, only: [:create]"
   create_file('app/controllers/users_controller.rb', <<-USERS)
 class UsersController < ApplicationController
   skip_before_action :verify_authenticity_token
   def create
-    User.create!(email: params[:email])
+    User.create!(email: params[:email]#{database_authenticatable ? ", password: '1Password'" : nil})
     head 201
   end
 end

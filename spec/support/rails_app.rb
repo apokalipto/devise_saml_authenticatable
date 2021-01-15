@@ -18,7 +18,7 @@ rescue Errno::ESRCH
 end
 
 def create_app(name, env = {})
-  puts "[#{name}] Creating Rails app"
+  puts "[#{name}] Creating Rails app in '#{working_directory}'"
   rails_new_options = %w[-T -J -S --skip-spring --skip-listen --skip-bootsnap]
   rails_new_options << "-O" if name == "idp"
   with_clean_env do
