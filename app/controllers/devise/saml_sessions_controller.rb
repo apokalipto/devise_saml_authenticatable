@@ -5,10 +5,10 @@ class Devise::SamlSessionsController < Devise::SessionsController
   unloadable if Rails::VERSION::MAJOR < 4
   if Rails::VERSION::MAJOR < 5
     skip_before_filter :verify_authenticity_token
-    prepend_before_filter :store_info_for_sp_initiated_logout, only: :destroy
+    prepend_before_filter :verify_signed_out_user, :store_info_for_sp_initiated_logout, only: :destroy
   else
     skip_before_action :verify_authenticity_token, raise: false
-    prepend_before_action :store_info_for_sp_initiated_logout, only: :destroy
+    prepend_before_action :verify_signed_out_user, :store_info_for_sp_initiated_logout, only: :destroy
   end
 
   def new
