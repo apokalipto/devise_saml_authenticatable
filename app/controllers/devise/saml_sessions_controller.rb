@@ -65,23 +65,29 @@ class Devise::SamlSessionsController < Devise::SessionsController
 
   # Override devise to send user to IdP logout for SLO
   def after_sign_out_path_for(_)
-    # if user is signed out, verify_signed_out_user method will set a notice flash message
-    # based on that, will redirect user to after sign out path or create the SP initiated logout request
-    if flash[:notice].present?
-      Devise.saml_sign_out_success_url.presence || super
-    else
-      idp_entity_id = get_idp_entity_id(params)
-      request = OneLogin::RubySaml::Logoutrequest.new
-      saml_settings = saml_config(idp_entity_id).dup
+    idp_entity_id = get_idp_entity_id(params)
+    request = OneLogin::RubySaml::Logoutrequest.new
+    saml_settings = saml_config(idp_entity_id).dup
 
-      # Add attributes to saml_settings which will later be used to create the SP
-      # initiated logout request
-      unless Devise.saml_config.name_identifier_format == 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'
-        saml_settings.name_identifier_value = @name_identifier_value_for_sp_initiated_logout
-        saml_settings.sessionindex = @sessionindex_for_sp_initiated_logout
-      end
+    # Add attributes to saml_settings which will later be used to create the SP
+    # initiated logout request
+    unless Devise.saml_config.name_identifier_format == 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'
+      saml_settings.name_identifier_value = @name_identifier_value_for_sp_initiated_logout
+      saml_settings.sessionindex = @sessionindex_for_sp_initiated_logout
+    end
 
-      request.create(saml_settings)
+    request.create(saml_settings)
+  end
+
+  # Overried devise: if user is signed out, not create the SP initiated logout request,
+  # redirect to saml_sign_out_success_url,
+  # or devise's after_sign_out_path_for
+  def verify_signed_out_user
+    if all_signed_out?
+      set_flash_message! :notice, :already_signed_out
+
+      redirect_to Devise.saml_sign_out_success_url.presence ||
+                  Devise::SessionsController.new.after_sign_out_path_for(resource_name)
     end
   end
 

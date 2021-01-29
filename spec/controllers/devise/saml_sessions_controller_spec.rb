@@ -173,10 +173,16 @@ describe Devise::SamlSessionsController, type: :controller do
     context "when user is signed out" do
       before do
         class Devise::SessionsController < DeviseController
-          def verify_signed_out_user
-            flash[:notice] = "The devise's already signed out message"
-            redirect_to after_sign_out_path_for(resource_class)
+          def all_signed_out?
+            true
           end
+        end
+      end
+
+      shared_examples "not create SP initiated logout request" do
+        it do
+          expect(OneLogin::RubySaml::Logoutrequest).not_to receive(:new)
+          subject
         end
       end
 
@@ -187,7 +193,10 @@ describe Devise::SamlSessionsController, type: :controller do
 
         it "redirect to saml_sign_out_success_url" do
           is_expected.to redirect_to "http://localhost:8009/logged_out"
+          expect(flash[:notice]).to eq I18n.t("devise.sessions.already_signed_out")
         end
+
+        it_behaves_like "not create SP initiated logout request"
       end
 
       context "when Devise.saml_sign_out_success_url is not set" do
@@ -201,15 +210,18 @@ describe Devise::SamlSessionsController, type: :controller do
 
         it "redirect to devise's after sign out path" do
           is_expected.to redirect_to "http://localhost:8009/logged_out"
+          expect(flash[:notice]).to eq I18n.t("devise.sessions.already_signed_out")
         end
+
+        it_behaves_like "not create SP initiated logout request"
       end
     end
 
     context "when user is not signed out" do
       before do
         class Devise::SessionsController < DeviseController
-          def verify_signed_out_user
-            # no-op for these tests
+          def all_signed_out?
+            false
           end
         end
         allow(controller).to receive(:sign_out)
