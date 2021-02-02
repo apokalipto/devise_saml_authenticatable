@@ -8,9 +8,18 @@ class DeviseController < ApplicationController
     User
   end
 
+  def resource_name
+    "users"
+  end
+
   def require_no_authentication
   end
+
+  def set_flash_message!(key, kind, options = {})
+    flash[key] = I18n.t("devise.sessions.#{kind}")
+  end
 end
+
 class Devise::SessionsController < DeviseController
   def destroy
     sign_out
