@@ -5,11 +5,12 @@ rvm:
   - "2.2.10"
   - "2.3.8"
   - "2.4.10"
-  - "2.5.8"
-  - "2.6.6"
-  - "2.7.1"
+  - "2.5.9"
+  - "2.6.7"
+  - "2.7.3"
 gemfile:
   - Gemfile
+  - spec/support/Gemfile.rails6
   - spec/support/Gemfile.rails5.2
   - spec/support/Gemfile.rails5.1
   - spec/support/Gemfile.rails5
@@ -24,6 +25,8 @@ matrix:
       gemfile: spec/support/Gemfile.rails5.1
     - rvm: "2.0.0"
       gemfile: spec/support/Gemfile.rails5.2
+    - rvm: "2.0.0"
+      gemfile: spec/support/Gemfile.rails6
     - rvm: "2.1.10"
       gemfile: Gemfile
     - rvm: "2.1.10"
@@ -32,17 +35,25 @@ matrix:
       gemfile: spec/support/Gemfile.rails5.1
     - rvm: "2.1.10"
       gemfile: spec/support/Gemfile.rails5.2
+    - rvm: "2.1.10"
+      gemfile: spec/support/Gemfile.rails6
     - rvm: "2.2.10"
       gemfile: Gemfile
     - rvm: "2.2.10"
       gemfile: spec/support/Gemfile.rails5.2
+    - rvm: "2.2.10"
+      gemfile: spec/support/Gemfile.rails6
     - rvm: "2.3.8"
       gemfile: Gemfile
+    - rvm: "2.3.8"
+      gemfile: spec/support/Gemfile.rails6
     - rvm: "2.4.10"
       gemfile: Gemfile
-    - rvm: "2.6.6"
+    - rvm: "2.4.10"
+      gemfile: spec/support/Gemfile.rails6
+    - rvm: "2.6.7"
       gemfile: spec/support/Gemfile.rails4
-    - rvm: "2.7.1"
+    - rvm: "2.7.3"
       gemfile: spec/support/Gemfile.rails4
 
 before_install:

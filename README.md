@@ -57,8 +57,8 @@ An extra step in SAML SSO setup is adding your application to your identity prov
 Your IdP should give you some information you need to configure in [ruby-saml](https://github.com/onelogin/ruby-saml), as in the next section:
 
 - Issuer (`idp_entity_id`)
-- SSO endpoint (`idp_sso_target_url`)
-- SLO endpoint (`idp_slo_target_url`)
+- SSO endpoint (`idp_sso_service_url`)
+- SLO endpoint (`idp_slo_service_url`)
 - Certificate fingerprint (`idp_cert_fingerprint`) and algorithm (`idp_cert_fingerprint_algorithm`)
     - Or the certificate itself (`idp_cert`)
 
@@ -119,8 +119,8 @@ In `config/initializers/devise.rb`:
       settings.name_identifier_format             = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
       settings.issuer                             = "http://localhost:3000/saml/metadata"
       settings.authn_context                      = ""
-      settings.idp_slo_target_url                 = "http://localhost/simplesaml/www/saml2/idp/SingleLogoutService.php"
-      settings.idp_sso_target_url                 = "http://localhost/simplesaml/www/saml2/idp/SSOService.php"
+      settings.idp_slo_service_url                = "http://localhost/simplesaml/www/saml2/idp/SingleLogoutService.php"
+      settings.idp_sso_service_url                = "http://localhost/simplesaml/www/saml2/idp/SSOService.php"
       settings.idp_cert_fingerprint               = "00:A1:2B:3C:44:55:6F:A7:88:CC:DD:EE:22:33:44:55:D6:77:8F:99"
       settings.idp_cert_fingerprint_algorithm     = "http://www.w3.org/2000/09/xmldsig#sha1"
     end
@@ -207,8 +207,8 @@ class IdPSettingsAdapter
         issuer: "http://localhost:3000/saml/metadata",
         idp_entity_id: "http://www.example_idp_entity_id.com",
         authn_context: "",
-        idp_slo_target_url: "http://example_idp_slo_target_url.com",
-        idp_sso_target_url: "http://example_idp_sso_target_url.com",
+        idp_slo_service_url: "http://example_idp_slo_service_url.com",
+        idp_sso_service_url: "http://example_idp_sso_service_url.com",
         idp_cert: "example_idp_cert"
       }
     when "http://www.another_idp_entity_id.biz"
@@ -219,8 +219,8 @@ class IdPSettingsAdapter
         issuer: "http://localhost:3000/saml/metadata",
         idp_entity_id: "http://www.another_idp_entity_id.biz",
         authn_context: "",
-        idp_slo_target_url: "http://another_idp_slo_target_url.com",
-        idp_sso_target_url: "http://another_idp_sso_target_url.com",
+        idp_slo_service_url: "http://another_idp_slo_service_url.com",
+        idp_sso_service_url: "http://another_idp_sso_service_url.com",
         idp_cert: "another_idp_cert"
       }
     else

@@ -8,13 +8,14 @@ use_subject_to_authenticate = ENV.fetch('USE_SUBJECT_TO_AUTHENTICATE')
 idp_settings_adapter = ENV.fetch('IDP_SETTINGS_ADAPTER', "nil")
 idp_entity_id_reader = ENV.fetch('IDP_ENTITY_ID_READER', '"DeviseSamlAuthenticatable::DefaultIdpEntityIdReader"')
 saml_failed_callback = ENV.fetch('SAML_FAILED_CALLBACK', "nil")
+ruby_saml_version = ENV.fetch("RUBY_SAML_VERSION")
 
 if Rails::VERSION::MAJOR < 5 || (Rails::VERSION::MAJOR == 5 && Rails::VERSION::MINOR < 2)
   gsub_file 'config/secrets.yml', /secret_key_base:.*$/, 'secret_key_base: "8b5889df1fcf03f76c7d66da02d8776bcc85b06bed7d9c592f076d9c8a5455ee6d4beae45986c3c030b40208db5e612f2a6ef8283036a352e3fae83c5eda36be"'
 end
 
 gem 'devise_saml_authenticatable', path: File.expand_path("../../..", __FILE__)
-gem 'ruby-saml', OneLogin::RubySaml::VERSION
+gem 'ruby-saml', ruby_saml_version
 gem 'thin'
 
 insert_into_file('Gemfile', after: /\z/) {
@@ -92,13 +93,24 @@ after_bundle do
   config.saml_configure do |settings|
     settings.assertion_consumer_service_url = "http://localhost:8020/users/saml/auth"
     settings.issuer = "http://localhost:8020/saml/metadata"
-    settings.idp_slo_target_url = "http://localhost:8009/saml/logout"
-    settings.idp_sso_target_url = "http://localhost:8009/saml/auth"
     settings.idp_cert_fingerprint = "9E:65:2E:03:06:8D:80:F2:86:C7:6C:77:A1:D9:14:97:0A:4D:F4:4D"
     settings.name_identifier_format = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
   end
 end
   CONFIG
+  if Gem::Version.new(ruby_saml_version) >= Gem::Version.new("1.12.0")
+    gsub_file 'config/initializers/devise.rb', /^  config\.saml_configure do \|settings\|$/, <<CONFIG
+  config.saml_configure do |settings|
+    settings.idp_slo_service_url = "http://localhost:8009/saml/logout"
+    settings.idp_sso_service_url = "http://localhost:8009/saml/auth"
+CONFIG
+  else
+    gsub_file 'config/initializers/devise.rb', /^  config\.saml_configure do \|settings\|$/, <<CONFIG
+  config.saml_configure do |settings|
+    settings.idp_slo_target_url = "http://localhost:8009/saml/logout"
+    settings.idp_sso_target_url = "http://localhost:8009/saml/auth"
+CONFIG
+  end
 
   generate :controller, 'home', 'index'
   insert_into_file('app/controllers/home_controller.rb', after: "class HomeController < ApplicationController\n") {
