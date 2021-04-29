@@ -1,6 +1,9 @@
 require 'rails_helper'
+require 'support/ruby_saml_support'
 
 describe Devise::Strategies::SamlAuthenticatable do
+  include RubySamlSupport
+
   subject(:strategy) { described_class.new(env, :user) }
   let(:env) { {} }
   let(:errors) { ["Test1", "Test2"] }
@@ -54,17 +57,27 @@ describe Devise::Strategies::SamlAuthenticatable do
       let(:idp_providers_adapter) {
         Class.new {
           def self.settings(idp_entity_id)
-            {
+            base = {
               assertion_consumer_service_url: "acs_url",
               assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
               name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
               issuer: "sp_issuer",
               idp_entity_id: "http://www.example.com",
               authn_context: "",
-              idp_slo_target_url: "idp_slo_url",
-              idp_sso_target_url: "http://idp_sso_url",
               idp_cert: "idp_cert"
             }
+            with_ruby_saml_1_12_or_greater(proc {
+              base.merge!(
+                idp_slo_service_url: "idp_slo_url",
+                idp_sso_service_url: "http://idp_sso_url",
+              )
+            }, else_do: proc {
+              base.merge!(
+                idp_slo_target_url: "idp_slo_url",
+                idp_sso_target_url: "http://idp_sso_url",
+              )
+            })
+            base
           end
         }
       }

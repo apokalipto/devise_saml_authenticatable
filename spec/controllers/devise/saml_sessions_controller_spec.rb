@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'support/ruby_saml_support'
 
 # The important parts from devise
 class DeviseController < ApplicationController
@@ -30,21 +31,33 @@ end
 require_relative '../../../app/controllers/devise/saml_sessions_controller'
 
 describe Devise::SamlSessionsController, type: :controller do
+  include RubySamlSupport
+
   let(:idp_providers_adapter) { spy("Stub IDPSettings Adaptor") }
 
   before do
     @request.env["devise.mapping"] = Devise.mappings[:user]
-    allow(idp_providers_adapter).to receive(:settings).and_return({
+    settings = {
       assertion_consumer_service_url: "acs_url",
       assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
       name_identifier_format: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
       issuer: "sp_issuer",
       idp_entity_id: "http://www.example.com",
       authn_context: "",
-      idp_slo_target_url: "http://idp_slo_url",
-      idp_sso_target_url: "http://idp_sso_url",
       idp_cert: "idp_cert"
+    }
+    with_ruby_saml_1_12_or_greater(proc {
+      settings.merge!(
+        idp_slo_service_url: "http://idp_slo_url",
+        idp_sso_service_url: "http://idp_sso_url",
+      )
+    }, else_do: proc {
+      settings.merge!(
+        idp_slo_target_url: "http://idp_slo_url",
+        idp_sso_target_url: "http://idp_sso_url",
+      )
     })
+    allow(idp_providers_adapter).to receive(:settings).and_return(settings)
   end
 
   before do
