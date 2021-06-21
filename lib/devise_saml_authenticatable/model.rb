@@ -29,7 +29,7 @@ module Devise
       end
 
       module ClassMethods
-        def authenticate_with_saml(saml_response, relay_state)
+        def authenticate_with_saml(saml_response, params)
           key = Devise.saml_default_user_key
           decorated_response = ::SamlAuthenticatable::SamlResponse.new(
             saml_response,
@@ -42,7 +42,7 @@ module Devise
           end
           auth_value.try(:downcase!) if Devise.case_insensitive_keys.include?(key)
 
-          resource = Devise.saml_resource_locator.call(self, decorated_response, auth_value)
+          resource = Devise.saml_resource_locator.call(self, decorated_response, auth_value, params)
 
           raise "Only one validator configuration can be used at a time" if Devise.saml_resource_validator && Devise.saml_resource_validator_hook
           if Devise.saml_resource_validator || Devise.saml_resource_validator_hook

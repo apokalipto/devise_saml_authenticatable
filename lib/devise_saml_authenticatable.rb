@@ -114,7 +114,7 @@ module Devise
   # Default resource locator. Uses saml_default_user_key and auth_value to resolve user.
   # See saml_resource_locator for more information.
   mattr_reader :saml_default_resource_locator
-  @@saml_default_resource_locator = Proc.new do |model, saml_response, auth_value|
+  @@saml_default_resource_locator = Proc.new do |model, saml_response, auth_value, params|
     model.where(Devise.saml_default_user_key => auth_value).first
   end
 
