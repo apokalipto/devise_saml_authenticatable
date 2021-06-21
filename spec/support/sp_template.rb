@@ -6,7 +6,6 @@ attribute_map_resolver = ENV.fetch("ATTRIBUTE_MAP_RESOLVER", "nil")
 saml_session_index_key = ENV.fetch('SAML_SESSION_INDEX_KEY', ":session_index")
 use_subject_to_authenticate = ENV.fetch('USE_SUBJECT_TO_AUTHENTICATE')
 idp_settings_adapter = ENV.fetch('IDP_SETTINGS_ADAPTER', "nil")
-idp_entity_id_reader = ENV.fetch('IDP_ENTITY_ID_READER', '"DeviseSamlAuthenticatable::DefaultIdpEntityIdReader"')
 saml_failed_callback = ENV.fetch('SAML_FAILED_CALLBACK', "nil")
 ruby_saml_version = ENV.fetch("RUBY_SAML_VERSION")
 
@@ -87,7 +86,6 @@ after_bundle do
   config.saml_create_user = true
   config.saml_update_user = true
   config.idp_settings_adapter = #{idp_settings_adapter}
-  config.idp_entity_id_reader = #{idp_entity_id_reader}
   config.saml_failed_callback = #{saml_failed_callback}
 
   config.saml_configure do |settings|

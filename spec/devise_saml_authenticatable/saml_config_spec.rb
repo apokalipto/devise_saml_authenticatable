@@ -26,12 +26,14 @@ describe DeviseSamlAuthenticatable::SamlConfig do
         Devise.idp_settings_adapter = idp_providers_adapter
       end
 
-      let(:saml_config) { controller.saml_config(idp_entity_id) }
+      let(:saml_config) { controller.saml_config(params) }
       let(:idp_providers_adapter) {
         Class.new {
           extend RubySamlSupport
 
-          def self.settings(idp_entity_id)
+          def self.settings(params)
+            idp_entity_id = params[:user_deduced_idp_entity_id]
+
             #some hash of stuff (by doing a fetch, in our case, but could also be a giant hash keyed by idp_entity_id)
             if idp_entity_id == "http://www.example.com"
               base = {
@@ -85,9 +87,9 @@ describe DeviseSamlAuthenticatable::SamlConfig do
       }
 
       context "when a specific idp_entity_id is requested" do
-        let(:idp_entity_id) { "http://www.example.com" }
+        let(:params) { { user_deduced_idp_entity_id: "http://www.example.com" } }
         it "uses the settings from the adapter for that idp" do
-          expect(saml_config.idp_entity_id).to eq (idp_entity_id)
+          expect(saml_config.idp_entity_id).to eq (params[:user_deduced_idp_entity_id])
           with_ruby_saml_1_12_or_greater(proc {
             expect(saml_config.idp_sso_service_url).to eq('idp_sso_url')
           }, else_do: proc {
@@ -98,9 +100,9 @@ describe DeviseSamlAuthenticatable::SamlConfig do
       end
 
       context "when another idp_entity_id is requested" do
-        let(:idp_entity_id) { "http://www.example.com_other" }
+        let(:params) { { user_deduced_idp_entity_id: "http://www.example.com_other" } }
         it "returns the other idp settings" do
-          expect(saml_config.idp_entity_id).to eq (idp_entity_id)
+          expect(saml_config.idp_entity_id).to eq (params[:user_deduced_idp_entity_id])
           with_ruby_saml_1_12_or_greater(proc {
             expect(saml_config.idp_sso_service_url).to eq('idp_sso_url_other')
           }, else_do: proc {

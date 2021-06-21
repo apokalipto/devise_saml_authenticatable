@@ -8,7 +8,7 @@ module Devise
         if params[:SAMLResponse]
           OneLogin::RubySaml::Response.new(
             params[:SAMLResponse],
-            settings: saml_config(get_idp_entity_id(params)),
+            settings: saml_config(params),
             allowed_clock_drift: Devise.allowed_clock_drift_in_seconds,
           )
         else
@@ -36,7 +36,7 @@ module Devise
       def parse_saml_response
         @response = OneLogin::RubySaml::Response.new(
           params[:SAMLResponse],
-          settings: saml_config(get_idp_entity_id(params)),
+          settings: saml_config(params),
           allowed_clock_drift: Devise.allowed_clock_drift_in_seconds,
         )
         unless @response.is_valid?

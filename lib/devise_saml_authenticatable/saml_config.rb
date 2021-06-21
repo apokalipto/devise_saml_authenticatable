@@ -1,9 +1,9 @@
 require 'ruby-saml'
 module DeviseSamlAuthenticatable
   module SamlConfig
-    def saml_config(idp_entity_id = nil)
+    def saml_config(params)
       return file_based_config if file_based_config
-      return adapter_based_config(idp_entity_id) if Devise.idp_settings_adapter
+      return adapter_based_config(params) if Devise.idp_settings_adapter
 
       Devise.saml_config
     end
@@ -19,10 +19,10 @@ module DeviseSamlAuthenticatable
       end
     end
 
-    def adapter_based_config(idp_entity_id)
+    def adapter_based_config(params)
       config = Marshal.load(Marshal.dump(Devise.saml_config))
 
-      idp_settings_adapter.settings(idp_entity_id).each do |k,v|
+      idp_settings_adapter.settings(params).each do |k,v|
         acc = "#{k.to_s}=".to_sym
 
         if config.respond_to? acc
@@ -30,18 +30,6 @@ module DeviseSamlAuthenticatable
         end
       end
       config
-    end
-
-    def get_idp_entity_id(params)
-      idp_entity_id_reader.entity_id(params)
-    end
-
-    def idp_entity_id_reader
-      if Devise.idp_entity_id_reader.respond_to?(:entity_id)
-        Devise.idp_entity_id_reader
-      else
-        @idp_entity_id_reader ||= Devise.idp_entity_id_reader.constantize
-      end
     end
 
     def idp_settings_adapter

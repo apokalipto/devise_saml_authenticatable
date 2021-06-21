@@ -6,7 +6,6 @@ require "devise_saml_authenticatable/logger"
 require "devise_saml_authenticatable/routes"
 require "devise_saml_authenticatable/saml_config"
 require "devise_saml_authenticatable/default_attribute_map_resolver"
-require "devise_saml_authenticatable/default_idp_entity_id_reader"
 
 begin
   Rails::Engine
@@ -53,10 +52,6 @@ module Devise
   # Adapter for multiple IdP support
   mattr_accessor :idp_settings_adapter
   @@idp_settings_adapter
-
-  # Reader that can parse entity id from a SAMLMessage
-  mattr_accessor :idp_entity_id_reader
-  @@idp_entity_id_reader ||= "::DeviseSamlAuthenticatable::DefaultIdpEntityIdReader"
 
   # Implements a #handle method that takes the response and strategy as an argument
   mattr_accessor :saml_failed_callback
