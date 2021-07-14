@@ -90,6 +90,11 @@ describe Devise::SamlSessionsController, type: :controller do
         do_get
         expect(response).to redirect_to(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
       end
+
+      it "stores saml_transaction_id in the session" do
+        do_get
+        expect(session[:saml_transaction_id]).to be_present
+      end
     end
 
     context "with a specified idp" do
@@ -100,6 +105,11 @@ describe Devise::SamlSessionsController, type: :controller do
       it "redirects to the associated IdP SSO target url" do
         do_get
         expect(response).to redirect_to(%r(\Ahttp://idp_sso_url\?SAMLRequest=))
+      end
+
+      it "stores saml_transaction_id in the session" do
+        do_get
+        expect(session[:saml_transaction_id]).to be_present
       end
 
       it "uses the DefaultIdpEntityIdReader" do

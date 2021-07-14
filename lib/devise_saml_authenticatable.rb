@@ -67,6 +67,10 @@ module Devise
   mattr_accessor :saml_relay_state
   @@saml_relay_state
 
+  # Validate that the InResponseTo header in SAML responses matches the ID of the request.
+  mattr_accessor :saml_validate_in_response_to
+  @@saml_validate_in_response_to = false
+
   # Instead of storing the attribute_map in attribute-map.yml, store it in the database, or set it programatically
   mattr_accessor :saml_attribute_map_resolver
   @@saml_attribute_map_resolver ||= "::DeviseSamlAuthenticatable::DefaultAttributeMapResolver"

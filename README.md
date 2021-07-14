@@ -111,6 +111,10 @@ In `config/initializers/devise.rb`:
     # This is a time in seconds.
     # config.allowed_clock_drift_in_seconds = 0
 
+    # In SAML responses, validate that the identity provider has included an InResponseTo
+    # header that matches the ID of the SAML request. (Default is false)
+    # config.saml_validate_in_response_to = false
+
     # Configure with your SAML settings (see ruby-saml's README for more information: https://github.com/onelogin/ruby-saml).
     config.saml_configure do |settings|
       # assertion_consumer_service_url is required starting with ruby-saml 1.4.3: https://github.com/onelogin/ruby-saml#updating-from-142-to-143

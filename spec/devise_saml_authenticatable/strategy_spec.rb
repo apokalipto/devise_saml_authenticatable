@@ -165,6 +165,40 @@ describe Devise::Strategies::SamlAuthenticatable do
         strategy.authenticate!
       end
     end
+
+    context "when saml_validate_in_response_to is opted-in to" do
+      let(:transaction_id) { "abc123" }
+
+      before do
+        allow(Devise).to receive(:saml_validate_in_response_to).and_return(true)
+        allow_any_instance_of(ActionDispatch::Request).to receive(:session).and_return(session)
+      end
+
+      context "when the session has a saml_transaction_id" do
+        let(:session) { { saml_transaction_id: transaction_id }}
+
+        it "is valid with the matches_request_id parameter" do
+          expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(matches_request_id: transaction_id))
+          expect(strategy).to be_valid
+        end
+
+        it "authenticates with the matches_request_id parameter" do
+          expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(matches_request_id: transaction_id))
+
+          expect(strategy).to receive(:success!).with(user)
+          strategy.authenticate!
+        end
+      end
+
+      context "when the session is missing a saml_transaction_id" do
+        let(:session) { { } }
+
+        it "uses an empty string for matches_request_id so validation will fail" do
+          expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(matches_request_id: ""))
+          strategy.authenticate!
+        end
+      end
+    end
   end
 
   it "is not valid without a SAMLResponse parameter" do
