@@ -193,8 +193,8 @@ describe Devise::Strategies::SamlAuthenticatable do
       context "when the session is missing a saml_transaction_id" do
         let(:session) { { } }
 
-        it "uses an empty string for matches_request_id so validation will fail" do
-          expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(matches_request_id: ""))
+        it "uses 'ID_MISSING' for matches_request_id so validation will fail" do
+          expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(matches_request_id: "ID_MISSING"))
           strategy.authenticate!
         end
       end

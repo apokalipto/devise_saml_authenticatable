@@ -62,7 +62,7 @@ module Devise
         }
 
         if Devise.saml_validate_in_response_to
-          options[:matches_request_id] = request.session[:saml_transaction_id] || ""
+          options[:matches_request_id] = request.session[:saml_transaction_id] || "ID_MISSING"
         end
 
         options
