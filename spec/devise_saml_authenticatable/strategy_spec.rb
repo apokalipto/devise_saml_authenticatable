@@ -19,7 +19,7 @@ describe Devise::Strategies::SamlAuthenticatable do
   let(:user) { double(:user) }
   before do
     allow(strategy).to receive(:mapping).and_return(mapping)
-    allow(user).to receive(:after_saml_authentication)
+    allow(user).to(receive(:after_saml_authentication)) if user
   end
 
   let(:params) { {} }
@@ -106,8 +106,10 @@ describe Devise::Strategies::SamlAuthenticatable do
       let(:user) { nil }
 
       it "fails to authenticate" do
-        expect(strategy).to receive(:fail!).with(:invalid)
         strategy.authenticate!
+        expect(strategy).to be_halted
+        expect(strategy.message).to be(:invalid)
+        expect(strategy.result).to be(:failure)
       end
 
       it 'logs the error' do
