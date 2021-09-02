@@ -93,7 +93,9 @@ describe Devise::SamlSessionsController, type: :controller do
 
       it "stores saml_transaction_id in the session" do
         do_get
-        expect(session[:saml_transaction_id]).to be_present
+        if OneLogin::RubySaml::Authrequest.public_instance_methods.include?(:request_id)
+          expect(session[:saml_transaction_id]).to be_present
+        end
       end
     end
 
@@ -109,7 +111,9 @@ describe Devise::SamlSessionsController, type: :controller do
 
       it "stores saml_transaction_id in the session" do
         do_get
-        expect(session[:saml_transaction_id]).to be_present
+        if OneLogin::RubySaml::Authrequest.public_instance_methods.include?(:request_id)
+          expect(session[:saml_transaction_id]).to be_present
+        end
       end
 
       it "uses the DefaultIdpEntityIdReader" do
