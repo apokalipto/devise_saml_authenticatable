@@ -165,7 +165,7 @@ describe "SAML Authentication", type: :feature do
     let(:valid_destination) { "true" }
     before(:each) do
       create_app('idp', 'INCLUDE_SUBJECT_IN_ATTRIBUTES' => "false", 'VALID_DESTINATION' => valid_destination)
-      create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "true", 'SAML_FAILED_CALLBACK' => "OurSamlFailedCallbackHandler")
+      create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "true", 'SAML_FAILED_CALLBACK' => '"OurSamlFailedCallbackHandler"')
 
       @idp_pid = start_app('idp', idp_port)
       @sp_pid  = start_app('sp',  sp_port)

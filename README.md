@@ -97,9 +97,9 @@ In `config/initializers/devise.rb`:
     # by setting this to the name of a custom reader class, or use the default.
     # config.idp_entity_id_reader = "DeviseSamlAuthenticatable::DefaultIdpEntityIdReader"
 
-    # You can set a handler object that takes the response for a failed SAML request and the strategy,
+    # You can set the name of a class that takes the response for a failed SAML request and the strategy,
     # and implements a #handle method. This method can then redirect the user, return error messages, etc.
-    # config.saml_failed_callback = nil
+    # config.saml_failed_callback = "MySamlFailedCallbacksHandler"
 
     # You can customize the named routes generated in case of named route collisions with
     # other Devise modules or libraries. Set the saml_route_helper_prefix to a string that will
