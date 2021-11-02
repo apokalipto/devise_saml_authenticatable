@@ -85,8 +85,8 @@ In `config/initializers/devise.rb`:
     # for the user's session to facilitate an IDP initiated logout request.
     config.saml_session_index_key = :session_index
 
-    # You can set this value to use Subject or SAML assertation as info to which email will be compared.
-    # If you don't set it then email will be extracted from SAML assertation attributes.
+    # You can set this value to use Subject or SAML assertion as info to which email will be compared.
+    # If you don't set it then email will be extracted from SAML assertion attributes.
     config.saml_use_subject = true
 
     # You can support multiple IdPs by setting this value to the name of a class that implements a ::settings method
