@@ -60,29 +60,11 @@ describe Devise::SamlSessionsController, type: :controller do
     allow(idp_providers_adapter).to receive(:settings).and_return(settings)
   end
 
-  before do
-    if Rails::VERSION::MAJOR < 5 && Gem::Version.new(RUBY_VERSION) > Gem::Version.new("2.6")
-      # we still want to support Rails 4
-      # patch tests using snippet from https://github.com/rails/rails/issues/34790#issuecomment-483607370
-      class ActionController::TestResponse < ActionDispatch::TestResponse
-        def recycle!
-          @mon_mutex_owner_object_id = nil
-          @mon_mutex = nil
-          initialize
-        end
-      end
-    end
-  end
-
   describe '#new' do
     let(:saml_response) { File.read(File.join(File.dirname(__FILE__), '../../support', 'response_encrypted_nameid.xml.base64')) }
 
     subject(:do_get) {
-      if Rails::VERSION::MAJOR > 4
-        get :new, params: {"SAMLResponse" => saml_response}
-      else
-        get :new, "SAMLResponse" => saml_response
-      end
+      get :new, params: {"SAMLResponse" => saml_response}
     }
 
     context "when using the default saml config" do
@@ -140,11 +122,7 @@ describe Devise::SamlSessionsController, type: :controller do
         end
 
         subject(:do_get) {
-          if Rails::VERSION::MAJOR > 4
-            get :new, params: {entity_id: "http://www.example.com"}
-          else
-            get :new, entity_id: "http://www.example.com"
-          end
+          get :new, params: {entity_id: "http://www.example.com"}
         }
 
         before do
@@ -311,11 +289,7 @@ describe Devise::SamlSessionsController, type: :controller do
           end
 
           subject(:do_delete) {
-            if Rails::VERSION::MAJOR > 4
-              delete :destroy, params: {entity_id: "http://www.example.com"}
-            else
-              delete :destroy, entity_id: "http://www.example.com"
-            end
+            delete :destroy, params: {entity_id: "http://www.example.com"}
           }
 
           before do
@@ -354,11 +328,7 @@ describe Devise::SamlSessionsController, type: :controller do
 
     context "when receiving a logout response from the IdP after redirecting an SP logout request" do
       subject(:do_post) {
-        if Rails::VERSION::MAJOR > 4
-          post :idp_sign_out, params: {SAMLResponse: "stubbed_response"}
-        else
-          post :idp_sign_out, SAMLResponse: "stubbed_response"
-        end
+        post :idp_sign_out, params: {SAMLResponse: "stubbed_response"}
       }
 
       it 'accepts a LogoutResponse and redirects sign_in' do
@@ -383,11 +353,7 @@ describe Devise::SamlSessionsController, type: :controller do
 
     context "when receiving an IdP logout request" do
       subject(:do_post) {
-        if Rails::VERSION::MAJOR > 4
-          post :idp_sign_out, params: {SAMLRequest: "stubbed_logout_request"}
-        else
-          post :idp_sign_out, SAMLRequest: "stubbed_logout_request"
-        end
+        post :idp_sign_out, params: {SAMLRequest: "stubbed_logout_request"}
       }
 
       let(:saml_request) { double(:slo_logoutrequest, {
