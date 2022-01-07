@@ -16,42 +16,13 @@ jobs:
           - "3.0"
           - "2.7"
           - "2.6"
-          - "2.5"
-          - "2.4"
-          - "2.3"
         gemfile:
           - Gemfile
           - spec/support/Gemfile.rails6
           - spec/support/Gemfile.rails5.2
-          - spec/support/Gemfile.rails5.1
-          - spec/support/Gemfile.rails5
         bundler:
           - "2"
         exclude:
-          - ruby: "2.3"
-            gemfile: Gemfile
-            bundler: "2"
-          - ruby: "2.3"
-            gemfile: spec/support/Gemfile.rails6
-            bundler: "2"
-          - ruby: "2.4"
-            gemfile: Gemfile
-            bundler: "2"
-          - ruby: "2.4"
-            gemfile: spec/support/Gemfile.rails6
-            bundler: "2"
-          - ruby: "2.5"
-            gemfile: Gemfile
-            bundler: "2"
-          - ruby: "2.6"
-            gemfile: Gemfile
-            bundler: "2"
-          - ruby: "3.0"
-            gemfile: spec/support/Gemfile.rails5
-            bundler: "2"
-          - ruby: "3.0"
-            gemfile: spec/support/Gemfile.rails5.1
-            bundler: "2"
           - ruby: "3.0"
             gemfile: spec/support/Gemfile.rails5.2
             bundler: "2"
@@ -59,42 +30,11 @@ jobs:
             gemfile: spec/support/Gemfile.rails6
             bundler: "2"
           - ruby: "3.1"
-            gemfile: spec/support/Gemfile.rails5
-            bundler: "2"
-          - ruby: "3.1"
-            gemfile: spec/support/Gemfile.rails5.1
-            bundler: "2"
-          - ruby: "3.1"
             gemfile: spec/support/Gemfile.rails5.2
             bundler: "2"
           - ruby: "3.1"
             gemfile: spec/support/Gemfile.rails6
             bundler: "2"
-        include:
-          - ruby: "2.5"
-            gemfile: spec/support/Gemfile.rails4
-            bundler: "1"
-          - ruby: "2.4"
-            gemfile: spec/support/Gemfile.rails4
-            bundler: "1"
-          - ruby: "2.3"
-            gemfile: spec/support/Gemfile.rails4
-            bundler: "1"
-          - ruby: "2.2"
-            gemfile: spec/support/Gemfile.rails5.1
-            bundler: "1"
-          - ruby: "2.2"
-            gemfile: spec/support/Gemfile.rails5
-            bundler: "1"
-          - ruby: "2.2"
-            gemfile: spec/support/Gemfile.rails4
-            bundler: "1"
-          - ruby: "2.1"
-            gemfile: spec/support/Gemfile.rails4
-            bundler: "1"
-          - ruby: "2.0"
-            gemfile: spec/support/Gemfile.rails4
-            bundler: "1"
     runs-on: ubuntu-latest
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}

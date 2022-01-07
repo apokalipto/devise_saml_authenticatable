@@ -13,4 +13,5 @@ lib/bundler/man
 pkg
 rdoc
 spec/reports
+spec/support/bin/*
 tmp

@@ -10,31 +10,16 @@ idp_entity_id_reader = ENV.fetch('IDP_ENTITY_ID_READER', '"DeviseSamlAuthenticat
 saml_failed_callback = ENV.fetch('SAML_FAILED_CALLBACK', "nil")
 ruby_saml_version = ENV.fetch("RUBY_SAML_VERSION")
 
-if Rails::VERSION::MAJOR < 5 || (Rails::VERSION::MAJOR == 5 && Rails::VERSION::MINOR < 2)
-  gsub_file 'config/secrets.yml', /secret_key_base:.*$/, 'secret_key_base: "8b5889df1fcf03f76c7d66da02d8776bcc85b06bed7d9c592f076d9c8a5455ee6d4beae45986c3c030b40208db5e612f2a6ef8283036a352e3fae83c5eda36be"'
-end
-
 gem 'devise_saml_authenticatable', path: File.expand_path("../../..", __FILE__)
 gem 'ruby-saml', ruby_saml_version
 gem 'thin'
-
-insert_into_file('Gemfile', after: /\z/) {
-  <<-GEMFILE
-# Lock down versions of gems for older versions of Ruby
-if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.1")
-  gem 'devise', '~> 3.5'
-  gem 'nokogiri', '~> 1.6.8'
-elsif Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.4")
-  gem 'responders', '~> 2.4'
-end
 
 if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new("3.1")
   gem 'net-smtp', require: false
   gem 'net-imap', require: false
   gem 'net-pop', require: false
 end
-  GEMFILE
-}
+
 if Rails::VERSION::MAJOR < 6
   # sqlite3 is hard-coded in Rails < 6 to v1.3.x
   gsub_file 'Gemfile', /^gem 'sqlite3'.*$/, "gem 'sqlite3', '~> 1.3.6'"
