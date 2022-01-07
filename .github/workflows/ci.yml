@@ -21,6 +21,7 @@ jobs:
           - "2.3"
         gemfile:
           - Gemfile
+          - spec/support/Gemfile.rails6.1
           - spec/support/Gemfile.rails6
           - spec/support/Gemfile.rails5.2
           - spec/support/Gemfile.rails5.1
@@ -32,10 +33,16 @@ jobs:
             gemfile: Gemfile
             bundler: "2"
           - ruby: "2.3"
+            gemfile: spec/support/Gemfile.rails6.1
+            bundler: "2"
+          - ruby: "2.3"
             gemfile: spec/support/Gemfile.rails6
             bundler: "2"
           - ruby: "2.4"
             gemfile: Gemfile
+            bundler: "2"
+          - ruby: "2.4"
+            gemfile: spec/support/Gemfile.rails6.1
             bundler: "2"
           - ruby: "2.4"
             gemfile: spec/support/Gemfile.rails6
