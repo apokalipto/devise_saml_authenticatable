@@ -224,7 +224,7 @@ describe "SAML Authentication", type: :feature do
   end
 
   def sign_in(entity_id: "")
-    visit "http://localhost:8020/users/saml/sign_in/?entity_id=#{URI.escape(entity_id)}"
+    visit "http://localhost:8020/users/saml/sign_in/?entity_id=#{URI.encode_www_form_component(entity_id)}"
     fill_in "Email", with: "you@example.com"
     fill_in "Password", with: "asdf"
     click_on "Sign in"

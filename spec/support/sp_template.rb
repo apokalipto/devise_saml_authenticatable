@@ -27,6 +27,12 @@ if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.1")
 elsif Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.4")
   gem 'responders', '~> 2.4'
 end
+
+if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new("3.1")
+  gem 'net-smtp', require: false
+  gem 'net-imap', require: false
+  gem 'net-pop', require: false
+end
   GEMFILE
 }
 if Rails::VERSION::MAJOR < 6

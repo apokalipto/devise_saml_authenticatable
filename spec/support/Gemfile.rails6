@@ -11,4 +11,8 @@ group :test do
   gem 'sqlite3', '~> 1.4.0'
   gem 'capybara'
   gem 'poltergeist'
+
+  if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new("3.0")
+    gem 'webrick'
+  end
 end
