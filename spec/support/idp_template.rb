@@ -19,6 +19,12 @@ if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("2.1")
   gem 'devise', '~> 3.5'
   gem 'nokogiri', '~> 1.6.8'
 end
+
+if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new("3.1")
+  gem 'net-smtp', require: false
+  gem 'net-imap', require: false
+  gem 'net-pop', require: false
+end
   GEMFILE
 }
 
