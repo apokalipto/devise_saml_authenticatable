@@ -1,4 +1,4 @@
-require "ruby-saml"
+require 'ruby-saml'
 
 class Devise::SamlSessionsController < Devise::SessionsController
   include DeviseSamlAuthenticatable::SamlConfig
@@ -11,16 +11,14 @@ class Devise::SamlSessionsController < Devise::SessionsController
     request = OneLogin::RubySaml::Authrequest.new
     auth_params = { RelayState: relay_state } if relay_state
     action = request.create(saml_config(idp_entity_id), auth_params || {})
-    if request.respond_to?(:request_id)
-      session[:saml_transaction_id] = request.request_id
-    end
-    redirect_to action
+    session[:saml_transaction_id] = request.request_id if request.respond_to?(:request_id)
+    redirect_to action, allow_other_host: true
   end
 
   def metadata
     idp_entity_id = params[:idp_entity_id]
     meta = OneLogin::RubySaml::Metadata.new
-    render :xml => meta.generate(saml_config(idp_entity_id))
+    render xml: meta.generate(saml_config(idp_entity_id))
   end
 
   def idp_sign_out
@@ -29,7 +27,7 @@ class Devise::SamlSessionsController < Devise::SessionsController
       logout_request = OneLogin::RubySaml::SloLogoutrequest.new(params[:SAMLRequest], settings: saml_config)
       resource_class.reset_session_key_for(logout_request.name_id)
 
-      redirect_to generate_idp_logout_response(saml_config, logout_request.id)
+      redirect_to generate_idp_logout_response(saml_config, logout_request.id), allow_other_host: true
     elsif params[:SAMLResponse]
       # Currently Devise handles the session invalidation when the request is made.
       # To support a true SP initiated logout response, the request ID would have to be tracked and session invalidated
@@ -47,18 +45,19 @@ class Devise::SamlSessionsController < Devise::SessionsController
   protected
 
   def relay_state
-    @relay_state ||= if Devise.saml_relay_state.present?
-      Devise.saml_relay_state.call(request)
-    end
+    @relay_state ||= (Devise.saml_relay_state.call(request) if Devise.saml_relay_state.present?)
   end
 
   # For non transient name ID, save info to identify user for logout purpose
   # before that user's session got destroyed. These info are used in the
   # `after_sign_out_path_for` method below.
   def store_info_for_sp_initiated_logout
-    return if Devise.saml_config.name_identifier_format == "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
+    return if Devise.saml_config.name_identifier_format == 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'
+
     @name_identifier_value_for_sp_initiated_logout = Devise.saml_name_identifier_retriever.call(current_user)
-    @sessionindex_for_sp_initiated_logout = current_user.public_send(Devise.saml_session_index_key) if Devise.saml_session_index_key
+    if Devise.saml_session_index_key
+      @sessionindex_for_sp_initiated_logout = current_user.public_send(Devise.saml_session_index_key)
+    end
   end
 
   # Override devise to send user to IdP logout for SLO
@@ -84,17 +83,14 @@ class Devise::SamlSessionsController < Devise::SessionsController
     if all_signed_out?
       set_flash_message! :notice, :already_signed_out
 
-      redirect_to Devise.saml_sign_out_success_url.presence ||
-                  Devise::SessionsController.new.after_sign_out_path_for(resource_name)
+      redirect_to (Devise.saml_sign_out_success_url.presence ||
+                  Devise::SessionsController.new.after_sign_out_path_for(resource_name)), allow_other_host: true
     end
   end
 
   def generate_idp_logout_response(saml_config, logout_request_id)
-
     params = {}
-    if relay_state
-      params[:RelayState] = relay_state
-    end
+    params[:RelayState] = relay_state if relay_state
 
     OneLogin::RubySaml::SloLogoutresponse.new.create(saml_config, logout_request_id, nil, params)
   end

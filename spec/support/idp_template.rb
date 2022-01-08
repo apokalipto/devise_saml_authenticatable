@@ -5,7 +5,7 @@
 @include_subject_in_attributes = ENV.fetch('INCLUDE_SUBJECT_IN_ATTRIBUTES')
 @valid_destination = ENV.fetch('VALID_DESTINATION', "true")
 
-gem 'ruby-saml-idp', '~> 0.3.3'
+gem 'stub_saml_idp'
 gem 'thin'
 
 if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new("3.1")
