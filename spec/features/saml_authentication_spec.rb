@@ -3,8 +3,21 @@ require 'net/http'
 require 'timeout'
 require 'uri'
 require 'capybara/rspec'
-require 'capybara/poltergeist'
-Capybara.default_driver = :poltergeist
+require 'selenium-webdriver'
+
+Capybara.register_driver :chrome do |app|
+  options = Selenium::WebDriver::Chrome::Options.new
+  options.add_argument('--headless')
+  options.add_argument('--allow-insecure-localhost')
+  options.add_argument('--ignore-certificate-errors')
+
+  Capybara::Selenium::Driver.new(
+    app,
+    browser: :chrome,
+    capabilities: [options]
+  )
+end
+Capybara.default_driver = :chrome
 Capybara.server = :webrick
 
 describe "SAML Authentication", type: :feature do
