@@ -1,4 +1,4 @@
-class SamlIdpController < SamlIdp::IdpController
+class SamlIdpController < StubSamlIdp::IdpController
   def new
     if session[:user_id]
       @saml_response = idp_make_saml_response(session[:user_id])

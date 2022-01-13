@@ -18,11 +18,15 @@ jobs:
           - "2.6"
         gemfile:
           - Gemfile
+          - spec/support/Gemfile.rails6.1
           - spec/support/Gemfile.rails6
           - spec/support/Gemfile.rails5.2
         bundler:
           - "2"
         exclude:
+          - ruby: "2.6"
+            gemfile: Gemfile
+            bundler: "2"
           - ruby: "3.0"
             gemfile: spec/support/Gemfile.rails5.2
             bundler: "2"

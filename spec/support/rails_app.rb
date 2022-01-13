@@ -19,7 +19,7 @@ end
 
 def create_app(name, env = {})
   puts "[#{name}] Creating Rails app"
-  rails_new_options = %w[-T -J -S --skip-spring --skip-listen --skip-bootsnap]
+  rails_new_options = %w[-A -G -C -T -J -S --skip-spring --skip-listen --skip-bootsnap --skip-action-mailbox --skip-jbuilder --skip-active-storage]
   rails_new_options << "-O" if name == "idp"
   env.merge!("RUBY_SAML_VERSION" => OneLogin::RubySaml::VERSION)
   Dir.chdir(working_directory) do
