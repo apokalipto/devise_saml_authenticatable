@@ -72,9 +72,17 @@ In `config/initializers/devise.rb`:
     # ==> Configuration for :saml_authenticatable
 
     # Create user if the user does not exist. (Default is false)
+    # Can also accept a proc, for ex:
+    # Devise.saml_create_user = Proc.new do |model_class, saml_response, auth_value|
+    #  model_class == Admin
+    # end
     config.saml_create_user = true
 
     # Update the attributes of the user after a successful login. (Default is false)
+    # Can also accept a proc, for ex:
+    # Devise.saml_update_user = Proc.new do |model_class, saml_response, auth_value|
+    #  model_class == Admin
+    # end
     config.saml_update_user = true
 
     # Set the default user key. The user will be looked up by this key. Make

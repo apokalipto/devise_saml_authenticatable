@@ -55,8 +55,11 @@ module Devise
             end
           end
 
+          create_user = if Devise.saml_create_user.respond_to?(:call) then Devise.saml_create_user.call(self, decorated_response, auth_value)
+                        else Devise.saml_create_user
+                        end
           if resource.nil?
-            if Devise.saml_create_user
+            if create_user
               logger.info("Creating user(#{auth_value}).")
               resource = new
             else
@@ -65,7 +68,10 @@ module Devise
             end
           end
 
-          if Devise.saml_update_user || (resource.new_record? && Devise.saml_create_user)
+          update_user = if Devise.saml_update_user.respond_to?(:call) then Devise.saml_update_user.call(self, decorated_response, auth_value)
+                        else Devise.saml_update_user
+                        end
+          if update_user || (resource.new_record? && create_user)
             Devise.saml_update_resource_hook.call(resource, decorated_response, auth_value)
           end
 
