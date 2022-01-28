@@ -106,6 +106,32 @@ describe Devise::Models::SamlAuthenticatable do
       end
     end
 
+    context "when configured to create a user by a proc and the user is not found" do
+      before do
+        create_user_proc = -> (model_class, _saml_response, auth_value) { model_class == Model && auth_value == 'user@example.com' }
+        allow(Devise).to receive(:saml_create_user).and_return(create_user_proc)
+      end
+
+      context "when the proc returns true" do
+        it "creates and returns a new user with the name identifier and given attributes" do
+          expect(Model).to receive(:where).with(email: name_id).and_return([])
+          model = Model.authenticate_with_saml(response, nil)
+          expect(model.email).to eq('user@example.com')
+          expect(model.name).to  eq('A User')
+          expect(model.saved).to be(true)
+        end
+      end
+
+      context "when the proc returns false" do
+        let(:name_id) { 'do_not_create@example.com' }
+
+        it "does not creates new user" do
+          expect(Model).to receive(:where).with(email: name_id).and_return([])
+          expect(Model.authenticate_with_saml(response, nil)).to be_nil
+        end
+      end
+    end
+
     context "when configured to update a user and the user is found" do
       before do
         allow(Devise).to receive(:saml_update_user).and_return(true)
@@ -120,7 +146,38 @@ describe Devise::Models::SamlAuthenticatable do
         expect(model.saved).to be(true)
       end
     end
+
+    context "when configured to update a user by a proc and the user is found" do
+      let(:user) { Model.new(email: 'old_mail@mail.com', name: 'old name', new_record: false) }
+
+      before do
+        update_user_proc = -> (model_class, _saml_response, auth_value) { model_class == Model && auth_value == 'user@example.com' }
+        allow(Devise).to receive(:saml_update_user).and_return(update_user_proc)
+      end
+
+      context "when the proc returns true" do
+        it "updates user with given attributes" do
+          expect(Model).to receive(:where).with(email: name_id).and_return([user])
+          model = Model.authenticate_with_saml(response, nil)
+          expect(model.email).to eq('user@example.com')
+          expect(model.name).to  eq('A User')
+          expect(model.saved).to be(true)
+        end
+      end
+
+      context "when the proc returns false" do
+        let(:name_id) { 'do_not_update@example.com' }
+
+        it "does not update user" do
+          expect(Model).to receive(:where).with(email: name_id).and_return([user])
+          model = Model.authenticate_with_saml(response, nil)
+          expect(model.email).to eq('old_mail@mail.com')
+          expect(model.name).to  eq('old name')
+        end
+      end
+    end
   end
+
 
   context "when configured to create an user and the user is not found" do
     before do
@@ -133,6 +190,35 @@ describe Devise::Models::SamlAuthenticatable do
       expect(model.email).to eq('user@example.com')
       expect(model.name).to  eq('A User')
       expect(model.saved).to be(true)
+    end
+  end
+
+  context "when configured to create a user by a proc and the user is not found" do
+    let(:create_user_proc) { -> (_model_class, saml_response, _auth_value) { saml_response.raw_response.issuers.first == 'to_create_idp' } }
+
+    before do
+      allow(Devise).to receive(:saml_create_user).and_return(create_user_proc)
+    end
+
+    context "when the proc returns true" do
+      let(:response) { double(:response, issuers: ['to_create_idp'], attributes: attributes, name_id: name_id) }
+
+      it "creates and returns a new user with the name identifier and given attributes" do
+        expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
+        model = Model.authenticate_with_saml(response, nil)
+        expect(model.email).to eq('user@example.com')
+        expect(model.name).to  eq('A User')
+        expect(model.saved).to be(true)
+      end
+    end
+
+    context "when the proc returns false" do
+      let(:response) { double(:response, issuers: ['do_not_create_idp'], attributes: attributes, name_id: name_id) }
+
+      it "does not creates new user" do
+        expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
+        expect(Model.authenticate_with_saml(response, nil)).to be_nil
+      end
     end
   end
 
@@ -153,6 +239,38 @@ describe Devise::Models::SamlAuthenticatable do
       expect(model.email).to eq('user@example.com')
       expect(model.name).to  eq('A User')
       expect(model.saved).to be(true)
+    end
+  end
+
+  context "when configured to update a user by a proc and the user is found" do
+    let(:user) { Model.new(email: 'old_mail@mail.com', name: 'old name', new_record: false) }
+    let(:update_user_proc) { -> (_model_class, saml_response, _auth_value) { saml_response.raw_response.issuers.first == 'to_update_idp' } }
+
+    before do
+      allow(Devise).to receive(:saml_update_user).and_return(update_user_proc)
+    end
+
+    context "when the proc returns true" do
+      let(:response) { double(:response, issuers: ['to_update_idp'], attributes: attributes, name_id: name_id) }
+
+      it "updates user with given attributes" do
+        expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
+        model = Model.authenticate_with_saml(response, nil)
+        expect(model.email).to eq('user@example.com')
+        expect(model.name).to  eq('A User')
+        expect(model.saved).to be(true)
+      end
+    end
+
+    context "when the proc returns false" do
+      let(:response) { double(:response, issuers: ['do_not_update_idp'], attributes: attributes, name_id: name_id) }
+
+      it "does not update user" do
+        expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
+        model = Model.authenticate_with_saml(response, nil)
+        expect(model.email).to eq('old_mail@mail.com')
+        expect(model.name).to  eq('old name')
+      end
     end
   end
 

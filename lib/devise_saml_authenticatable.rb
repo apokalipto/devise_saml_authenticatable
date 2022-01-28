@@ -29,10 +29,20 @@ module Devise
   @@saml_logger = true
 
   # Add valid users to database
+  # Can accept a Boolean value or a Proc that is called with the model class, the saml_response and auth_value
+  # Ex: 
+  # Devise.saml_create_user = Proc.new do |model_class, saml_response, auth_value|
+  #  model_class == Admin
+  # end
   mattr_accessor :saml_create_user
   @@saml_create_user = false
 
   # Update user attributes after login
+  # Can accept a Boolean value or a Proc that is called with the model class, the saml_response and auth_value
+  # Ex: 
+  # Devise.saml_update_user = Proc.new do |model_class, saml_response, auth_value|
+  #  model_class == User
+  # end
   mattr_accessor :saml_update_user
   @@saml_update_user = false
 
