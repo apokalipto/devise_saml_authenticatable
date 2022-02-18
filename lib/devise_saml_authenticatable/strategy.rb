@@ -65,7 +65,7 @@ module Devise
 
       def response_options
         options = {
-          settings: saml_config(get_idp_entity_id(params)),
+          settings: saml_config(get_idp_entity_id(params), request),
           allowed_clock_drift: Devise.allowed_clock_drift_in_seconds,
         }
 

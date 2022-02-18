@@ -8,22 +8,22 @@ class Devise::SamlSessionsController < Devise::SessionsController
 
   def new
     idp_entity_id = get_idp_entity_id(params)
-    request = OneLogin::RubySaml::Authrequest.new
+    auth_request = OneLogin::RubySaml::Authrequest.new
     auth_params = { RelayState: relay_state } if relay_state
-    action = request.create(saml_config(idp_entity_id), auth_params || {})
-    session[:saml_transaction_id] = request.request_id if request.respond_to?(:request_id)
+    action = auth_request.create(saml_config(idp_entity_id, request), auth_params || {})
+    session[:saml_transaction_id] = auth_request.request_id if auth_request.respond_to?(:request_id)
     redirect_to action, allow_other_host: true
   end
 
   def metadata
     idp_entity_id = params[:idp_entity_id]
     meta = OneLogin::RubySaml::Metadata.new
-    render xml: meta.generate(saml_config(idp_entity_id))
+    render xml: meta.generate(saml_config(idp_entity_id, request))
   end
 
   def idp_sign_out
     if params[:SAMLRequest] && Devise.saml_session_index_key
-      saml_config = saml_config(get_idp_entity_id(params))
+      saml_config = saml_config(get_idp_entity_id(params), request)
       logout_request = OneLogin::RubySaml::SloLogoutrequest.new(params[:SAMLRequest], settings: saml_config)
       resource_class.reset_session_key_for(logout_request.name_id)
 
@@ -63,8 +63,8 @@ class Devise::SamlSessionsController < Devise::SessionsController
   # Override devise to send user to IdP logout for SLO
   def after_sign_out_path_for(_)
     idp_entity_id = get_idp_entity_id(params)
-    request = OneLogin::RubySaml::Logoutrequest.new
-    saml_settings = saml_config(idp_entity_id).dup
+    logout_request = OneLogin::RubySaml::Logoutrequest.new
+    saml_settings = saml_config(idp_entity_id, request).dup
 
     # Add attributes to saml_settings which will later be used to create the SP
     # initiated logout request
@@ -73,7 +73,7 @@ class Devise::SamlSessionsController < Devise::SessionsController
       saml_settings.sessionindex = @sessionindex_for_sp_initiated_logout
     end
 
-    request.create(saml_settings)
+    logout_request.create(saml_settings)
   end
 
   # Overried devise: if user is signed out, not create the SP initiated logout request,
