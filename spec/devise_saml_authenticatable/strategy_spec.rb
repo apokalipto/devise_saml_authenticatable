@@ -58,7 +58,7 @@ describe Devise::Strategies::SamlAuthenticatable do
         Class.new {
           def self.settings(idp_entity_id, request)
             base = {
-              assertion_consumer_service_url: "#{request.protocol}#{request.host}",
+              assertion_consumer_service_url: "acs url",
               assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
               name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
               issuer: "sp_issuer",
@@ -93,7 +93,7 @@ describe Devise::Strategies::SamlAuthenticatable do
 
       it "authenticates with the response for the corresponding idp" do
         expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], anything)
-        expect(idp_providers_adapter).to receive(:settings).with(idp_entity_id, request)
+        expect(idp_providers_adapter).to receive(:settings).with(idp_entity_id, anything)
         expect(user_class).to receive(:authenticate_with_saml).with(response, params[:RelayState])
         expect(user).to receive(:after_saml_authentication).with(response.sessionindex)
 
