@@ -102,7 +102,7 @@ describe Devise::SamlSessionsController, type: :controller do
       it 'uses the DefaultIdpEntityIdReader' do
         expect(DeviseSamlAuthenticatable::DefaultIdpEntityIdReader).to receive(:entity_id)
         do_get
-        expect(idp_providers_adapter).to have_received(:settings).with(nil)
+        expect(idp_providers_adapter).to have_received(:settings).with(nil, request)
       end
 
       context 'with a relay_state lambda defined' do
@@ -137,7 +137,7 @@ describe Devise::SamlSessionsController, type: :controller do
 
         it 'redirects to the associated IdP SSO target url' do
           do_get
-          expect(idp_providers_adapter).to have_received(:settings).with('http://www.example.com')
+          expect(idp_providers_adapter).to have_received(:settings).with('http://www.example.com', request)
           expect(response).to redirect_to(%r{\Ahttp://idp_sso_url\?SAMLRequest=})
         end
       end
@@ -305,7 +305,7 @@ describe Devise::SamlSessionsController, type: :controller do
           it 'redirects to the associated IdP SLO target url' do
             do_delete
             expect(controller).to have_received(:sign_out)
-            expect(idp_providers_adapter).to have_received(:settings).with('http://www.example.com')
+            expect(idp_providers_adapter).to have_received(:settings).with('http://www.example.com', request)
             expect(response).to redirect_to(%r{\Ahttp://idp_slo_url\?SAMLRequest=})
           end
         end
@@ -385,7 +385,7 @@ describe Devise::SamlSessionsController, type: :controller do
         it 'accepts a LogoutResponse for the associated slo_target_url and redirects to sign_in' do
           do_post
           expect(response.status).to eq 302
-          expect(idp_providers_adapter).to have_received(:settings).with(idp_entity_id)
+          expect(idp_providers_adapter).to have_received(:settings).with(idp_entity_id, request)
           expect(response).to redirect_to 'http://localhost/logout_response'
         end
       end

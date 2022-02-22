@@ -97,8 +97,8 @@ In `config/initializers/devise.rb`:
     # If you don't set it then email will be extracted from SAML assertion attributes.
     config.saml_use_subject = true
 
-    # You can support multiple IdPs by setting this value to the name of a class that implements a ::settings method
-    # which takes an IdP entity id as an argument and returns a hash of idp settings for the corresponding IdP.
+    # You can implement IdP settings with the options to support multiple IdPs and use the request object by setting this value to the name of a class that implements a ::settings method
+    # which takes an IdP entity id and a request object as arguments and returns a hash of idp settings for the corresponding IdP.
     # config.idp_settings_adapter = "MyIdPSettingsAdapter"
 
     # You provide you own method to find the idp_entity_id in a SAML message in the case of multiple IdPs
@@ -202,20 +202,22 @@ If you only have one IdP, you can use the config file above, or just return a si
   end
 ```
 
-## Supporting Multiple IdPs
+## IdP Settings Adapter
 
-If you must support multiple Identity Providers you can implement an adapter class with a `#settings` method that takes an IdP entity id and returns a hash of settings for the corresponding IdP. The `config.idp_settings_adapter` then must be set to point to your adapter in `config/initializers/devise.rb`. The implementation of the adapter is up to you. A simple example may look like this:
+Implementing a custom settings adapter allows you to support multiple Identity Providers, and dynamic application domains with the request object.
+
+You can implement an adapter class with a `#settings` method. It must take two arguments (idp_entity_id, request) and return a hash of settings for the corresponding IdP. The `config.idp_settings_adapter` then must be set to point to your adapter in `config/initializers/devise.rb`. The implementation of the adapter is up to you. A simple example may look like this:
 
 ```ruby
 class IdPSettingsAdapter
-  def self.settings(idp_entity_id)
+  def self.settings(idp_entity_id, request)
     case idp_entity_id
     when "http://www.example_idp_entity_id.com"
       {
-        assertion_consumer_service_url: "http://localhost:3000/users/saml/auth",
+        assertion_consumer_service_url: "#{request.protocol}#{request.host_with_port}/users/saml/auth",
         assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
         name_identifier_format: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-        issuer: "http://localhost:3000/saml/metadata",
+        issuer: "#{request.protocol}#{request.host_with_port}/saml/metadata",
         idp_entity_id: "http://www.example_idp_entity_id.com",
         authn_context: "",
         idp_slo_service_url: "http://example_idp_slo_service_url.com",
