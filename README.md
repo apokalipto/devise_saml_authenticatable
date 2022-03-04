@@ -128,7 +128,7 @@ In `config/initializers/devise.rb`:
       settings.assertion_consumer_service_url     = "http://localhost:3000/users/saml/auth"
       settings.assertion_consumer_service_binding = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
       settings.name_identifier_format             = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
-      settings.issuer                             = "http://localhost:3000/saml/metadata"
+      settings.sp_entity_id                       = "http://localhost:3000/saml/metadata"
       settings.authn_context                      = ""
       settings.idp_slo_service_url                = "http://localhost/simplesaml/www/saml2/idp/SingleLogoutService.php"
       settings.idp_sso_service_url                = "http://localhost/simplesaml/www/saml2/idp/SSOService.php"
@@ -217,7 +217,7 @@ class IdPSettingsAdapter
         assertion_consumer_service_url: "#{request.protocol}#{request.host_with_port}/users/saml/auth",
         assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
         name_identifier_format: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-        issuer: "#{request.protocol}#{request.host_with_port}/saml/metadata",
+        sp_entity_id: "#{request.protocol}#{request.host_with_port}/saml/metadata",
         idp_entity_id: "http://www.example_idp_entity_id.com",
         authn_context: "",
         idp_slo_service_url: "http://example_idp_slo_service_url.com",
@@ -229,7 +229,7 @@ class IdPSettingsAdapter
         assertion_consumer_service_url: "http://localhost:3000/users/saml/auth",
         assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
         name_identifier_format: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-        issuer: "http://localhost:3000/saml/metadata",
+        sp_entity_id: "http://localhost:3000/saml/metadata",
         idp_entity_id: "http://www.another_idp_entity_id.biz",
         authn_context: "",
         idp_slo_service_url: "http://another_idp_slo_service_url.com",

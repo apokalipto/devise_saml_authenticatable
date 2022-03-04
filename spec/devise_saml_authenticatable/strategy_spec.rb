@@ -61,7 +61,7 @@ describe Devise::Strategies::SamlAuthenticatable do
               assertion_consumer_service_url: "acs url",
               assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
               name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
-              issuer: "sp_issuer",
+              sp_entity_id: "sp_issuer",
               idp_entity_id: "http://www.example.com",
               authn_context: "",
               idp_cert: "idp_cert"
