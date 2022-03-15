@@ -85,6 +85,29 @@ In `config/initializers/devise.rb`:
     # end
     config.saml_update_user = true
 
+    # Lambda that is called if Devise.saml_update_user and/or Devise.saml_create_user are true.
+    # Receives the model object, saml_response and auth_value, and defines how the object's values are
+    # updated with regards to the SAML response. 
+    # config.saml_update_resource_hook = -> (model, saml_response, auth_value) {
+    #   saml_response.attributes.resource_keys.each do |key|
+    #     user.send "#{key}=", saml_response.attribute_value_by_resource_key(key)
+    #   end
+    #
+    #   if (Devise.saml_use_subject)
+    #     model.send "#{Devise.saml_default_user_key}=", auth_value
+    #   end
+    #
+    #   model.save!
+    # }
+
+    # Lambda that is called to resolve the saml_response and auth_value into the correct user object.
+    # Receives a copy of the ActiveRecord::Model, saml_response and auth_value. Is expected to return
+    # one instance of the provided model that is the matched account, or nil if none exists.
+    # config.saml_resource_locator = -> (model, saml_response, auth_value) {
+    #   model.where(Devise.saml_default_user_key => auth_value).first
+    # }
+    
+
     # Set the default user key. The user will be looked up by this key. Make
     # sure that the Authentication Response includes the attribute.
     config.saml_default_user_key = :email
