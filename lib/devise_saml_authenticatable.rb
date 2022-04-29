@@ -151,6 +151,14 @@ module Devise
   @@saml_name_identifier_retriever = Proc.new do |current_user|
     current_user.public_send(Devise.saml_default_user_key)
   end
+
+  # An alternate redirect URL to use instead of the SLO target URL for IdP initiated logout.
+  # The escaped SLO target URL will be appended to that URL.
+  # Override to do other redirections if the SP is an IdP too, but make sure to
+  # finally redirect to the provided URL.
+  # Example: '/logging_out?redirect_to='
+  mattr_accessor :idp_sign_out_alternate_redirect_url
+  @@idp_sign_out_alternate_redirect_url = nil
 end
 
 # Add saml_authenticatable strategy to defaults.

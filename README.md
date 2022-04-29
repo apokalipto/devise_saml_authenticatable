@@ -149,6 +149,12 @@ In `config/initializers/devise.rb`:
     # header that matches the ID of the SAML request. (Default is false)
     # config.saml_validate_in_response_to = false
 
+    # An alternate redirect URL to use instead of the SLO target URL for IdP initiated logout.
+    # The escaped SLO target URL will be appended to that URL.
+    # Override to do other redirections if the SP is an IdP too, but make sure to
+    # finally redirect to the provided URL.
+    # config.idp_sign_out_alternate_redirect_url = '/logging_out?redirect_to='
+
     # Configure with your SAML settings (see ruby-saml's README for more information: https://github.com/onelogin/ruby-saml).
     config.saml_configure do |settings|
       settings.assertion_consumer_service_url     = "http://localhost:3000/users/saml/auth"
