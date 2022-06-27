@@ -40,7 +40,7 @@ describe Devise::SamlSessionsController, type: :controller do
       assertion_consumer_service_url: 'acs_url',
       assertion_consumer_service_binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST',
       name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
-      issuer: 'sp_issuer',
+      sp_entity_id: 'sp_issuer',
       idp_entity_id: 'http://www.example.com',
       authn_context: '',
       idp_cert: 'idp_cert'
@@ -167,7 +167,7 @@ describe Devise::SamlSessionsController, type: :controller do
           settings.assertion_consumer_service_url = 'http://localhost:3000/users/saml/auth'
           settings.assertion_consumer_service_binding = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
           settings.name_identifier_format = 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'
-          settings.issuer = 'http://localhost:3000'
+          settings.sp_entity_id = 'http://localhost:3000'
         end
       end
 
