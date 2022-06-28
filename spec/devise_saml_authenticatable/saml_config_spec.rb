@@ -156,7 +156,7 @@ TARGET_URLS
     before do
       allow(Rails).to receive(:env).and_return("environment")
       allow(Rails).to receive(:root).and_return("/railsroot")
-      allow(File).to receive(:exists?).with("/railsroot/config/idp.yml").and_return(true)
+      allow(File).to receive(:exist?).with("/railsroot/config/idp.yml").and_return(true)
       allow(File).to receive(:read).with("/railsroot/config/idp.yml").and_return(idp_yaml)
     end
 
