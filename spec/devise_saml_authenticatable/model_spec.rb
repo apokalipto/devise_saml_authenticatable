@@ -64,12 +64,12 @@ describe Devise::Models::SamlAuthenticatable do
 
   it "looks up the user by the configured default user key" do
     user = Model.new(new_record: false)
-    expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
+    expect(Model).to receive(:where).with({ email: 'user@example.com' }).and_return([user])
     expect(Model.authenticate_with_saml(response, nil)).to eq(user)
   end
 
   it "returns nil if it cannot find a user" do
-    expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
+    expect(Model).to receive(:where).with({ email: 'user@example.com' }).and_return([])
     expect(Model.authenticate_with_saml(response, nil)).to be_nil
   end
 
@@ -83,12 +83,12 @@ describe Devise::Models::SamlAuthenticatable do
 
     it "looks up the user by the configured default user key" do
       user = Model.new(new_record: false)
-      expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
+      expect(Model).to receive(:where).with({ email: 'user@example.com' }).and_return([user])
       expect(Model.authenticate_with_saml(response, nil)).to eq(user)
     end
 
     it "returns nil if it cannot find a user" do
-      expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
+      expect(Model).to receive(:where).with({ email: 'user@example.com' }).and_return([])
       expect(Model.authenticate_with_saml(response, nil)).to be_nil
     end
 
@@ -98,7 +98,7 @@ describe Devise::Models::SamlAuthenticatable do
       end
 
       it "creates and returns a new user with the name identifier and given attributes" do
-        expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
+        expect(Model).to receive(:where).with({ email: 'user@example.com' }).and_return([])
         model = Model.authenticate_with_saml(response, nil)
         expect(model.email).to eq('user@example.com')
         expect(model.name).to  eq('A User')
@@ -114,7 +114,7 @@ describe Devise::Models::SamlAuthenticatable do
 
       context "when the proc returns true" do
         it "creates and returns a new user with the name identifier and given attributes" do
-          expect(Model).to receive(:where).with(email: name_id).and_return([])
+          expect(Model).to receive(:where).with({ email: name_id }).and_return([])
           model = Model.authenticate_with_saml(response, nil)
           expect(model.email).to eq('user@example.com')
           expect(model.name).to  eq('A User')
@@ -126,7 +126,7 @@ describe Devise::Models::SamlAuthenticatable do
         let(:name_id) { 'do_not_create@example.com' }
 
         it "does not creates new user" do
-          expect(Model).to receive(:where).with(email: name_id).and_return([])
+          expect(Model).to receive(:where).with({ email: name_id }).and_return([])
           expect(Model.authenticate_with_saml(response, nil)).to be_nil
         end
       end
