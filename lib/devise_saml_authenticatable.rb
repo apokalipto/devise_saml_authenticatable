@@ -134,7 +134,7 @@ module Devise
   # See saml_resource_locator for more information.
   mattr_reader :saml_default_resource_locator
   @@saml_default_resource_locator = Proc.new do |model, saml_response, auth_value|
-    model.where(Devise.saml_default_user_key => auth_value).first
+    model.find_by(Devise.saml_default_user_key => auth_value)
   end
 
   # Proc that is called to resolve the saml_response and auth_value into the correct user object.
