@@ -104,9 +104,9 @@ In `config/initializers/devise.rb`:
     # Receives a copy of the ActiveRecord::Model, saml_response and auth_value. Is expected to return
     # one instance of the provided model that is the matched account, or nil if none exists.
     # config.saml_resource_locator = -> (model, saml_response, auth_value) {
-    #   model.where(Devise.saml_default_user_key => auth_value).first
+    #   model.find_by(Devise.saml_default_user_key => auth_value)
     # }
-    
+
 
     # Set the default user key. The user will be looked up by this key. Make
     # sure that the Authentication Response includes the attribute.
