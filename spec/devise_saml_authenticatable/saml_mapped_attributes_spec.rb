@@ -8,8 +8,8 @@ describe SamlAuthenticatable::SamlMappedAttributes do
   let(:saml_attributes) do
     {
       "first_name" => ["John"],
-      "last_name"=>["Smith"],
-      "email"=>["john.smith@example.com"]
+      "last_name"=> ["Smith"],
+      "email"=> ["john.smith@example.com"]
     }
   end
 
@@ -46,5 +46,14 @@ describe SamlAuthenticatable::SamlMappedAttributes do
         include_examples 'correctly maps the value of the resource key', saml_key, 'email', ['john.smith@example.com']
       end
     end
+
+    context 'multiple groups' do
+     saml_keys = ['urn:mace:dir:attribute-def:email', 'email_address', 'emailAddress', 'email']
+
+      saml_keys.each do |saml_key|
+        include_examples 'correctly maps the value of the resource key', saml_key, 'email', ['john.smith@example.com']
+      end
+    end
+
   end
 end
