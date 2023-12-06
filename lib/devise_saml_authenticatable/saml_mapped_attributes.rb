@@ -22,14 +22,12 @@ module SamlAuthenticatable
       # When an attribute is "multi", return the entire array
       # When the attribute is "single", return the first value
       saml_value = nil
+
+      # Find the first non-nil value
       attribute_map_for_key.each_pair do |saml_key, config|
-        if config["attribute_type"] == "multi"
-          saml_value ||= []
-          saml_value << value_by_saml_attribute_key(saml_key, config)
-        else
-          saml_value = value_by_saml_attribute_key(saml_key, config)
-          return saml_value unless saml_value.nil?
-        end
+        saml_value = value_by_saml_attribute_key(saml_key, config)
+
+        break unless saml_value.nil?
       end
 
       saml_value
