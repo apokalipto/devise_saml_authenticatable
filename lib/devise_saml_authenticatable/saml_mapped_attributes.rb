@@ -34,18 +34,16 @@ module SamlAuthenticatable
     end
 
     def value_by_saml_attribute_key(key, config)
-      # If this is a multiple value attribute, temporarily force multiple values, then switch back to prior behaviour.
-      # This feels completely wrong, but it's a class method.
-      # Alternative - raise exception if this is on but you are asking for a single attribute?
-      if config["attribute_type"] == "multi"
-        single_value = OneLogin::RubySaml::Attributes.single_value_compatibility
-        OneLogin::RubySaml::Attributes.single_value_compatibility = false
-        values = @attributes[String(key)]
-        OneLogin::RubySaml::Attributes.single_value_compatibility = single_value
-        return values
-      end
+      case config["attribute_type"]
+      when "multi"
+        @attributes.multi(String(key))
+      when "single"
+        @attributes.single(String(key))
+      else
+        warn("SAML attribute behaviour not specified. This relies on Ruby-SAML's OneLogin::RubySaml::Attributes.single_value_compatibility settings. Update attributes-map.yml or your custom resource hook to specify `attribute_type` and `resource_name`")
 
-      @attributes[String(key)]
+        @attributes[String(key)]
+      end
     end
   end
 end
