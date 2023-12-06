@@ -1,6 +1,9 @@
 require 'rails_helper'
+require 'support/ruby_saml_support'
 
 describe Devise::Strategies::SamlAuthenticatable do
+  include RubySamlSupport
+
   subject(:strategy) { described_class.new(env, :user) }
   let(:env) { {} }
   let(:errors) { ["Test1", "Test2"] }
@@ -16,7 +19,7 @@ describe Devise::Strategies::SamlAuthenticatable do
   let(:user) { double(:user) }
   before do
     allow(strategy).to receive(:mapping).and_return(mapping)
-    allow(user).to receive(:after_saml_authentication)
+    allow(user).to(receive(:after_saml_authentication)) if user
   end
 
   let(:params) { {} }
@@ -53,18 +56,28 @@ describe Devise::Strategies::SamlAuthenticatable do
     context "when saml config uses an idp_adapter" do
       let(:idp_providers_adapter) {
         Class.new {
-          def self.settings(idp_entity_id)
-            {
-              assertion_consumer_service_url: "acs_url",
+          def self.settings(idp_entity_id, request)
+            base = {
+              assertion_consumer_service_url: "acs url",
               assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
               name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
-              issuer: "sp_issuer",
+              sp_entity_id: "sp_issuer",
               idp_entity_id: "http://www.example.com",
               authn_context: "",
-              idp_slo_target_url: "idp_slo_url",
-              idp_sso_target_url: "http://idp_sso_url",
               idp_cert: "idp_cert"
             }
+            with_ruby_saml_1_12_or_greater(proc {
+              base.merge!(
+                idp_slo_service_url: "idp_slo_url",
+                idp_sso_service_url: "http://idp_sso_url",
+              )
+            }, else_do: proc {
+              base.merge!(
+                idp_slo_target_url: "idp_slo_url",
+                idp_sso_target_url: "http://idp_sso_url",
+              )
+            })
+            base
           end
         }
       }
@@ -80,7 +93,7 @@ describe Devise::Strategies::SamlAuthenticatable do
 
       it "authenticates with the response for the corresponding idp" do
         expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], anything)
-        expect(idp_providers_adapter).to receive(:settings).with(idp_entity_id)
+        expect(idp_providers_adapter).to receive(:settings).with(idp_entity_id, anything)
         expect(user_class).to receive(:authenticate_with_saml).with(response, params[:RelayState])
         expect(user).to receive(:after_saml_authentication).with(response.sessionindex)
 
@@ -93,8 +106,10 @@ describe Devise::Strategies::SamlAuthenticatable do
       let(:user) { nil }
 
       it "fails to authenticate" do
-        expect(strategy).to receive(:fail!).with(:invalid)
         strategy.authenticate!
+        expect(strategy).to be_halted
+        expect(strategy.message).to be(:invalid)
+        expect(strategy.result).to be(:failure)
       end
 
       it 'logs the error' do
@@ -150,6 +165,40 @@ describe Devise::Strategies::SamlAuthenticatable do
 
         expect(strategy).to receive(:success!).with(user)
         strategy.authenticate!
+      end
+    end
+
+    context "when saml_validate_in_response_to is opted-in to" do
+      let(:transaction_id) { "abc123" }
+
+      before do
+        allow(Devise).to receive(:saml_validate_in_response_to).and_return(true)
+        allow_any_instance_of(ActionDispatch::Request).to receive(:session).and_return(session)
+      end
+
+      context "when the session has a saml_transaction_id" do
+        let(:session) { { saml_transaction_id: transaction_id }}
+
+        it "is valid with the matches_request_id parameter" do
+          expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(matches_request_id: transaction_id))
+          expect(strategy).to be_valid
+        end
+
+        it "authenticates with the matches_request_id parameter" do
+          expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(matches_request_id: transaction_id))
+
+          expect(strategy).to receive(:success!).with(user)
+          strategy.authenticate!
+        end
+      end
+
+      context "when the session is missing a saml_transaction_id" do
+        let(:session) { { } }
+
+        it "uses 'ID_MISSING' for matches_request_id so validation will fail" do
+          expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(matches_request_id: "ID_MISSING"))
+          strategy.authenticate!
+        end
       end
     end
   end

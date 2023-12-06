@@ -1,3 +1,5 @@
+require "fileutils"
+
 RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
   config.filter_run :focus
@@ -28,8 +30,13 @@ RSpec.configure do |config|
     Devise.saml_session_index_key = @original_saml_session_index_key
     Devise.idp_settings_adapter = nil
   end
+
+  config.after :suite do
+    FileUtils.rm_rf($working_directory) if $working_directory
+  end
 end
 
 require 'support/rails_app'
 
+require "action_controller" # https://github.com/heartcombo/responders/pull/95
 require 'devise_saml_authenticatable'

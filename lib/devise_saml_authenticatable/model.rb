@@ -33,9 +33,9 @@ module Devise
           key = Devise.saml_default_user_key
           decorated_response = ::SamlAuthenticatable::SamlResponse.new(
             saml_response,
-            attribute_map
+            attribute_map(saml_response),
           )
-          if (Devise.saml_use_subject)
+          if Devise.saml_use_subject
             auth_value = saml_response.name_id
           else
             auth_value = decorated_response.attribute_value_by_resource_key(key)
@@ -55,8 +55,11 @@ module Devise
             end
           end
 
+          create_user = if Devise.saml_create_user.respond_to?(:call) then Devise.saml_create_user.call(self, decorated_response, auth_value)
+                        else Devise.saml_create_user
+                        end
           if resource.nil?
-            if Devise.saml_create_user
+            if create_user
               logger.info("Creating user(#{auth_value}).")
               resource = new
             else
@@ -65,7 +68,10 @@ module Devise
             end
           end
 
-          if Devise.saml_update_user || (resource.new_record? && Devise.saml_create_user)
+          update_user = if Devise.saml_update_user.respond_to?(:call) then Devise.saml_update_user.call(self, decorated_response, auth_value)
+                        else Devise.saml_update_user
+                        end
+          if update_user || (resource.new_record? && create_user)
             Devise.saml_update_resource_hook.call(resource, decorated_response, auth_value)
           end
 
@@ -81,18 +87,15 @@ module Devise
           find_for_authentication(conditions)
         end
 
-        def attribute_map
-          @attribute_map ||= attribute_map_for_environment
+        def attribute_map(saml_response = nil)
+          attribute_map_resolver.new(saml_response).attribute_map
         end
 
-        private
-
-        def attribute_map_for_environment
-          attribute_map = YAML.load(File.read("#{Rails.root}/config/attribute-map.yml"))
-          if attribute_map.has_key?(Rails.env)
-            attribute_map[Rails.env]
+        def attribute_map_resolver
+          if Devise.saml_attribute_map_resolver.respond_to?(:new)
+            Devise.saml_attribute_map_resolver
           else
-            attribute_map
+            Devise.saml_attribute_map_resolver.constantize
           end
         end
       end

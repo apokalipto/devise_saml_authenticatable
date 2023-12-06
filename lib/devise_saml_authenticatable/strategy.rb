@@ -8,8 +8,7 @@ module Devise
         if params[:SAMLResponse]
           OneLogin::RubySaml::Response.new(
             params[:SAMLResponse],
-            settings: Devise.saml_config,
-            allowed_clock_drift: Devise.allowed_clock_drift_in_seconds,
+            response_options,
           )
         else
           false
@@ -36,8 +35,7 @@ module Devise
       def parse_saml_response
         @response = OneLogin::RubySaml::Response.new(
           params[:SAMLResponse],
-          settings: saml_config(get_idp_entity_id(params)),
-          allowed_clock_drift: Devise.allowed_clock_drift_in_seconds,
+          response_options,
         )
         unless @response.is_valid?
           failed_auth("Auth errors: #{@response.errors.join(', ')}")
@@ -54,9 +52,29 @@ module Devise
       def failed_auth(msg)
         DeviseSamlAuthenticatable::Logger.send(msg)
         fail!(:invalid)
-        Devise.saml_failed_callback.new.handle(@response, self) if Devise.saml_failed_callback
+        failed_callback.new.handle(@response, self) if Devise.saml_failed_callback
       end
 
+      def failed_callback
+        if Devise.saml_failed_callback.respond_to?(:new)
+          Devise.saml_failed_callback
+        else
+          Devise.saml_failed_callback.constantize
+        end
+      end
+
+      def response_options
+        options = {
+          settings: saml_config(get_idp_entity_id(params), request),
+          allowed_clock_drift: Devise.allowed_clock_drift_in_seconds,
+        }
+
+        if Devise.saml_validate_in_response_to
+          options[:matches_request_id] = request.session[:saml_transaction_id] || "ID_MISSING"
+        end
+
+        options
+      end
     end
   end
 end

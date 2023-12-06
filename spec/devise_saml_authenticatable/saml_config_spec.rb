@@ -1,13 +1,16 @@
 require 'spec_helper'
+require 'support/ruby_saml_support'
 
 describe DeviseSamlAuthenticatable::SamlConfig do
+  include RubySamlSupport
+
   let(:saml_config) { controller.saml_config }
   let(:controller) { Class.new { include DeviseSamlAuthenticatable::SamlConfig }.new }
 
   context "when config/idp.yml does not exist" do
     before do
       allow(Rails).to receive(:root).and_return("/railsroot")
-      allow(File).to receive(:exists?).with("/railsroot/config/idp.yml").and_return(false)
+      allow(File).to receive(:exist?).with("/railsroot/config/idp.yml").and_return(false)
     end
 
     it "is the global devise SAML config" do
@@ -26,32 +29,54 @@ describe DeviseSamlAuthenticatable::SamlConfig do
       let(:saml_config) { controller.saml_config(idp_entity_id) }
       let(:idp_providers_adapter) {
         Class.new {
+          extend RubySamlSupport
+
           def self.settings(idp_entity_id)
             #some hash of stuff (by doing a fetch, in our case, but could also be a giant hash keyed by idp_entity_id)
             if idp_entity_id == "http://www.example.com"
-              {
+              base = {
                 assertion_consumer_service_url: "acs_url",
                 assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
                 name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
-                issuer: "sp_issuer",
+                sp_entity_id: "sp_issuer",
                 idp_entity_id: "http://www.example.com",
                 authn_context: "",
-                idp_slo_target_url: "idp_slo_url",
-                idp_sso_target_url: "idp_sso_url",
                 idp_cert: "idp_cert"
               }
+              with_ruby_saml_1_12_or_greater(proc {
+                base.merge!(
+                  idp_slo_service_url: "idp_slo_url",
+                  idp_sso_service_url: "idp_sso_url",
+                )
+              }, else_do: proc {
+                base.merge!(
+                  idp_slo_target_url: "idp_slo_url",
+                  idp_sso_target_url: "idp_sso_url",
+                )
+              })
+              base
             elsif idp_entity_id == "http://www.example.com_other"
-              {
+              base = {
                 assertion_consumer_service_url: "acs_url_other",
                 assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST_other",
                 name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress_other",
-                issuer: "sp_issuer_other",
+                sp_entity_id: "sp_issuer_other",
                 idp_entity_id: "http://www.example.com_other",
                 authn_context: "_other",
-                idp_slo_target_url: "idp_slo_url_other",
-                idp_sso_target_url: "idp_sso_url_other",
                 idp_cert: "idp_cert_other"
               }
+              with_ruby_saml_1_12_or_greater(proc {
+                base.merge!(
+                  idp_slo_service_url: "idp_slo_url_other",
+                  idp_sso_service_url: "idp_sso_url_other",
+                )
+              }, else_do: proc {
+                base.merge!(
+                  idp_slo_target_url: "idp_slo_url_other",
+                  idp_sso_target_url: "idp_sso_url_other",
+                )
+              })
+              base
             else
               {}
             end
@@ -63,7 +88,11 @@ describe DeviseSamlAuthenticatable::SamlConfig do
         let(:idp_entity_id) { "http://www.example.com" }
         it "uses the settings from the adapter for that idp" do
           expect(saml_config.idp_entity_id).to eq (idp_entity_id)
-          expect(saml_config.idp_sso_target_url).to eq ("idp_sso_url")
+          with_ruby_saml_1_12_or_greater(proc {
+            expect(saml_config.idp_sso_service_url).to eq('idp_sso_url')
+          }, else_do: proc {
+            expect(saml_config.idp_sso_target_url).to eq('idp_sso_url')
+          })
           expect(saml_config.class).to eq OneLogin::RubySaml::Settings
         end
       end
@@ -72,7 +101,11 @@ describe DeviseSamlAuthenticatable::SamlConfig do
         let(:idp_entity_id) { "http://www.example.com_other" }
         it "returns the other idp settings" do
           expect(saml_config.idp_entity_id).to eq (idp_entity_id)
-          expect(saml_config.idp_sso_target_url).to eq ("idp_sso_url_other")
+          with_ruby_saml_1_12_or_greater(proc {
+            expect(saml_config.idp_sso_service_url).to eq('idp_sso_url_other')
+          }, else_do: proc {
+            expect(saml_config.idp_sso_target_url).to eq('idp_sso_url_other')
+          })
           expect(saml_config.class).to eq OneLogin::RubySaml::Settings
         end
       end
@@ -80,11 +113,8 @@ describe DeviseSamlAuthenticatable::SamlConfig do
   end
 
   context "when config/idp.yml exists" do
-    before do
-      allow(Rails).to receive(:env).and_return("environment")
-      allow(Rails).to receive(:root).and_return("/railsroot")
-      allow(File).to receive(:exists?).with("/railsroot/config/idp.yml").and_return(true)
-      allow(File).to receive(:read).with("/railsroot/config/idp.yml").and_return(<<-IDP)
+    let(:idp_yaml) {
+      yaml = <<-IDP
 ---
 environment:
   assertion_consumer_logout_service_binding: assertion_consumer_logout_service_binding
@@ -104,9 +134,7 @@ environment:
   idp_cert_fingerprint: idp_cert_fingerprint
   idp_cert_fingerprint_algorithm: idp_cert_fingerprint_algorithm
   idp_entity_id: idp_entity_id
-  idp_slo_target_url: idp_slo_target_url
-  idp_sso_target_url: idp_sso_target_url
-  issuer: issuer
+  sp_entity_id: issuer
   name_identifier_format: name_identifier_format
   name_identifier_value: name_identifier_value
   passive: passive
@@ -116,6 +144,20 @@ environment:
   sessionindex: sessionindex
   sp_name_qualifier: sp_name_qualifier
       IDP
+    with_ruby_saml_1_12_or_greater(proc { yaml << <<SERVICE_URLS }, else_do: proc { yaml << <<TARGET_URLS })
+  idp_slo_service_url: idp_slo_service_url
+  idp_sso_service_url: idp_sso_service_url
+SERVICE_URLS
+  idp_slo_target_url: idp_slo_service_url
+  idp_sso_target_url: idp_sso_service_url
+TARGET_URLS
+      yaml
+    }
+    before do
+      allow(Rails).to receive(:env).and_return("environment")
+      allow(Rails).to receive(:root).and_return("/railsroot")
+      allow(File).to receive(:exist?).with("/railsroot/config/idp.yml").and_return(true)
+      allow(File).to receive(:read).with("/railsroot/config/idp.yml").and_return(idp_yaml)
     end
 
     it "uses that file's contents" do
@@ -136,9 +178,14 @@ environment:
       expect(saml_config.idp_cert_fingerprint).to eq('idp_cert_fingerprint')
       expect(saml_config.idp_cert_fingerprint_algorithm).to eq('idp_cert_fingerprint_algorithm')
       expect(saml_config.idp_entity_id).to eq('idp_entity_id')
-      expect(saml_config.idp_slo_target_url).to eq('idp_slo_target_url')
-      expect(saml_config.idp_sso_target_url).to eq('idp_sso_target_url')
-      expect(saml_config.issuer).to eq('issuer')
+      with_ruby_saml_1_12_or_greater(proc {
+        expect(saml_config.idp_slo_service_url).to eq('idp_slo_service_url')
+        expect(saml_config.idp_sso_service_url).to eq('idp_sso_service_url')
+      }, else_do: proc {
+        expect(saml_config.idp_slo_target_url).to eq('idp_slo_service_url')
+        expect(saml_config.idp_sso_target_url).to eq('idp_sso_service_url')
+      })
+      expect(saml_config.sp_entity_id).to eq('issuer')
       expect(saml_config.name_identifier_format).to eq('name_identifier_format')
       expect(saml_config.name_identifier_value).to eq('name_identifier_value')
       expect(saml_config.passive).to eq('passive')

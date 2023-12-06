@@ -5,6 +5,7 @@ require "devise_saml_authenticatable/exception"
 require "devise_saml_authenticatable/logger"
 require "devise_saml_authenticatable/routes"
 require "devise_saml_authenticatable/saml_config"
+require "devise_saml_authenticatable/default_attribute_map_resolver"
 require "devise_saml_authenticatable/default_idp_entity_id_reader"
 
 begin
@@ -28,10 +29,20 @@ module Devise
   @@saml_logger = true
 
   # Add valid users to database
+  # Can accept a Boolean value or a Proc that is called with the model class, the saml_response and auth_value
+  # Ex: 
+  # Devise.saml_create_user = Proc.new do |model_class, saml_response, auth_value|
+  #  model_class == Admin
+  # end
   mattr_accessor :saml_create_user
   @@saml_create_user = false
 
   # Update user attributes after login
+  # Can accept a Boolean value or a Proc that is called with the model class, the saml_response and auth_value
+  # Ex: 
+  # Devise.saml_update_user = Proc.new do |model_class, saml_response, auth_value|
+  #  model_class == User
+  # end
   mattr_accessor :saml_update_user
   @@saml_update_user = false
 
@@ -55,7 +66,7 @@ module Devise
 
   # Reader that can parse entity id from a SAMLMessage
   mattr_accessor :idp_entity_id_reader
-  @@idp_entity_id_reader ||= ::DeviseSamlAuthenticatable::DefaultIdpEntityIdReader
+  @@idp_entity_id_reader ||= "::DeviseSamlAuthenticatable::DefaultIdpEntityIdReader"
 
   # Implements a #handle method that takes the response and strategy as an argument
   mattr_accessor :saml_failed_callback
@@ -65,6 +76,14 @@ module Devise
   # from SamlSessionsController#new action as an argument
   mattr_accessor :saml_relay_state
   @@saml_relay_state
+
+  # Validate that the InResponseTo header in SAML responses matches the ID of the request.
+  mattr_accessor :saml_validate_in_response_to
+  @@saml_validate_in_response_to = false
+
+  # Instead of storing the attribute_map in attribute-map.yml, store it in the database, or set it programatically
+  mattr_accessor :saml_attribute_map_resolver
+  @@saml_attribute_map_resolver ||= "::DeviseSamlAuthenticatable::DefaultAttributeMapResolver"
 
   # Implements a #validate method that takes the retrieved resource and response right after retrieval,
   # and returns true if it's valid.  False will cause authentication to fail.
@@ -115,7 +134,7 @@ module Devise
   # See saml_resource_locator for more information.
   mattr_reader :saml_default_resource_locator
   @@saml_default_resource_locator = Proc.new do |model, saml_response, auth_value|
-    model.where(Devise.saml_default_user_key => auth_value).first
+    model.find_by(Devise.saml_default_user_key => auth_value)
   end
 
   # Proc that is called to resolve the saml_response and auth_value into the correct user object.
