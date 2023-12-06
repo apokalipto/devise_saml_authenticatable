@@ -31,8 +31,12 @@ template File.expand_path('../idp_settings_adapter.rb.erb', __FILE__), 'app/lib/
 if attribute_map_resolver == "nil"
   create_file 'config/attribute-map.yml', <<-ATTRIBUTES
 ---
-"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress": email
-"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name":         name
+"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress":
+  "resource_key": "email"
+  "attribute_type" : "single"
+"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name":
+  "resource_key": "name"
+  "attribute_type" : "single"
   ATTRIBUTES
 end
 
