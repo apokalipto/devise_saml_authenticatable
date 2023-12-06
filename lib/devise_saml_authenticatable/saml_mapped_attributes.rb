@@ -30,12 +30,7 @@ module SamlAuthenticatable
     end
 
     def value_by_saml_attribute_key(key, config)
-      case config["attribute_type"]
-      when "single"
-        return @attributes[String(key)]&.first
-      when "multi"
-        return @attributes[String(key)]
-      end
+      @attributes[String(key)]
     end
   end
 end
