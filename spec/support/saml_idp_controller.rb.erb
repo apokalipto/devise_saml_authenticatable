@@ -18,7 +18,7 @@ class SamlIdpController < StubSamlIdp::IdpController
   def idp_make_saml_response(_)
     attributes = {
       name_attribute_key => "A User",
-      "groups" => ["A", "B", "C"]
+      "groups" => ["GroupA", "GroupB", "GroupC"]
     }
     if include_subject_in_attributes
       attributes[email_address_attribute_key] = "you@example.com"
@@ -52,7 +52,11 @@ class SamlIdpController < StubSamlIdp::IdpController
     if attributes.any?
       attribute_items = attributes.map { |format, value|
         if value.kind_of?(Array)
-          %[<Attribute Name="#{format}">#{value.map {|v| "<AttributeValue>#{v}</AttributeValue>" }</Attribute>]
+          generated = %[<Attribute Name="#{format}">]
+          value.map {|v| generated += %[<AttributeValue>#{v}</AttributeValue>] }
+          generated += %[</Attribute>]
+
+          generated
         else
           %[<Attribute Name="#{format}"><AttributeValue>#{value}</AttributeValue></Attribute>]
         end

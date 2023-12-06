@@ -139,7 +139,7 @@ CONFIG
 class UsersController < ApplicationController
   skip_before_action :verify_authenticity_token
   def create
-    User.create!(email: params[:email], groups: params[:groups])
+    User.create!(email: params[:email])
     head 201
   end
 end

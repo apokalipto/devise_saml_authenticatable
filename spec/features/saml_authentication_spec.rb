@@ -45,6 +45,7 @@ describe "SAML Authentication", type: :feature do
       click_on "Sign in"
       expect(page).to have_content("you@example.com")
       expect(page).to have_content("A User")
+      expect(page).to have_content("GroupA,GroupB,GroupC")
       expect(current_url).to eq("http://localhost:8020/")
     end
 
