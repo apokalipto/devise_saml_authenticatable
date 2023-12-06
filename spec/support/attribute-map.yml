@@ -34,3 +34,9 @@
 "email":
   "resource_key": "email"
   "attribute_type": "single"
+"groups":
+  "resource_key": "groups"
+  "attribute_type": "multi"
+"multiple_but_single":
+  "resource_key": "multiple_but_single"
+  "attribute_type": "single"

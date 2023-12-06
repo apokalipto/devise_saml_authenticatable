@@ -9,7 +9,9 @@ describe SamlAuthenticatable::SamlMappedAttributes do
     {
       "first_name" => ["John"],
       "last_name"=> ["Smith"],
-      "email"=> ["john.smith@example.com"]
+      "email"=> ["john.smith@example.com"],
+      "groups" => ["admin", "reporting"],
+      "multiple_but_single" => ["1", "2", "3"],
     }
   end
 
@@ -27,7 +29,7 @@ describe SamlAuthenticatable::SamlMappedAttributes do
       saml_keys = ['urn:mace:dir:attribute-def:first_name', 'first_name', 'firstName', 'firstname']
 
       saml_keys.each do |saml_key|
-        include_examples 'correctly maps the value of the resource key', saml_key, 'first_name', ['John']
+        include_examples 'correctly maps the value of the resource key', saml_key, 'first_name', 'John'
       end
     end
 
@@ -35,7 +37,7 @@ describe SamlAuthenticatable::SamlMappedAttributes do
       saml_keys = ['urn:mace:dir:attribute-def:last_name', 'last_name', 'lastName', 'lastname']
 
       saml_keys.each do |saml_key|
-        include_examples 'correctly maps the value of the resource key', saml_key, 'last_name', ['Smith']
+        include_examples 'correctly maps the value of the resource key', saml_key, 'last_name', 'Smith'
       end
     end
 
@@ -43,17 +45,25 @@ describe SamlAuthenticatable::SamlMappedAttributes do
       saml_keys = ['urn:mace:dir:attribute-def:email', 'email_address', 'emailAddress', 'email']
 
       saml_keys.each do |saml_key|
-        include_examples 'correctly maps the value of the resource key', saml_key, 'email', ['john.smith@example.com']
+        include_examples 'correctly maps the value of the resource key', saml_key, 'email', 'john.smith@example.com'
       end
     end
 
     context 'multiple groups' do
-     saml_keys = ['urn:mace:dir:attribute-def:email', 'email_address', 'emailAddress', 'email']
+     saml_keys = ['groups']
 
       saml_keys.each do |saml_key|
-        include_examples 'correctly maps the value of the resource key', saml_key, 'email', ['john.smith@example.com']
+        include_examples 'correctly maps the value of the resource key', saml_key, 'groups', ["admin", "reporting"]
       end
     end
 
+
+    context 'multiple values, but configured as single' do
+     saml_keys = ['multiple_but_single']
+
+      saml_keys.each do |saml_key|
+        include_examples 'correctly maps the value of the resource key', saml_key, 'multiple_but_single', "1"
+      end
+    end
   end
 end

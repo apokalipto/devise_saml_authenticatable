@@ -20,8 +20,6 @@ module SamlAuthenticatable
       attribute_map_for_key = @attribute_map.select { |_, config| String(config["resource_key"]) == str_key }
 
       saml_value = nil
-
-      # Find the first non-nil value
       attribute_map_for_key.each_pair do |saml_key, config|
         saml_value = value_by_saml_attribute_key(saml_key, config)
 
@@ -32,7 +30,12 @@ module SamlAuthenticatable
     end
 
     def value_by_saml_attribute_key(key, config)
-      @attributes.send(config["attribute_type"], String(key))
+      case config["attribute_type"]
+      when "single"
+        return @attributes[String(key)]&.first
+      when "multi"
+        return @attributes[String(key)]
+      end
     end
   end
 end
