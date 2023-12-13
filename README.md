@@ -225,6 +225,9 @@ If you only have one IdP, you can use the config file above, or just return a si
   end
 ```
 
+If you are mapping authorisation *groups* or any other array of values as some providers render (ie: Okta), be aware of [ruby-saml's `single_value_compatibility`](https://github.com/SAML-Toolkits/ruby-saml#retrieving-attributes).
+
+
 ## IdP Settings Adapter
 
 Implementing a custom settings adapter allows you to support multiple Identity Providers, and dynamic application domains with the request object.
