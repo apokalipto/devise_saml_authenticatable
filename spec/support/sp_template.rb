@@ -139,8 +139,8 @@ end
 
   rake "db:create"
   rake "db:migrate"
-  rake "db:create", env: "production"
-  rake "db:migrate", env: "production"
+  rake "db:create", env: "test"
+  rake "db:migrate", env: "test"
 
   # Remove any specs so that future RSpec runs don't try to also run these
   run 'rm -rf spec'
