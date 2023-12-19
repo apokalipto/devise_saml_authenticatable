@@ -1,6 +1,8 @@
 module SamlAuthenticatable
   class SamlMappedAttributes
     def initialize(attributes, attribute_map)
+      raise ArgumentError.new("Expected OneLogin::RubySaml::Attributes, got #{attributes.class.name}") unless attributes.kind_of?(OneLogin::RubySaml::Attributes)
+
       @attributes = attributes
       @attribute_map = attribute_map
     end
