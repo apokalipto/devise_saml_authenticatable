@@ -6,11 +6,11 @@ describe SamlAuthenticatable::SamlMappedAttributes do
   let(:attribute_map_file) { File.join(File.dirname(__FILE__), '../support/attribute-map.yml') }
   let(:attribute_map) { YAML.load(File.read(attribute_map_file)) }
   let(:saml_attributes) do
-    {
+    OneLogin::RubySaml::Attributes.new({
       "first_name" => ["John"],
       "last_name"=>["Smith"],
       "email"=>["john.smith@example.com"]
-    }
+    })
   end
 
   describe "#value_by_resource_key" do
