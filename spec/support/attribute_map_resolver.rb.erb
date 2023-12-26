@@ -6,6 +6,7 @@ class AttributeMapResolver < DeviseSamlAuthenticatable::DefaultAttributeMapResol
       {
         "myemailaddress" => {"resource_key" => "email", "attribute_type" => "single"},
         "myname" => {"resource_key" => "name", "attribute_type" => "single"},
+        "groups" => {"resource_key" => "groups", "attribute_type" => "multi"}
       }
     else
       {}
