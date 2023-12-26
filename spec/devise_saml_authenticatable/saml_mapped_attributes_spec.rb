@@ -14,11 +14,20 @@ describe SamlAuthenticatable::SamlMappedAttributes do
   end
 
   describe "#value_by_resource_key" do
+    before do
+      @single_value_compatibility = OneLogin::RubySaml::Attributes.single_value_compatibility
+      OneLogin::RubySaml::Attributes.single_value_compatibility = false
+    end
+
+    after do
+      OneLogin::RubySaml::Attributes.single_value_compatibility = @single_value_compatibility
+    end
+
     RSpec.shared_examples "correctly maps the value of the resource key" do |saml_key, resource_key, expected_value|
       subject(:perform) { instance.value_by_resource_key(resource_key) }
 
       it "correctly maps the resource key, #{resource_key}, to the value of the '#{saml_key}' SAML key" do
-        saml_attributes[saml_key] = saml_attributes.delete(resource_key)
+        saml_attributes[saml_key] = saml_attributes.to_h.delete(resource_key)
         expect(perform).to eq(expected_value)
       end
     end
