@@ -11,7 +11,7 @@ describe SamlAuthenticatable::SamlMappedAttributes do
       "last_name"=> ["Smith"],
       "email"=> ["john.smith@example.com"],
       "groups" => ["admin", "reporting"],
-      "multiple_but_single" => ["1", "2", "3"],
+      "multiple_but_single" => ["1", "2", "3"]
     })
   end
 
@@ -20,7 +20,7 @@ describe SamlAuthenticatable::SamlMappedAttributes do
       subject(:perform) { instance.value_by_resource_key(resource_key) }
 
       it "correctly maps the resource key, #{resource_key}, to the value of the '#{saml_key}' SAML key" do
-        saml_attributes[saml_key] = saml_attributes.delete(resource_key)
+        saml_attributes[saml_key] = saml_attributes.to_h.delete(resource_key)
         expect(perform).to eq(expected_value)
       end
     end
@@ -56,7 +56,6 @@ describe SamlAuthenticatable::SamlMappedAttributes do
         include_examples 'correctly maps the value of the resource key', saml_key, 'groups', ["admin", "reporting"]
       end
     end
-
 
     context 'multiple values, but configured as single' do
      saml_keys = ['multiple_but_single']
