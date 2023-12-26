@@ -38,6 +38,8 @@ describe "SAML Authentication", type: :feature do
     end
 
     it "creates a user on the SP from the IdP attributes" do
+      # In SamlIdpController#idp_make_saml_response, we have setup the expected values.
+
       visit 'http://localhost:8020/'
       expect(current_url).to match(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
       fill_in "Email", with: "you@example.com"
@@ -45,6 +47,7 @@ describe "SAML Authentication", type: :feature do
       click_on "Sign in"
       expect(page).to have_content("you@example.com")
       expect(page).to have_content("A User")
+
       expect(page).to have_content("GroupA")
       expect(page).to have_content("GroupB")
       expect(page).to have_content("GroupC")

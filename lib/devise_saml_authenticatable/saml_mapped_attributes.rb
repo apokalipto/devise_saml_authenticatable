@@ -7,6 +7,10 @@ module SamlAuthenticatable
       @attribute_map = attribute_map
     end
 
+    def unmapped_keys
+      @attributes.attributes.keys - @attribute_map.keys
+    end
+
     def saml_attribute_keys
       @attribute_map.keys
     end
