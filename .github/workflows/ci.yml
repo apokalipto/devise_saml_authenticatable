@@ -28,6 +28,9 @@ jobs:
           - ruby: "2.6"
             gemfile: Gemfile
             bundler: "2"
+          - ruby: "2.7"
+            gemfile: Gemfile
+            bundler: "2"
           - ruby: "3.0"
             gemfile: spec/support/Gemfile.rails5.2
             bundler: "2"
