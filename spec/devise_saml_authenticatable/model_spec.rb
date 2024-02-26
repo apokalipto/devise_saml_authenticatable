@@ -46,8 +46,8 @@ describe Devise::Models::SamlAuthenticatable do
     Class.new(::DeviseSamlAuthenticatable::DefaultAttributeMapResolver) do
       def attribute_map
         {
-          "saml-email-format" => "email",
-          "saml-name-format" => "name",
+          "saml-email-format" => { "resource_key" => "email", "attribute_type" => "single" },
+          "saml-name-format" => { "resource_key" => "name", "attribute_type" => "single"  },
         }
       end
     end
