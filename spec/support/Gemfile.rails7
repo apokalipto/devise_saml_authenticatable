@@ -6,7 +6,7 @@ gemspec path: '../..'
 group :test do
   gem 'rake'
   gem 'rspec', '~> 3.0'
-  gem 'rails', '~> 6.0.0'
+  gem 'rails', '~> 7.0.0'
   gem 'rspec-rails', '~> 5.0'
   gem 'sqlite3', '~> 1.4.0'
   gem 'capybara'
@@ -14,5 +14,11 @@ group :test do
 
   if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new("3.0")
     gem 'webrick'
+  end
+
+  if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new("3.1")
+    gem 'net-smtp', require: false
+    gem 'net-imap', require: false
+    gem 'net-pop', require: false
   end
 end

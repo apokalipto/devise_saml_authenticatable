@@ -6,7 +6,7 @@ Gem::Specification.new do |gem|
   gem.email         = ["Josef.Sauter@gmail.com"]
   gem.description   = %q{SAML Authentication for devise}
   gem.summary       = %q{SAML Authentication for devise }
-  gem.homepage      = ""
+  gem.homepage      = "https://github.com/apokalipto/devise_saml_authenticatable"
   gem.license     = "MIT"
 
   gem.files         = `git ls-files`.split($\)
@@ -16,6 +16,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = DeviseSamlAuthenticatable::VERSION
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
+  gem.required_ruby_version = ">= 2.6.0"
 
   gem.add_dependency("devise","> 2.0.0")
   gem.add_dependency("ruby-saml","~> 1.7")
