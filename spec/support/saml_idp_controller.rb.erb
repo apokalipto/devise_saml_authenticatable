@@ -103,10 +103,7 @@ class SamlIdpController < StubSamlIdp::IdpController
   def sp_sign_out
     idp_slo_authenticate(params[:name_id])
     saml_slo_request = encode_SAML_SLO_Request("you@example.com")
-    uri = URI.parse("http://localhost:8020/users/saml/idp_sign_out")
-    require 'net/http'
-    Net::HTTP.post_form(uri, {"SAMLRequest" => saml_slo_request})
-    head :no_content
+    redirect_to "http://localhost:8020/users/saml/idp_sign_out?SAMLRequest=#{URI.encode_www_form_component(saml_slo_request)}"
   end
 
   def idp_slo_authenticate(email)
