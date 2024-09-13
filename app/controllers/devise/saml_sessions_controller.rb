@@ -23,10 +23,11 @@ class Devise::SamlSessionsController < Devise::SessionsController
 
   def idp_sign_out
     if params[:SAMLRequest] && Devise.saml_session_index_key
+      Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name)
+      session[Devise.saml_session_index_key] = nil
+
       saml_config = saml_config(get_idp_entity_id(params), request)
       logout_request = OneLogin::RubySaml::SloLogoutrequest.new(params[:SAMLRequest], settings: saml_config)
-      resource_class.reset_session_key_for(logout_request.name_id)
-
       redirect_to generate_idp_logout_response(saml_config, logout_request.id), allow_other_host: true
     elsif params[:SAMLResponse]
       # Currently Devise handles the session invalidation when the request is made.
@@ -56,7 +57,7 @@ class Devise::SamlSessionsController < Devise::SessionsController
 
     @name_identifier_value_for_sp_initiated_logout = Devise.saml_name_identifier_retriever.call(current_user)
     if Devise.saml_session_index_key
-      @sessionindex_for_sp_initiated_logout = current_user.public_send(Devise.saml_session_index_key)
+      @sessionindex_for_sp_initiated_logout = session[Devise.saml_session_index_key]
     end
   end
 
