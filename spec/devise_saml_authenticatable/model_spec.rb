@@ -20,7 +20,7 @@ describe Devise::Models::SamlAuthenticatable do
 
     # Fake out ActiveRecord and Devise API to satisfy verifiable mocks
     class << self
-      def where(*args); end
+      def find_by(*args); end
       def logger; end
     end
   end
@@ -64,12 +64,12 @@ describe Devise::Models::SamlAuthenticatable do
 
   it "looks up the user by the configured default user key" do
     user = Model.new(new_record: false)
-    expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
+    expect(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(user)
     expect(Model.authenticate_with_saml(response, nil)).to eq(user)
   end
 
   it "returns nil if it cannot find a user" do
-    expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
+    expect(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(nil)
     expect(Model.authenticate_with_saml(response, nil)).to be_nil
   end
 
@@ -83,12 +83,12 @@ describe Devise::Models::SamlAuthenticatable do
 
     it "looks up the user by the configured default user key" do
       user = Model.new(new_record: false)
-      expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
+      expect(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(user)
       expect(Model.authenticate_with_saml(response, nil)).to eq(user)
     end
 
     it "returns nil if it cannot find a user" do
-      expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
+      expect(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(nil)
       expect(Model.authenticate_with_saml(response, nil)).to be_nil
     end
 
@@ -98,11 +98,37 @@ describe Devise::Models::SamlAuthenticatable do
       end
 
       it "creates and returns a new user with the name identifier and given attributes" do
-        expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
+        expect(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(nil)
         model = Model.authenticate_with_saml(response, nil)
         expect(model.email).to eq('user@example.com')
         expect(model.name).to  eq('A User')
         expect(model.saved).to be(true)
+      end
+    end
+
+    context "when configured to create a user by a proc and the user is not found" do
+      before do
+        create_user_proc = -> (model_class, _saml_response, auth_value) { model_class == Model && auth_value == 'user@example.com' }
+        allow(Devise).to receive(:saml_create_user).and_return(create_user_proc)
+      end
+
+      context "when the proc returns true" do
+        it "creates and returns a new user with the name identifier and given attributes" do
+          expect(Model).to receive(:find_by).with({ email: name_id }).and_return(nil)
+          model = Model.authenticate_with_saml(response, nil)
+          expect(model.email).to eq('user@example.com')
+          expect(model.name).to  eq('A User')
+          expect(model.saved).to be(true)
+        end
+      end
+
+      context "when the proc returns false" do
+        let(:name_id) { 'do_not_create@example.com' }
+
+        it "does not creates new user" do
+          expect(Model).to receive(:find_by).with({ email: name_id }).and_return(nil)
+          expect(Model.authenticate_with_saml(response, nil)).to be_nil
+        end
       end
     end
 
@@ -113,14 +139,45 @@ describe Devise::Models::SamlAuthenticatable do
 
       it "creates and returns a new user with the name identifier and given attributes" do
         user = Model.new(email: "old_mail@mail.com", name: "old name", new_record: false)
-        expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
+        expect(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(user)
         model = Model.authenticate_with_saml(response, nil)
         expect(model.email).to eq('user@example.com')
         expect(model.name).to  eq('A User')
         expect(model.saved).to be(true)
       end
     end
+
+    context "when configured to update a user by a proc and the user is found" do
+      let(:user) { Model.new(email: 'old_mail@mail.com', name: 'old name', new_record: false) }
+
+      before do
+        update_user_proc = -> (model_class, _saml_response, auth_value) { model_class == Model && auth_value == 'user@example.com' }
+        allow(Devise).to receive(:saml_update_user).and_return(update_user_proc)
+      end
+
+      context "when the proc returns true" do
+        it "updates user with given attributes" do
+          expect(Model).to receive(:find_by).with({ email: name_id }).and_return(user)
+          model = Model.authenticate_with_saml(response, nil)
+          expect(model.email).to eq('user@example.com')
+          expect(model.name).to  eq('A User')
+          expect(model.saved).to be(true)
+        end
+      end
+
+      context "when the proc returns false" do
+        let(:name_id) { 'do_not_update@example.com' }
+
+        it "does not update user" do
+          expect(Model).to receive(:find_by).with({ email: name_id }).and_return(user)
+          model = Model.authenticate_with_saml(response, nil)
+          expect(model.email).to eq('old_mail@mail.com')
+          expect(model.name).to  eq('old name')
+        end
+      end
+    end
   end
+
 
   context "when configured to create an user and the user is not found" do
     before do
@@ -128,11 +185,40 @@ describe Devise::Models::SamlAuthenticatable do
     end
 
     it "creates and returns a new user with the given attributes" do
-      expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
+      expect(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(nil)
       model = Model.authenticate_with_saml(response, nil)
       expect(model.email).to eq('user@example.com')
       expect(model.name).to  eq('A User')
       expect(model.saved).to be(true)
+    end
+  end
+
+  context "when configured to create a user by a proc and the user is not found" do
+    let(:create_user_proc) { -> (_model_class, saml_response, _auth_value) { saml_response.raw_response.issuers.first == 'to_create_idp' } }
+
+    before do
+      allow(Devise).to receive(:saml_create_user).and_return(create_user_proc)
+    end
+
+    context "when the proc returns true" do
+      let(:response) { double(:response, issuers: ['to_create_idp'], attributes: attributes, name_id: name_id) }
+
+      it "creates and returns a new user with the name identifier and given attributes" do
+        expect(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(nil)
+        model = Model.authenticate_with_saml(response, nil)
+        expect(model.email).to eq('user@example.com')
+        expect(model.name).to  eq('A User')
+        expect(model.saved).to be(true)
+      end
+    end
+
+    context "when the proc returns false" do
+      let(:response) { double(:response, issuers: ['do_not_create_idp'], attributes: attributes, name_id: name_id) }
+
+      it "does not creates new user" do
+        expect(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(nil)
+        expect(Model.authenticate_with_saml(response, nil)).to be_nil
+      end
     end
   end
 
@@ -142,17 +228,49 @@ describe Devise::Models::SamlAuthenticatable do
     end
 
     it "returns nil if the user is not found" do
-      expect(Model).to receive(:where).with(email: 'user@example.com').and_return([])
+      expect(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(nil)
       expect(Model.authenticate_with_saml(response, nil)).to be_nil
     end
 
     it "updates the attributes if the user is found" do
       user = Model.new(email: "old_mail@mail.com", name: "old name", new_record: false)
-      expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
+      expect(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(user)
       model = Model.authenticate_with_saml(response, nil)
       expect(model.email).to eq('user@example.com')
       expect(model.name).to  eq('A User')
       expect(model.saved).to be(true)
+    end
+  end
+
+  context "when configured to update a user by a proc and the user is found" do
+    let(:user) { Model.new(email: 'old_mail@mail.com', name: 'old name', new_record: false) }
+    let(:update_user_proc) { -> (_model_class, saml_response, _auth_value) { saml_response.raw_response.issuers.first == 'to_update_idp' } }
+
+    before do
+      allow(Devise).to receive(:saml_update_user).and_return(update_user_proc)
+    end
+
+    context "when the proc returns true" do
+      let(:response) { double(:response, issuers: ['to_update_idp'], attributes: attributes, name_id: name_id) }
+
+      it "updates user with given attributes" do
+        expect(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(user)
+        model = Model.authenticate_with_saml(response, nil)
+        expect(model.email).to eq('user@example.com')
+        expect(model.name).to  eq('A User')
+        expect(model.saved).to be(true)
+      end
+    end
+
+    context "when the proc returns false" do
+      let(:response) { double(:response, issuers: ['do_not_update_idp'], attributes: attributes, name_id: name_id) }
+
+      it "does not update user" do
+        expect(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(user)
+        model = Model.authenticate_with_saml(response, nil)
+        expect(model.email).to eq('old_mail@mail.com')
+        expect(model.name).to  eq('old name')
+      end
     end
   end
 
@@ -164,7 +282,7 @@ describe Devise::Models::SamlAuthenticatable do
 
       it "looks up the user with a downcased value" do
         user = Model.new(new_record: false)
-        expect(Model).to receive(:where).with(email: 'upper@example.com').and_return([user])
+        expect(Model).to receive(:find_by).with({ email: 'upper@example.com' }).and_return(user)
         expect(Model.authenticate_with_saml(response, nil)).to eq(user)
       end
     end
@@ -202,7 +320,7 @@ describe Devise::Models::SamlAuthenticatable do
       end
 
       it "returns the user" do
-        expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
+        expect(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(user)
         expect(Model.authenticate_with_saml(response, nil)).to eq(user)
       end
     end
@@ -213,7 +331,7 @@ describe Devise::Models::SamlAuthenticatable do
       end
 
       it "returns nil" do
-        expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
+        expect(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(user)
         expect(Model.authenticate_with_saml(response, nil)).to be_nil
       end
     end
@@ -236,7 +354,7 @@ describe Devise::Models::SamlAuthenticatable do
       end
 
       it "returns the user" do
-        expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
+        expect(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(user)
         expect(Model.authenticate_with_saml(response, nil)).to eq(user)
       end
     end
@@ -247,7 +365,7 @@ describe Devise::Models::SamlAuthenticatable do
       end
 
       it "returns nil" do
-        expect(Model).to receive(:where).with(email: 'user@example.com').and_return([user])
+        expect(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(user)
         expect(Model.authenticate_with_saml(response, nil)).to be_nil
       end
     end
@@ -294,7 +412,7 @@ describe Devise::Models::SamlAuthenticatable do
     end
 
     def configure_hook(&block)
-      allow(Model).to receive(:where).with(email: 'user@example.com').and_return([])
+      allow(Model).to receive(:find_by).with({ email: 'user@example.com' }).and_return(nil)
       allow(Devise).to receive(:saml_default_user_key).and_return(:email)
       allow(Devise).to receive(:saml_create_user).and_return(true)
       allow(Devise).to receive(:saml_update_resource_hook).and_return(block)
@@ -305,7 +423,7 @@ describe Devise::Models::SamlAuthenticatable do
     let(:name_id) { 'SomeUsername' }
 
     it "can replicate the default behaviour for a new user in a custom locator" do
-      allow(Model).to receive(:where).with(email: attributes['saml-email-format']).and_return([])
+      allow(Model).to receive(:find_by).with({ email: attributes['saml-email-format'] }).and_return(nil)
 
       configure_hook do |model, saml_response, auth_value|
         Devise.saml_default_resource_locator.call(model, saml_response, auth_value)
@@ -321,7 +439,7 @@ describe Devise::Models::SamlAuthenticatable do
       user = Model.new(email: attributes['saml-email-format'], name: attributes['saml-name-format'])
       user.save!
 
-      allow(Model).to receive(:where).with(email: attributes['saml-email-format']).and_return([user])
+      allow(Model).to receive(:find_by).with({ email: attributes['saml-email-format'] }).and_return(user)
 
       configure_hook do |model, saml_response, auth_value|
         Devise.saml_default_resource_locator.call(model, saml_response, auth_value)
@@ -335,11 +453,11 @@ describe Devise::Models::SamlAuthenticatable do
     end
 
     it "can change the default behaviour for a new user from the saml response" do
-      allow(Model).to receive(:where).with(foo: attributes['saml-email-format'], bar: name_id).and_return([])
+      allow(Model).to receive(:find_by).with({ foo: attributes['saml-email-format'], bar: name_id }).and_return(nil)
 
       configure_hook do |model, saml_response, auth_value|
         name_id = saml_response.raw_response.name_id
-        model.where(foo: auth_value, bar: name_id).first
+        model.find_by(foo: auth_value, bar: name_id)
       end
 
       new_user = Model.authenticate_with_saml(response, nil)
@@ -352,11 +470,11 @@ describe Devise::Models::SamlAuthenticatable do
       user = Model.new(email: attributes['saml-email-format'], name: attributes['saml-name-format'])
       user.save!
 
-      allow(Model).to receive(:where).with(foo: attributes['saml-email-format'], bar: name_id).and_return([user])
+      allow(Model).to receive(:find_by).with({ foo: attributes['saml-email-format'], bar: name_id }).and_return(user)
 
       configure_hook do |model, saml_response, auth_value|
         name_id = saml_response.raw_response.name_id
-        model.where(foo: auth_value, bar: name_id).first
+        model.find_by(foo: auth_value, bar: name_id)
       end
 
       new_user = Model.authenticate_with_saml(response, nil)

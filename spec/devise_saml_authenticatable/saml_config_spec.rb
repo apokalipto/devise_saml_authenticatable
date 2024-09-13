@@ -10,7 +10,7 @@ describe DeviseSamlAuthenticatable::SamlConfig do
   context "when config/idp.yml does not exist" do
     before do
       allow(Rails).to receive(:root).and_return("/railsroot")
-      allow(File).to receive(:exists?).with("/railsroot/config/idp.yml").and_return(false)
+      allow(File).to receive(:exist?).with("/railsroot/config/idp.yml").and_return(false)
     end
 
     it "is the global devise SAML config" do
@@ -40,7 +40,7 @@ describe DeviseSamlAuthenticatable::SamlConfig do
                 assertion_consumer_service_url: "acs_url",
                 assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
                 name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
-                issuer: "sp_issuer",
+                sp_entity_id: "sp_issuer",
                 idp_entity_id: "http://www.example.com",
                 authn_context: "",
                 idp_cert: "idp_cert"
@@ -62,7 +62,7 @@ describe DeviseSamlAuthenticatable::SamlConfig do
                 assertion_consumer_service_url: "acs_url_other",
                 assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST_other",
                 name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress_other",
-                issuer: "sp_issuer_other",
+                sp_entity_id: "sp_issuer_other",
                 idp_entity_id: "http://www.example.com_other",
                 authn_context: "_other",
                 idp_cert: "idp_cert_other"
@@ -136,7 +136,7 @@ environment:
   idp_cert_fingerprint: idp_cert_fingerprint
   idp_cert_fingerprint_algorithm: idp_cert_fingerprint_algorithm
   idp_entity_id: idp_entity_id
-  issuer: issuer
+  sp_entity_id: issuer
   name_identifier_format: name_identifier_format
   name_identifier_value: name_identifier_value
   passive: passive
@@ -158,7 +158,7 @@ TARGET_URLS
     before do
       allow(Rails).to receive(:env).and_return("environment")
       allow(Rails).to receive(:root).and_return("/railsroot")
-      allow(File).to receive(:exists?).with("/railsroot/config/idp.yml").and_return(true)
+      allow(File).to receive(:exist?).with("/railsroot/config/idp.yml").and_return(true)
       allow(File).to receive(:read).with("/railsroot/config/idp.yml").and_return(idp_yaml)
     end
 
@@ -187,7 +187,7 @@ TARGET_URLS
         expect(saml_config.idp_slo_target_url).to eq('idp_slo_service_url')
         expect(saml_config.idp_sso_target_url).to eq('idp_sso_service_url')
       })
-      expect(saml_config.issuer).to eq('issuer')
+      expect(saml_config.sp_entity_id).to eq('issuer')
       expect(saml_config.name_identifier_format).to eq('name_identifier_format')
       expect(saml_config.name_identifier_value).to eq('name_identifier_value')
       expect(saml_config.passive).to eq('passive')

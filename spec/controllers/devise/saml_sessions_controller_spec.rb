@@ -10,13 +10,12 @@ class DeviseController < ApplicationController
   end
 
   def resource_name
-    "users"
+    'users'
   end
 
-  def require_no_authentication
-  end
+  def require_no_authentication; end
 
-  def set_flash_message!(key, kind, options = {})
+  def set_flash_message!(key, kind, _options = {})
     flash[key] = I18n.t("devise.sessions.#{kind}")
   end
 end
@@ -24,7 +23,7 @@ end
 class Devise::SessionsController < DeviseController
   def destroy
     sign_out
-    redirect_to after_sign_out_path_for(:user)
+    redirect_to after_sign_out_path_for(:user), allow_other_host: true
   end
 end
 
@@ -33,110 +32,104 @@ require_relative '../../../app/controllers/devise/saml_sessions_controller'
 describe Devise::SamlSessionsController, type: :controller do
   include RubySamlSupport
 
-  let(:idp_providers_adapter) { spy("Stub IDPSettings Adaptor") }
+  let(:idp_providers_adapter) { spy('Stub IDPSettings Adaptor') }
 
   before do
-    @request.env["devise.mapping"] = Devise.mappings[:user]
+    @request.env['devise.mapping'] = Devise.mappings[:user]
     settings = {
-      assertion_consumer_service_url: "acs_url",
-      assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
-      name_identifier_format: "urn:oasis:names:tc:SAML:2.0:nameid-format:transient",
-      issuer: "sp_issuer",
-      idp_entity_id: "http://www.example.com",
-      authn_context: "",
-      idp_cert: "idp_cert"
+      assertion_consumer_service_url: 'acs_url',
+      assertion_consumer_service_binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST',
+      name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
+      sp_entity_id: 'sp_issuer',
+      idp_entity_id: 'http://www.example.com',
+      authn_context: '',
+      idp_cert: 'idp_cert'
     }
     with_ruby_saml_1_12_or_greater(proc {
       settings.merge!(
-        idp_slo_service_url: "http://idp_slo_url",
-        idp_sso_service_url: "http://idp_sso_url",
+        idp_slo_service_url: 'http://idp_slo_url',
+        idp_sso_service_url: 'http://idp_sso_url'
       )
     }, else_do: proc {
       settings.merge!(
-        idp_slo_target_url: "http://idp_slo_url",
-        idp_sso_target_url: "http://idp_sso_url",
+        idp_slo_target_url: 'http://idp_slo_url',
+        idp_sso_target_url: 'http://idp_sso_url'
       )
     })
     allow(idp_providers_adapter).to receive(:settings).and_return(settings)
   end
 
-  before do
-    if Rails::VERSION::MAJOR < 5 && Gem::Version.new(RUBY_VERSION) > Gem::Version.new("2.6")
-      # we still want to support Rails 4
-      # patch tests using snippet from https://github.com/rails/rails/issues/34790#issuecomment-483607370
-      class ActionController::TestResponse < ActionDispatch::TestResponse
-        def recycle!
-          @mon_mutex_owner_object_id = nil
-          @mon_mutex = nil
-          initialize
+  describe '#new' do
+    let(:saml_response) do
+      File.read(File.join(File.dirname(__FILE__), '../../support', 'response_encrypted_nameid.xml.base64'))
+    end
+
+    subject(:do_get) do
+      get :new, params: { 'SAMLResponse' => saml_response }
+    end
+
+    context 'when using the default saml config' do
+      it 'redirects to the IdP SSO target url' do
+        do_get
+        expect(response).to redirect_to(%r{\Ahttp://localhost:8009/saml/auth\?SAMLRequest=})
+      end
+
+      it 'stores saml_transaction_id in the session' do
+        do_get
+        if OneLogin::RubySaml::Authrequest.public_instance_methods.include?(:request_id)
+          expect(session[:saml_transaction_id]).to be_present
         end
       end
     end
-  end
 
-  describe '#new' do
-    let(:saml_response) { File.read(File.join(File.dirname(__FILE__), '../../support', 'response_encrypted_nameid.xml.base64')) }
-
-    subject(:do_get) {
-      if Rails::VERSION::MAJOR > 4
-        get :new, params: {"SAMLResponse" => saml_response}
-      else
-        get :new, "SAMLResponse" => saml_response
-      end
-    }
-
-    context "when using the default saml config" do
-      it "redirects to the IdP SSO target url" do
-        do_get
-        expect(response).to redirect_to(%r(\Ahttp://localhost:8009/saml/auth\?SAMLRequest=))
-      end
-    end
-
-    context "with a specified idp" do
+    context 'with a specified idp' do
       before do
         Devise.idp_settings_adapter = idp_providers_adapter
       end
 
-      it "redirects to the associated IdP SSO target url" do
+      it 'redirects to the associated IdP SSO target url' do
         do_get
-        expect(response).to redirect_to(%r(\Ahttp://idp_sso_url\?SAMLRequest=))
+        expect(response).to redirect_to(%r{\Ahttp://idp_sso_url\?SAMLRequest=})
       end
 
-      it "uses the DefaultIdpEntityIdReader" do
-        expect(DeviseSamlAuthenticatable::DefaultIdpEntityIdReader).to receive(:entity_id)
+      it 'stores saml_transaction_id in the session' do
         do_get
-        expect(idp_providers_adapter).to have_received(:settings).with(nil)
-      end
-
-      context "with a relay_state lambda defined" do
-        let(:relay_state) { ->(request) { "123" } }
-
-        it "includes the RelayState param in the request to the IdP" do
-          expect(Devise).to receive(:saml_relay_state).at_least(:once).and_return(relay_state)
-          do_get
-          expect(response).to redirect_to(%r(\Ahttp://idp_sso_url\?SAMLRequest=.*&RelayState=123))
+        if OneLogin::RubySaml::Authrequest.public_instance_methods.include?(:request_id)
+          expect(session[:saml_transaction_id]).to be_present
         end
       end
 
-      context "with a specified idp entity id reader" do
+      context 'with a relay_state lambda defined' do
+        let(:relay_state) { ->(_request) { '123' } }
+
+        it 'includes the RelayState param in the request to the IdP' do
+          expect(Devise).to receive(:saml_relay_state).at_least(:once).and_return(relay_state)
+          do_get
+          expect(response).to redirect_to(%r{\Ahttp://idp_sso_url\?SAMLRequest=.*&RelayState=123})
+        end
+      end
+
+      context 'with a specified idp entity id reader' do
         class OurIdpEntityIdReader
           def self.entity_id(params)
             params[:entity_id]
           end
         end
+        let(:entity_id) {'http://www.example.com'}
+        let(:request_params) do
+          ActionController::Parameters.new(
+            { entity_id:, controller: 'devise/saml_sessions', action: 'new'}
+          )
+        end
 
-        subject(:do_get) {
-          if Rails::VERSION::MAJOR > 4
-            get :new, params: {entity_id: "http://www.example.com"}
-          else
-            get :new, entity_id: "http://www.example.com"
-          end
-        }
+        subject(:do_get) do
+          get :new, params: { entity_id: }
+        end
 
         it "redirects to the associated IdP SSO target url" do
           do_get
-          expect(idp_providers_adapter).to have_received(:settings).with("http://www.example.com")
-          expect(response).to redirect_to(%r(\Ahttp://idp_sso_url\?SAMLRequest=))
+          expect(idp_providers_adapter).to have_received(:settings).with(request_params, request)
+          expect(response).to redirect_to(%r{\Ahttp://idp_sso_url\?SAMLRequest=})
         end
       end
     end
@@ -145,7 +138,7 @@ describe Devise::SamlSessionsController, type: :controller do
   describe '#metadata' do
     let(:saml_config) { Devise.saml_config.dup }
 
-    context "with the default configuration" do
+    context 'with the default configuration' do
       it 'generates metadata' do
         get :metadata
 
@@ -156,20 +149,20 @@ describe Devise::SamlSessionsController, type: :controller do
       end
     end
 
-    context "with a specified IDP" do
-      let(:saml_config) { controller.saml_config("anything") }
+    context 'with a specified IDP' do
+      let(:saml_config) { controller.saml_config('anything') }
 
       before do
         Devise.idp_settings_adapter = idp_providers_adapter
         Devise.saml_configure do |settings|
-          settings.assertion_consumer_service_url = "http://localhost:3000/users/saml/auth"
-          settings.assertion_consumer_service_binding = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-          settings.name_identifier_format = "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
-          settings.issuer = "http://localhost:3000"
+          settings.assertion_consumer_service_url = 'http://localhost:3000/users/saml/auth'
+          settings.assertion_consumer_service_binding = 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
+          settings.name_identifier_format = 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'
+          settings.sp_entity_id = 'http://localhost:3000'
         end
       end
 
-      it "generates the same service metadata" do
+      it 'generates the same service metadata' do
         get :metadata
 
         # Remove ID that can vary across requests
@@ -183,7 +176,7 @@ describe Devise::SamlSessionsController, type: :controller do
   describe '#destroy' do
     subject { delete :destroy }
 
-    context "when user is signed out" do
+    context 'when user is signed out' do
       before do
         class Devise::SessionsController < DeviseController
           def all_signed_out?
@@ -192,45 +185,45 @@ describe Devise::SamlSessionsController, type: :controller do
         end
       end
 
-      shared_examples "not create SP initiated logout request" do
+      shared_examples 'not create SP initiated logout request' do
         it do
           expect(OneLogin::RubySaml::Logoutrequest).not_to receive(:new)
           subject
         end
       end
 
-      context "when Devise.saml_sign_out_success_url is set" do
+      context 'when Devise.saml_sign_out_success_url is set' do
         before do
-          allow(Devise).to receive(:saml_sign_out_success_url).and_return("http://localhost:8009/logged_out")
+          allow(Devise).to receive(:saml_sign_out_success_url).and_return('http://localhost:8009/logged_out')
         end
 
-        it "redirect to saml_sign_out_success_url" do
-          is_expected.to redirect_to "http://localhost:8009/logged_out"
-          expect(flash[:notice]).to eq I18n.t("devise.sessions.already_signed_out")
+        it 'redirect to saml_sign_out_success_url' do
+          is_expected.to redirect_to 'http://localhost:8009/logged_out'
+          expect(flash[:notice]).to eq I18n.t('devise.sessions.already_signed_out')
         end
 
-        it_behaves_like "not create SP initiated logout request"
+        it_behaves_like 'not create SP initiated logout request'
       end
 
-      context "when Devise.saml_sign_out_success_url is not set" do
+      context 'when Devise.saml_sign_out_success_url is not set' do
         before do
           class Devise::SessionsController < DeviseController
             def after_sign_out_path_for(_)
-              "http://localhost:8009/logged_out"
+              'http://localhost:8009/logged_out'
             end
           end
         end
 
         it "redirect to devise's after sign out path" do
-          is_expected.to redirect_to "http://localhost:8009/logged_out"
-          expect(flash[:notice]).to eq I18n.t("devise.sessions.already_signed_out")
+          is_expected.to redirect_to 'http://localhost:8009/logged_out'
+          expect(flash[:notice]).to eq I18n.t('devise.sessions.already_signed_out')
         end
 
-        it_behaves_like "not create SP initiated logout request"
+        it_behaves_like 'not create SP initiated logout request'
       end
     end
 
-    context "when user is not signed out" do
+    context 'when user is not signed out' do
       before do
         class Devise::SessionsController < DeviseController
           def all_signed_out?
@@ -240,44 +233,43 @@ describe Devise::SamlSessionsController, type: :controller do
         allow(controller).to receive(:sign_out)
       end
 
-      context "when using the default saml config" do
-        it "signs out and redirects to the IdP" do
+      context 'when using the default saml config' do
+        it 'signs out and redirects to the IdP' do
           delete :destroy
           expect(controller).to have_received(:sign_out)
-          expect(response).to redirect_to(%r(\Ahttp://localhost:8009/saml/logout\?SAMLRequest=))
+          expect(response).to redirect_to(%r{\Ahttp://localhost:8009/saml/logout\?SAMLRequest=})
         end
       end
 
-      context "when configured to use a non-transient name identifier" do
+      context 'when configured to use a non-transient name identifier' do
         before do
-          allow(Devise.saml_config).to receive(:name_identifier_format).and_return("urn:oasis:names:tc:SAML:2.0:nameid-format:persistent")
+          allow(Devise.saml_config).to receive(:name_identifier_format).and_return('urn:oasis:names:tc:SAML:2.0:nameid-format:persistent')
         end
 
-        it "includes a LogoutRequest with the name identifier and session index", :aggregate_failures do
-          controller.current_user = Struct.new(:email, :session_index).new("user@example.com", "sessionindex")
+        it 'includes a LogoutRequest with the name identifier and session index', :aggregate_failures do
+          controller.current_user = Struct.new(:email, :session_index).new('user@example.com', 'sessionindex')
 
           actual_settings = nil
           expect_any_instance_of(OneLogin::RubySaml::Logoutrequest).to receive(:create) do |_, settings|
             actual_settings = settings
-            "http://localhost:8009/saml/logout"
+            'http://localhost:8009/saml/logout'
           end
 
           delete :destroy
-          expect(actual_settings.name_identifier_value).to eq("user@example.com")
-          expect(actual_settings.sessionindex).to eq("sessionindex")
+          expect(actual_settings.name_identifier_value).to eq('user@example.com')
+          expect(actual_settings.sessionindex).to eq('sessionindex')
         end
       end
 
-      context "with a specified idp" do
+      context 'with a specified idp' do
         before do
           Devise.idp_settings_adapter = idp_providers_adapter
         end
 
-        it "redirects to the associated IdP SSO target url" do
-          expect(DeviseSamlAuthenticatable::DefaultIdpEntityIdReader).to receive(:entity_id)
+        it 'redirects to the associated IdP SSO target url' do
           delete :destroy
           expect(controller).to have_received(:sign_out)
-          expect(response).to redirect_to(%r(\Ahttp://idp_slo_url\?SAMLRequest=))
+          expect(response).to redirect_to(%r{\Ahttp://idp_slo_url\?SAMLRequest=})
         end
       end
     end
@@ -297,14 +289,10 @@ describe Devise::SamlSessionsController, type: :controller do
       expect(response.status).to eq 500
     end
 
-    context "when receiving a logout response from the IdP after redirecting an SP logout request" do
-      subject(:do_post) {
-        if Rails::VERSION::MAJOR > 4
-          post :idp_sign_out, params: {SAMLResponse: "stubbed_response"}
-        else
-          post :idp_sign_out, SAMLResponse: "stubbed_response"
-        end
-      }
+    context 'when receiving a logout response from the IdP after redirecting an SP logout request' do
+      subject(:do_post) do
+        post :idp_sign_out, params: { SAMLResponse: 'stubbed_response' }
+      end
 
       it 'accepts a LogoutResponse and redirects sign_in' do
         do_post
@@ -326,20 +314,18 @@ describe Devise::SamlSessionsController, type: :controller do
       end
     end
 
-    context "when receiving an IdP logout request" do
-      subject(:do_post) {
-        if Rails::VERSION::MAJOR > 4
-          post :idp_sign_out, params: {SAMLRequest: "stubbed_logout_request"}
-        else
-          post :idp_sign_out, SAMLRequest: "stubbed_logout_request"
-        end
-      }
+    context 'when receiving an IdP logout request' do
+      subject(:do_post) do
+        post :idp_sign_out, params: { SAMLRequest: 'stubbed_logout_request' }
+      end
 
-      let(:saml_request) { double(:slo_logoutrequest, {
-        id: 42,
-        name_id: name_id,
-        issuer: "http://www.example.com"
-      }) }
+      let(:saml_request) do
+        double(:slo_logoutrequest, {
+                 id: 42,
+                 name_id: name_id,
+                 issuer: 'http://www.example.com'
+               })
+      end
       let(:name_id) { '12312312' }
       before do
         allow(OneLogin::RubySaml::SloLogoutrequest).to receive(:new).and_return(saml_request)
@@ -352,27 +338,32 @@ describe Devise::SamlSessionsController, type: :controller do
         expect(User).to have_received(:reset_session_key_for).with(name_id)
       end
 
-      context "with a specified idp" do
-        let(:idp_entity_id) { "http://www.example.com" }
+      context 'with a specified idp' do
         before do
           Devise.idp_settings_adapter = idp_providers_adapter
         end
+        let(:request_params) do
+          ActionController::Parameters.new(
+            { SAMLRequest: "stubbed_logout_request", controller: 'devise/saml_sessions', action: 'idp_sign_out'}
+          )
+        end
 
-        it "accepts a LogoutResponse for the associated slo_target_url and redirects to sign_in" do
+        it 'accepts a LogoutResponse for the associated slo_target_url and redirects to sign_in' do
           do_post
           expect(response.status).to eq 302
-          expect(idp_providers_adapter).to have_received(:settings).with(idp_entity_id)
-          expect(response).to redirect_to "http://localhost/logout_response"
+          expect(idp_providers_adapter).to have_received(:settings).with(request_params, request)
+          expect(response).to redirect_to 'http://localhost/logout_response'
         end
       end
 
-      context "with a relay_state lambda defined" do
-        let(:relay_state) { ->(request) { "123" } }
+      context 'with a relay_state lambda defined' do
+        let(:relay_state) { ->(_request) { '123' } }
 
-        it "includes the RelayState param in the request to the IdP" do
+        it 'includes the RelayState param in the request to the IdP' do
           expect(Devise).to receive(:saml_relay_state).at_least(:once).and_return(relay_state)
           do_post
-          expect(saml_response).to have_received(:create).with(Devise.saml_config, saml_request.id, nil, {RelayState: "123"})
+          expect(saml_response).to have_received(:create).with(Devise.saml_config, saml_request.id, nil,
+                                                               { RelayState: '123' })
         end
       end
 

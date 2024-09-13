@@ -3,8 +3,21 @@ require 'net/http'
 require 'timeout'
 require 'uri'
 require 'capybara/rspec'
-require 'capybara/poltergeist'
-Capybara.default_driver = :poltergeist
+require 'selenium-webdriver'
+
+Capybara.register_driver :chrome do |app|
+  options = Selenium::WebDriver::Chrome::Options.new
+  options.add_argument('--headless')
+  options.add_argument('--allow-insecure-localhost')
+  options.add_argument('--ignore-certificate-errors')
+
+  Capybara::Selenium::Driver.new(
+    app,
+    browser: :chrome,
+    options: options,
+  )
+end
+Capybara.default_driver = :chrome
 Capybara.server = :webrick
 
 describe "SAML Authentication", type: :feature do
@@ -165,7 +178,7 @@ describe "SAML Authentication", type: :feature do
     let(:valid_destination) { "true" }
     before(:each) do
       create_app('idp', 'INCLUDE_SUBJECT_IN_ATTRIBUTES' => "false", 'VALID_DESTINATION' => valid_destination)
-      create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "true", 'SAML_FAILED_CALLBACK' => "OurSamlFailedCallbackHandler")
+      create_app('sp', 'USE_SUBJECT_TO_AUTHENTICATE' => "true", 'SAML_FAILED_CALLBACK' => '"OurSamlFailedCallbackHandler"')
 
       @idp_pid = start_app('idp', idp_port)
       @sp_pid  = start_app('sp',  sp_port)
@@ -224,7 +237,7 @@ describe "SAML Authentication", type: :feature do
   end
 
   def sign_in(entity_id: "")
-    visit "http://localhost:8020/users/saml/sign_in/?entity_id=#{URI.escape(entity_id)}"
+    visit "http://localhost:8020/users/saml/sign_in/?entity_id=#{URI.encode_www_form_component(entity_id)}"
     fill_in "Email", with: "you@example.com"
     fill_in "Password", with: "asdf"
     click_on "Sign in"

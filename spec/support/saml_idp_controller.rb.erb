@@ -1,4 +1,4 @@
-class SamlIdpController < SamlIdp::IdpController
+class SamlIdpController < StubSamlIdp::IdpController
   def new
     if session[:user_id]
       @saml_response = idp_make_saml_response(session[:user_id])
@@ -79,13 +79,8 @@ class SamlIdpController < SamlIdp::IdpController
   end
 
   # == SLO functionality, see https://github.com/lawrencepit/ruby-saml-idp/pull/10
-  <% if Rails::VERSION::MAJOR < 5 %>
-  skip_before_filter :validate_saml_request, :only => [:logout, :sp_sign_out]
-  before_filter :validate_saml_slo_request, :only => [:logout]
-  <% else %>
   skip_before_action :validate_saml_request, :only => [:logout, :sp_sign_out]
   before_action :validate_saml_slo_request, :only => [:logout]
-  <% end %>
 
   public
 
