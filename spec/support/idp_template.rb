@@ -6,7 +6,6 @@
 @valid_destination = ENV.fetch('VALID_DESTINATION', "true")
 
 gem 'stub_saml_idp'
-gem 'thin'
 
 if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new("3.1")
   gem 'net-smtp', require: false

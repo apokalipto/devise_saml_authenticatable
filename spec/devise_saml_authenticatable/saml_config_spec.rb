@@ -33,13 +33,13 @@ describe DeviseSamlAuthenticatable::SamlConfig do
 
           def self.settings(idp_entity_id)
             #some hash of stuff (by doing a fetch, in our case, but could also be a giant hash keyed by idp_entity_id)
-            if idp_entity_id == "http://www.example.com"
+            if idp_entity_id == "https://www.example.com"
               base = {
                 assertion_consumer_service_url: "acs_url",
                 assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
                 name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
                 sp_entity_id: "sp_issuer",
-                idp_entity_id: "http://www.example.com",
+                idp_entity_id: "https://www.example.com",
                 authn_context: "",
                 idp_cert: "idp_cert"
               }
@@ -55,13 +55,13 @@ describe DeviseSamlAuthenticatable::SamlConfig do
                 )
               })
               base
-            elsif idp_entity_id == "http://www.example.com_other"
+            elsif idp_entity_id == "https://www.example.com_other"
               base = {
                 assertion_consumer_service_url: "acs_url_other",
                 assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST_other",
                 name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress_other",
                 sp_entity_id: "sp_issuer_other",
-                idp_entity_id: "http://www.example.com_other",
+                idp_entity_id: "https://www.example.com_other",
                 authn_context: "_other",
                 idp_cert: "idp_cert_other"
               }
@@ -85,7 +85,7 @@ describe DeviseSamlAuthenticatable::SamlConfig do
       }
 
       context "when a specific idp_entity_id is requested" do
-        let(:idp_entity_id) { "http://www.example.com" }
+        let(:idp_entity_id) { "https://www.example.com" }
         it "uses the settings from the adapter for that idp" do
           expect(saml_config.idp_entity_id).to eq (idp_entity_id)
           with_ruby_saml_1_12_or_greater(proc {
@@ -98,7 +98,7 @@ describe DeviseSamlAuthenticatable::SamlConfig do
       end
 
       context "when another idp_entity_id is requested" do
-        let(:idp_entity_id) { "http://www.example.com_other" }
+        let(:idp_entity_id) { "https://www.example.com_other" }
         it "returns the other idp settings" do
           expect(saml_config.idp_entity_id).to eq (idp_entity_id)
           with_ruby_saml_1_12_or_greater(proc {

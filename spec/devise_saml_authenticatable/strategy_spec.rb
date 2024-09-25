@@ -62,7 +62,7 @@ describe Devise::Strategies::SamlAuthenticatable do
               assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
               name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
               sp_entity_id: "sp_issuer",
-              idp_entity_id: "http://www.example.com",
+              idp_entity_id: "https://www.example.com",
               authn_context: "",
               idp_cert: "idp_cert"
             }
