@@ -12,7 +12,6 @@ ruby_saml_version = ENV.fetch("RUBY_SAML_VERSION")
 
 gem 'devise_saml_authenticatable', path: File.expand_path("../../..", __FILE__)
 gem 'ruby-saml', ruby_saml_version
-gem 'thin'
 
 if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new("3.1")
   gem 'net-smtp', require: false
@@ -22,7 +21,10 @@ end
 
 if Rails::VERSION::MAJOR < 6
   # sqlite3 is hard-coded in Rails < 6 to v1.3.x
-  gsub_file 'Gemfile', /^gem 'sqlite3'.*$/, "gem 'sqlite3', '~> 1.3.6'"
+  gsub_file 'Gemfile', /^gem ['"]sqlite3['"].*$/, 'gem "sqlite3", "~> 1.3.6"'
+elsif Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("3.1")
+  # sqlite3 2.1 does not support Ruby 3.0
+  gsub_file 'Gemfile', /^gem ['"]sqlite3['"].*$/, 'gem "sqlite3", "~> 1.4"'
 end
 
 template File.expand_path('../attribute_map_resolver.rb.erb', __FILE__), 'app/lib/attribute_map_resolver.rb'
@@ -40,7 +42,7 @@ create_file('app/lib/our_saml_failed_callback_handler.rb', <<-CALLBACKHANDLER)
 
 class OurSamlFailedCallbackHandler
   def handle(response, strategy)
-    strategy.redirect! "http://www.example.com"
+    strategy.redirect! "https://www.example.com"
   end
 end
 CALLBACKHANDLER

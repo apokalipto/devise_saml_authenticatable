@@ -41,7 +41,7 @@ describe Devise::SamlSessionsController, type: :controller do
       assertion_consumer_service_binding: 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST',
       name_identifier_format: 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
       sp_entity_id: 'sp_issuer',
-      idp_entity_id: 'http://www.example.com',
+      idp_entity_id: 'https://www.example.com',
       authn_context: '',
       idp_cert: 'idp_cert'
     }
@@ -123,7 +123,7 @@ describe Devise::SamlSessionsController, type: :controller do
         end
 
         subject(:do_get) do
-          get :new, params: { entity_id: 'http://www.example.com' }
+          get :new, params: { entity_id: 'https://www.example.com' }
         end
 
         before do
@@ -137,7 +137,7 @@ describe Devise::SamlSessionsController, type: :controller do
 
         it 'redirects to the associated IdP SSO target url' do
           do_get
-          expect(idp_providers_adapter).to have_received(:settings).with('http://www.example.com', request)
+          expect(idp_providers_adapter).to have_received(:settings).with('https://www.example.com', request)
           expect(response).to redirect_to(%r{\Ahttp://idp_sso_url\?SAMLRequest=})
         end
       end
@@ -290,7 +290,7 @@ describe Devise::SamlSessionsController, type: :controller do
           end
 
           subject(:do_delete) do
-            delete :destroy, params: { entity_id: 'http://www.example.com' }
+            delete :destroy, params: { entity_id: 'https://www.example.com' }
           end
 
           before do
@@ -305,7 +305,7 @@ describe Devise::SamlSessionsController, type: :controller do
           it 'redirects to the associated IdP SLO target url' do
             do_delete
             expect(controller).to have_received(:sign_out)
-            expect(idp_providers_adapter).to have_received(:settings).with('http://www.example.com', request)
+            expect(idp_providers_adapter).to have_received(:settings).with('https://www.example.com', request)
             expect(response).to redirect_to(%r{\Ahttp://idp_slo_url\?SAMLRequest=})
           end
         end
@@ -361,7 +361,7 @@ describe Devise::SamlSessionsController, type: :controller do
         double(:slo_logoutrequest, {
                  id: 42,
                  name_id: name_id,
-                 issuer: 'http://www.example.com'
+                 issuer: 'https://www.example.com'
                })
       end
       let(:name_id) { '12312312' }
@@ -377,7 +377,7 @@ describe Devise::SamlSessionsController, type: :controller do
       end
 
       context 'with a specified idp' do
-        let(:idp_entity_id) { 'http://www.example.com' }
+        let(:idp_entity_id) { 'https://www.example.com' }
         before do
           Devise.idp_settings_adapter = idp_providers_adapter
         end
