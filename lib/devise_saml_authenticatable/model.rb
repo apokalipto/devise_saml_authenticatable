@@ -50,7 +50,7 @@ module Devise
                     else Devise.saml_resource_validator_hook.call(resource, decorated_response, auth_value)
                     end
             if !valid
-              logger.info("User(#{auth_value}) did not pass custom validation.")
+              logger.info("#{self.name}(#{auth_value}) did not pass custom validation.")
               return nil
             end
           end
@@ -60,10 +60,10 @@ module Devise
                         end
           if resource.nil?
             if create_user
-              logger.info("Creating user(#{auth_value}).")
+              logger.info("Creating #{self.name.downcase}(#{auth_value}).")
               resource = new
             else
-              logger.info("User(#{auth_value}) not found.  Not configured to create the user.")
+              logger.info("#{self.name}(#{auth_value}) not found. Not configured to create the #{self.name.downcase}.")
               return nil
             end
           end
