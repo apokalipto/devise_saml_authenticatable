@@ -31,6 +31,7 @@ require_relative '../../../app/controllers/devise/saml_sessions_controller'
 
 describe Devise::SamlSessionsController, type: :controller do
   include RubySamlSupport
+  include Devise::Test::ControllerHelpers
 
   let(:idp_providers_adapter) { spy('Stub IDPSettings Adaptor') }
 
@@ -256,7 +257,8 @@ describe Devise::SamlSessionsController, type: :controller do
         end
 
         it 'includes a LogoutRequest with the name identifier and session index', :aggregate_failures do
-          controller.current_user = Struct.new(:email, :session_index).new('user@example.com', 'sessionindex')
+          controller.current_user = Struct.new(:email).new('user@example.com')
+          session[Devise.saml_session_index_key] = 'sessionindex'
 
           actual_settings = nil
           expect_any_instance_of(OneLogin::RubySaml::Logoutrequest).to receive(:create) do |_, settings|
@@ -322,9 +324,10 @@ describe Devise::SamlSessionsController, type: :controller do
     end
 
     it 'returns invalid request if SAMLRequest or SAMLResponse is not passed' do
-      expect(User).not_to receive(:reset_session_key_for)
+      session[Devise.saml_session_index_key] = 'sessionindex'
       post :idp_sign_out
       expect(response.status).to eq 500
+      expect(session[Devise.saml_session_index_key]).to eq('sessionindex')
     end
 
     context 'when receiving a logout response from the IdP after redirecting an SP logout request' do
@@ -367,13 +370,13 @@ describe Devise::SamlSessionsController, type: :controller do
       let(:name_id) { '12312312' }
       before do
         allow(OneLogin::RubySaml::SloLogoutrequest).to receive(:new).and_return(saml_request)
-        allow(User).to receive(:reset_session_key_for)
+        session[Devise.saml_session_index_key] = 'sessionindex'
       end
 
       it 'direct the resource to reset the session key' do
         do_post
         expect(response).to redirect_to response_url
-        expect(User).to have_received(:reset_session_key_for).with(name_id)
+        expect(session[Devise.saml_session_index_key]).to be_nil
       end
 
       context 'with a specified idp' do
@@ -387,6 +390,7 @@ describe Devise::SamlSessionsController, type: :controller do
           expect(response.status).to eq 302
           expect(idp_providers_adapter).to have_received(:settings).with(idp_entity_id, request)
           expect(response).to redirect_to 'http://localhost/logout_response'
+          expect(session[Devise.saml_session_index_key]).to be_nil
         end
       end
 
@@ -407,7 +411,6 @@ describe Devise::SamlSessionsController, type: :controller do
         end
 
         it 'returns invalid request' do
-          expect(User).not_to receive(:reset_session_key_for).with(name_id)
           do_post
           expect(response.status).to eq 500
         end
