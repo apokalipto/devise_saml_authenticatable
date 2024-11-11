@@ -1,4 +1,5 @@
-[![Build Status](https://github.com/apokalipto/devise_saml_authenticatable/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/apokalipto/devise_saml_authenticatable/actions/workflows/ci.yml)
+[![Build Status](https://github.com/apokalipto/devise_saml_authenticatable/actions/workflows/ci.yml/badge.svg?branch=1.x-maintenance)](https://github.com/apokalipto/devise_saml_authenticatable/actions/workflows/ci.yml)
+
 # DeviseSamlAuthenticatable
 
 Devise Saml Authenticatable is a Single-Sign-On authentication strategy for devise that relies on SAML.
