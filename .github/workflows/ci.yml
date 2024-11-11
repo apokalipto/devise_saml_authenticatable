@@ -2,9 +2,11 @@ name: ci
 on:
   push:
     branches:
+      - 1.x-maintenance
       - master
   pull_request:
     branches:
+      - 1.x-maintenance
       - master
 jobs:
   test:
