@@ -8,8 +8,7 @@ It uses [ruby-saml][] to handle all SAML-related stuff.
 
 Add this gem to your application's Gemfile:
 
-    git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
-    gem "devise_saml_authenticatable", github: "apokalipto/devise_saml_authenticatable"
+    gem "devise_saml_authenticatable"
 
 And then execute:
 
@@ -87,7 +86,7 @@ In `config/initializers/devise.rb`:
 
     # Lambda that is called if Devise.saml_update_user and/or Devise.saml_create_user are true.
     # Receives the model object, saml_response and auth_value, and defines how the object's values are
-    # updated with regards to the SAML response. 
+    # updated with regards to the SAML response.
     # config.saml_update_resource_hook = -> (user, saml_response, auth_value) {
     #   saml_response.attributes.resource_keys.each do |key|
     #     user.send "#{key}=", saml_response.attribute_value_by_resource_key(key)
