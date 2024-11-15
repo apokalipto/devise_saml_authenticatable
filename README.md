@@ -20,7 +20,7 @@ And then execute:
 
 ## Usage
 
-Follow the [normal devise installation process](https://github.com/plataformatec/devise/tree/master#getting-started). The controller filters and helpers are unchanged from normal devise usage.
+Follow the [normal devise installation process](https://github.com/heartcombo/devise/tree/main#getting-started). The controller filters and helpers are unchanged from normal devise usage.
 
 ### Configuring Models
 
@@ -289,11 +289,11 @@ If you don't have an identity provider and you would like to test the authentica
 2. Use an online service that can act as an IdP. OneLogin, Salesforce, Okta and some others provide you with this functionality.
 3. Install your own IdP.
 
-There are numerous IdPs that support SAML 2.0, there are propietary (like Microsoft ADFS 2.0 or Ping federate) and there are also open source solutions like Shibboleth and [SimpleSAMLphp].
+There are numerous IdPs that support SAML 2.0, there are proprietary (like Microsoft ADFS 2.0 or Ping federate) and there are also open source solutions like Shibboleth and [SimpleSAMLphp].
 
 [SimpleSAMLphp] was my choice for development since it is a production-ready SAML solution, that is also really easy to install, configure and use.
 
-[SimpleSAMLphp]: http://simplesamlphp.org/
+[SimpleSAMLphp]: https://simplesamlphp.org/
 
 ## Logout
 
