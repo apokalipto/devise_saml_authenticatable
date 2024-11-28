@@ -4,7 +4,7 @@ class Devise::SamlSessionsController < Devise::SessionsController
   include DeviseSamlAuthenticatable::SamlConfig
 
   skip_before_action :verify_authenticity_token, raise: false
-  prepend_before_action :verify_signed_out_user, :store_info_for_sp_initiated_logout, only: :destroy
+  prepend_before_action :store_info_for_sp_initiated_logout, :verify_signed_out_user, only: :destroy
 
   def new
     idp_entity_id = get_idp_entity_id(params)
