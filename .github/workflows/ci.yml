@@ -21,7 +21,7 @@ jobs:
         gemfile:
           - Gemfile
           - spec/support/Gemfile.rails6.1
-          - spec/support/Gemfile.rails7
+          - spec/support/Gemfile.rails7.2
         bundler:
           - "2"
     runs-on: ubuntu-latest
