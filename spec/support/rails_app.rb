@@ -2,6 +2,8 @@ require "open3"
 require "socket"
 require "tempfile"
 require "timeout"
+require "bundler/setup"
+require "bundler/gem_tasks"
 
 APP_READY_TIMEOUT ||= 30
 
