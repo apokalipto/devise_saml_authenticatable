@@ -14,13 +14,14 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
+          - "3.4"
           - "3.3"
           - "3.2"
-          - "3.1"
         gemfile:
           - Gemfile
           - spec/support/Gemfile.rails7.1
           - spec/support/Gemfile.rails7.2
+          - spec/support/Gemfile.rails8.0
         bundler:
           - "2"
     runs-on: ubuntu-latest
