@@ -1,9 +1,12 @@
 require "fileutils"
+require 'capybara/rspec'
 
 RSpec.configure do |config|
   config.run_all_when_everything_filtered = true
   config.filter_run :focus
   config.order = 'random'
+  # Specify a longer timeout for Capybara to allow for slower CI environments causing failing tests
+  Capybara.default_max_wait_time = 10 #
 
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
