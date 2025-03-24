@@ -11,7 +11,7 @@ ActiveRecord::Base.logger = Logger.new(nil)
 if ActiveRecord::Base.connection.respond_to?(:migration_context)
   ActiveRecord::Base.connection.migration_context.migrate
 else
-  ActiveRecord::Migrator.migrate("#{working_directory}/sp/db/migrate/")
+  ActiveRecord::MigrationContext.new("#{working_directory}/sp/db/migrate/").migrate
 end
 
 RSpec.configure do |config|
