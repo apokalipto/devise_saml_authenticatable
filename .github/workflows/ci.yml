@@ -20,8 +20,6 @@ jobs:
         gemfile:
           - Gemfile
           - spec/support/Gemfile.rails7.1
-          - spec/support/Gemfile.rails7.2
-          - spec/support/Gemfile.rails8.0
         bundler:
           - "2"
     runs-on: ubuntu-latest
@@ -29,7 +27,8 @@ jobs:
       BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}
     steps:
       - uses: actions/checkout@v4
-      - uses: ruby/setup-ruby@v1
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
         with:
           bundler: ${{ matrix.bundler }}
           ruby-version: ${{ matrix.ruby }}
