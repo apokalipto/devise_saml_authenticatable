@@ -5,6 +5,12 @@
 @include_subject_in_attributes = ENV.fetch('INCLUDE_SUBJECT_IN_ATTRIBUTES')
 @valid_destination = ENV.fetch('VALID_DESTINATION', "true")
 
+# Rails 6.1 and 7.0 bug where ActiveSupport uses logger but does not require it. Concurrent ruby used to include
+#  logger which masked the bug but stopped including it in 1.3.5. Fixed in rails >=7.1.
+if defined?(Rails) && Rails.version < '7.1'
+  gem 'concurrent-ruby', '1.3.4'
+end
+
 gem 'stub_saml_idp'
 
 if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new("3.1")
