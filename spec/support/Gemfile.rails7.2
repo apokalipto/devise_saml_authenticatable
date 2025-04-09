@@ -11,14 +11,8 @@ group :test do
   gem 'sqlite3', '~> 2.6.0'
   gem 'capybara'
   gem 'selenium-webdriver'
-
-  if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new("3.0")
-    gem 'webrick'
-  end
-
-  if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new("3.1")
-    gem 'net-smtp', require: false
-    gem 'net-imap', require: false
-    gem 'net-pop', require: false
-  end
+  gem 'webrick'
+  gem 'net-smtp', require: false
+  gem 'net-imap', require: false
+  gem 'net-pop', require: false
 end

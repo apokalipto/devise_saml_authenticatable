@@ -10,27 +10,23 @@ idp_entity_id_reader = ENV.fetch('IDP_ENTITY_ID_READER', '"DeviseSamlAuthenticat
 saml_failed_callback = ENV.fetch('SAML_FAILED_CALLBACK', "nil")
 ruby_saml_version = ENV.fetch("RUBY_SAML_VERSION")
 
-# Rails 6.1 and 7.0 bug where ActiveSupport uses logger but does not require it. Concurrent ruby used to include
-#  logger which masked the bug but stopped including it in 1.3.5. Fixed in rails >=7.1.
-if defined?(Rails) && Rails.version < '7.1'
-  gem 'concurrent-ruby', '1.3.4'
-end
-
 gem 'devise_saml_authenticatable', path: File.expand_path("../../..", __FILE__)
 gem 'ruby-saml', ruby_saml_version
+gem 'net-smtp', require: false
+gem 'net-imap', require: false
+gem 'net-pop', require: false
 
-if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new("3.1")
-  gem 'net-smtp', require: false
-  gem 'net-imap', require: false
-  gem 'net-pop', require: false
-end
-
-if Rails::VERSION::MAJOR < 6
-  # sqlite3 is hard-coded in Rails < 6 to v1.3.x
-  gsub_file 'Gemfile', /^gem ['"]sqlite3['"].*$/, 'gem "sqlite3", "~> 1.3.6"'
-elsif Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new("3.1")
-  # sqlite3 2.1 does not support Ruby 3.0
-  gsub_file 'Gemfile', /^gem ['"]sqlite3['"].*$/, 'gem "sqlite3", "~> 2.6.0"'
+# Starting from Rails 8.0, routes are lazy-loaded by default in test and development environments.
+# However, Devise's mappings are built during the routes loading phase.
+# To ensure it works correctly, we need to load the routes first before accessing @@mappings.
+if defined?(Rails) && Rails.version > '8.0'
+  require 'devise'
+  module Devise
+    def self.mappings
+      Rails.application.try(:reload_routes_unless_loaded)
+      @@mappings
+    end
+  end
 end
 
 template File.expand_path('../attribute_map_resolver.rb.erb', __FILE__), 'app/lib/attribute_map_resolver.rb'

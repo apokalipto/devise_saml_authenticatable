@@ -6,19 +6,13 @@ gemspec
 group :test do
   gem 'rake'
   gem 'rspec', '~> 3.0'
-  gem 'rails', '~> 7.1.0'
+  gem 'rails', '~> 8.0.0'
   gem 'rspec-rails'
-  gem 'sqlite3', '~> 1.4'
+  gem 'sqlite3', '~> 2.6.0'
   gem 'capybara'
   gem 'selenium-webdriver'
-
-  if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new("3.0")
-    gem 'webrick'
-  end
-
-  if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new("3.1")
-    gem 'net-smtp', require: false
-    gem 'net-imap', require: false
-    gem 'net-pop', require: false
-  end
+  gem 'webrick'
+  gem 'net-smtp', require: false
+  gem 'net-imap', require: false
+  gem 'net-pop', require: false
 end
