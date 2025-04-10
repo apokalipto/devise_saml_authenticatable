@@ -16,18 +16,6 @@ gem 'net-smtp', require: false
 gem 'net-imap', require: false
 gem 'net-pop', require: false
 
-# Starting from Rails 8.0, routes are lazy-loaded by default in test and development environments.
-# However, Devise's mappings are built during the routes loading phase.
-# To ensure it works correctly, we need to load the routes first before accessing @@mappings.
-if defined?(Rails) && Rails.version > '8.0'
-  require 'devise'
-  module Devise
-    def self.mappings
-      Rails.application.try(:reload_routes_unless_loaded)
-      @@mappings
-    end
-  end
-end
 
 template File.expand_path('../attribute_map_resolver.rb.erb', __FILE__), 'app/lib/attribute_map_resolver.rb'
 template File.expand_path('../idp_settings_adapter.rb.erb', __FILE__), 'app/lib/idp_settings_adapter.rb'
