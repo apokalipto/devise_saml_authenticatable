@@ -19,5 +19,5 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version = ">= 2.6.0"
 
   gem.add_dependency("devise","> 2.0.0")
-  gem.add_dependency("ruby-saml","~> 1.17")
+  gem.add_dependency("ruby-saml","~> 1.18")
 end
