@@ -30,7 +30,7 @@ module Devise
 
   # Add valid users to database
   # Can accept a Boolean value or a Proc that is called with the model class, the saml_response and auth_value
-  # Ex: 
+  # Ex:
   # Devise.saml_create_user = Proc.new do |model_class, saml_response, auth_value|
   #  model_class == Admin
   # end
@@ -39,7 +39,7 @@ module Devise
 
   # Update user attributes after login
   # Can accept a Boolean value or a Proc that is called with the model class, the saml_response and auth_value
-  # Ex: 
+  # Ex:
   # Devise.saml_update_user = Proc.new do |model_class, saml_response, auth_value|
   #  model_class == User
   # end
@@ -54,7 +54,7 @@ module Devise
 
   # Key used to index sessions for later retrieval
   mattr_accessor :saml_session_index_key
-  @@saml_session_index_key
+  @@saml_session_index_key ||= :saml_session_index
 
   # Redirect after signout (redirects to 'users/saml/sign_in' by default)
   mattr_accessor :saml_sign_out_success_url

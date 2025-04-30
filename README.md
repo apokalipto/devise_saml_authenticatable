@@ -4,12 +4,15 @@
 Devise Saml Authenticatable is a Single-Sign-On authentication strategy for devise that relies on SAML.
 It uses [ruby-saml][] to handle all SAML-related stuff.
 
+> [!WARNING]
+> The master branch now represents v2.x of this gem, which is still unreleased.
+> See [the 1.x branch README](https://github.com/apokalipto/devise_saml_authenticatable/tree/refs/heads/1.x-maintenance?tab=readme-ov-file) for details about that version.
+
 ## Installation
 
 Add this gem to your application's Gemfile:
 
-    git_source(:github) { |repo_name| "https://github.com/#{repo_name}" }
-    gem "devise_saml_authenticatable", github: "apokalipto/devise_saml_authenticatable"
+    gem "devise_saml_authenticatable"
 
 And then execute:
 
@@ -87,7 +90,7 @@ In `config/initializers/devise.rb`:
 
     # Lambda that is called if Devise.saml_update_user and/or Devise.saml_create_user are true.
     # Receives the model object, saml_response and auth_value, and defines how the object's values are
-    # updated with regards to the SAML response. 
+    # updated with regards to the SAML response.
     # config.saml_update_resource_hook = -> (user, saml_response, auth_value) {
     #   saml_response.attributes.resource_keys.each do |key|
     #     user.send "#{key}=", saml_response.attribute_value_by_resource_key(key)
@@ -112,9 +115,9 @@ In `config/initializers/devise.rb`:
     # sure that the Authentication Response includes the attribute.
     config.saml_default_user_key = :email
 
-    # Optional. This stores the session index defined by the IDP during login.  If provided it will be used as a salt
-    # for the user's session to facilitate an IDP initiated logout request.
-    config.saml_session_index_key = :session_index
+    # Optional. This stores the session index defined by the IDP during login.
+    # If provided it will be used to facilitate an IDP initiated logout request.
+    config.saml_session_index_key = :saml_session_index
 
     # You can set this value to use Subject or SAML assertion as info to which email will be compared.
     # If you don't set it then email will be extracted from SAML assertion attributes.
@@ -300,7 +303,7 @@ Logout support is included by immediately terminating the local session and then
 
 Logout requests from the IDP are supported by the `idp_sign_out` endpoint.  Directing logout requests to `users/saml/idp_sign_out` will log out the respective user by invalidating their current sessions.
 
-`saml_session_index_key` must be configured to support this feature.
+To disable this feature, set `saml_session_index_key` to `nil`.
 
 ## Signing and Encrypting Authentication Requests and Assertions
 

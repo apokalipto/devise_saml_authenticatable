@@ -45,7 +45,7 @@ class SamlIdpController < StubSamlIdp::IdpController
     now = Time.now.utc
     response_id = SecureRandom.uuid
     audience_uri = opts[:audience_uri] || "#{saml_acs_url[/^(.*?\/\/.*?\/)/, 1]}saml/metadata"
-    issuer_uri = opts[:issuer_uri] || (defined?(request) && request.url) || "http://example.com"
+    issuer_uri = opts[:issuer_uri] || (defined?(request) && request.url) || "https://example.com"
 
     attributes = opts.fetch(:attributes, {})
     if attributes.any?
@@ -96,17 +96,14 @@ class SamlIdpController < StubSamlIdp::IdpController
     if Idp::Application.config.slo_sp_url
       redirect_to "#{Idp::Application.config.slo_sp_url}?SAMLResponse=#{@saml_slo_response}"
     else
-      redirect_to 'http://example.com'
+      redirect_to 'https://example.com'
     end
   end
 
   def sp_sign_out
     idp_slo_authenticate(params[:name_id])
     saml_slo_request = encode_SAML_SLO_Request("you@example.com")
-    uri = URI.parse("http://localhost:8020/users/saml/idp_sign_out")
-    require 'net/http'
-    Net::HTTP.post_form(uri, {"SAMLRequest" => saml_slo_request})
-    head :no_content
+    redirect_to "http://localhost:8020/users/saml/idp_sign_out?SAMLRequest=#{URI.encode_www_form_component(saml_slo_request)}"
   end
 
   def idp_slo_authenticate(email)
@@ -148,7 +145,7 @@ class SamlIdpController < StubSamlIdp::IdpController
     now = Time.now.utc
     response_id = SecureRandom.uuid
     audience_uri = opts[:audience_uri] || (@saml_slo_acs_url && @saml_slo_acs_url[/^(.*?\/\/.*?\/)/, 1])
-    issuer_uri = opts[:issuer_uri] || (defined?(request) && request.url.split("?")[0]) || "http://example.com"
+    issuer_uri = opts[:issuer_uri] || (defined?(request) && request.url.split("?")[0]) || "https://example.com"
 
     assertion = %[<Assertion xmlns="urn:oasis:names:tc:SAML:2.0:assertion" ID="_#{session_index}" IssueInstant="#{now.iso8601}" Version="2.0"><Issuer2>#{issuer_uri}</Issuer2><Subject><NameID Format="urn:oasis:names:tc:SAML:2.0:nameid-format:transient">#{nameID}</NameID><SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer"><SubjectConfirmationData InResponseTo="#{@saml_slo_request_id}" NotOnOrAfter="#{(now+3*60).iso8601}" Recipient="#{@saml_slo_acs_url}"></SubjectConfirmationData></SubjectConfirmation></Subject><Conditions NotBefore="#{(now-5).iso8601}" NotOnOrAfter="#{(now+60*60).iso8601}"><AudienceRestriction><Audience>#{audience_uri}</Audience></AudienceRestriction></Conditions><AttributeStatement><Attribute Name="#{email_address_attribute_key}"><AttributeValue>#{nameID}</AttributeValue></Attribute></AttributeStatement><AuthnStatement AuthnInstant="#{now.iso8601}" SessionIndex="_#{session_index}"><AuthnContext><AuthnContextClassRef>urn:federation:authentication:windows</AuthnContextClassRef></AuthnContext></AuthnStatement></Assertion>]
 
@@ -183,7 +180,7 @@ class SamlIdpController < StubSamlIdp::IdpController
   def encode_SAML_SLO_Request(nameID, opts = {})
     now = Time.now.utc
     response_id = SecureRandom.uuid
-    issuer_uri = opts[:issuer_uri] || (defined?(request) && request.url.split("?")[0]) || "http://example.com"
+    issuer_uri = opts[:issuer_uri] || (defined?(request) && request.url.split("?")[0]) || "https://example.com"
     xml = %[<samlp:LogoutRequest
     xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
     xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
