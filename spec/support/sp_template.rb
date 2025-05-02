@@ -23,8 +23,15 @@ template File.expand_path('../idp_settings_adapter.rb.erb', __FILE__), 'app/lib/
 if attribute_map_resolver == "nil"
   create_file 'config/attribute-map.yml', <<-ATTRIBUTES
 ---
-"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress": email
-"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name":         name
+"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress":
+  "resource_key": "email"
+  "attribute_type" : "single"
+"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name":
+  "resource_key": "name"
+  "attribute_type" : "single"
+"groups":
+  "resource_key": "groups"
+  "attribute_type" : "multi"
   ATTRIBUTES
 end
 
@@ -103,7 +110,7 @@ CONFIG
   }
   insert_into_file('app/views/home/index.html.erb', after: /\z/) {
     <<-HOME
-<%= current_user.email %> <%= current_user.name %>
+<%= current_user.email %> <%= current_user.name %> <%= current_user.groups %>
 <%= form_tag destroy_user_session_path(entity_id: "http://localhost:8020/saml/metadata"), method: :delete do %>
   <%= submit_tag "Log out" %>
 <% end %>
@@ -111,11 +118,12 @@ CONFIG
   }
   route "root to: 'home#index'"
 
+  # TODO: https://github.com/heartcombo/devise/blob/main/lib/generators/active_record/templates/migration.rb - string vs array
   if Rails::VERSION::MAJOR < 6
-    generate :devise, "user", "email:string", "name:string", "session_index:string"
+    generate :devise, "user", "email:string", "name:string", "session_index:string", "groups:string"
   else
     # devise seems to add `email` by default in Rails 6
-    generate :devise, "user", "name:string", "session_index:string"
+    generate :devise, "user", "name:string", "session_index:string", "groups:string"
   end
   gsub_file 'app/models/user.rb', /database_authenticatable.*\n.*/, 'saml_authenticatable'
   route "resources :users, only: [:create]"
