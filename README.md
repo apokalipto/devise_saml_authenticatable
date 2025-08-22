@@ -188,10 +188,18 @@ Create a YAML file (`config/attribute-map.yml`) that maps SAML attributes with y
 ```yaml
   # attribute-map.yml
 
-  "urn:mace:dir:attribute-def:uid": "user_name"
-  "urn:mace:dir:attribute-def:email": "email"
-  "urn:mace:dir:attribute-def:name": "last_name"
-  "urn:mace:dir:attribute-def:givenName": "name"
+  "urn:mace:dir:attribute-def:email":
+    "resource_key": "email"
+    "attribute_type": "single"
+  "urn:mace:dir:attribute-def:name":
+    "resource_key": "last_name"
+    "attribute_type": "single"
+  "urn:mace:dir:attribute-def:name":
+    "resource_key": "first_name"
+    "attribute_type": "single"
+  "urn:mace:dir:attribute-def:roles":
+    "resource_key": "roles"
+    "attribute_type": "multi"
 ```
 
 ##### Attribute map initializer
