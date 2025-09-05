@@ -4,8 +4,9 @@ class AttributeMapResolver < DeviseSamlAuthenticatable::DefaultAttributeMapResol
     Rails.logger.info("[#{self.class.name}] issuer=#{issuer.inspect}")
     if issuer == "http://localhost:8009/saml/auth"
       {
-        "myemailaddress" => "email",
-        "myname" => "name",
+        "myemailaddress" => {"resource_key" => "email", "attribute_type" => "single"},
+        "myname" => {"resource_key" => "name", "attribute_type" => "single"},
+        "groups" => {"resource_key" => "groups", "attribute_type" => "multi"}
       }
     else
       {}
