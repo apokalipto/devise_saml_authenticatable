@@ -19,7 +19,9 @@ module Devise
         parse_saml_response
         retrieve_resource unless self.halted?
         unless self.halted?
-          @resource.after_saml_authentication(@response.sessionindex)
+          if Devise.saml_session_index_key
+            request.session[Devise.saml_session_index_key] = @response.sessionindex
+          end
           success!(@resource)
         end
       end

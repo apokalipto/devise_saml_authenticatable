@@ -2,6 +2,8 @@ require "open3"
 require "socket"
 require "tempfile"
 require "timeout"
+require "bundler/setup"
+require "bundler/gem_tasks"
 
 APP_READY_TIMEOUT ||= 30
 
@@ -36,7 +38,7 @@ def start_app(name, port, options = {})
 
   with_clean_env do
     Dir.chdir(app_dir(name)) do
-      pid = Process.spawn(app_env(name), "bundle exec rails server -p #{port} -e production", chdir: app_dir(name), out: "log/#{name}.log", err: "log/#{name}.err.log")
+      pid = Process.spawn(app_env(name), "bundle exec rails server -p #{port} -e test", chdir: app_dir(name), out: "log/#{name}.log", err: "log/#{name}.err.log")
       begin
         Timeout.timeout(APP_READY_TIMEOUT) do
           sleep 1 until app_ready?(pid, port)
@@ -75,9 +77,9 @@ def stop_app(name, pid)
       warn "=== [#{name}] stderr"
       warn File.read("log/#{name}.err.log")
     end
-    if File.exist?("log/production.log")
+    if File.exist?("log/test.log")
       puts "=== [#{name}] Rails logs"
-      puts File.read("log/production.log")
+      puts File.read("log/test.log")
     end
   end
 end
@@ -121,7 +123,7 @@ def app_dir(name)
 end
 
 def app_env(name)
-  {"BUNDLE_GEMFILE" => File.join(app_dir(name), "Gemfile"), "RAILS_ENV" => "production"}
+  {"BUNDLE_GEMFILE" => File.join(app_dir(name), "Gemfile"), "RAILS_ENV" => "test"}
 end
 
 def working_directory

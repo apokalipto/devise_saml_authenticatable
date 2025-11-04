@@ -10,11 +10,18 @@ Capybara.register_driver :chrome do |app|
   options.add_argument('--headless')
   options.add_argument('--allow-insecure-localhost')
   options.add_argument('--ignore-certificate-errors')
+  # Headless Chrome 134 is failing randomly - optimizing here to try and avoid it
+  options.add_argument('--disable-background-timer-throttling')
+  options.add_argument('--disable-backgrounding-occluded-windows')
+  options.add_argument('--disable-renderer-backgrounding')
+  options.add_argument('--no-sandbox')
+  options.add_argument('--password-store=basic');
+  options.add_argument('--suppress-message-center-popups');
 
   Capybara::Selenium::Driver.new(
     app,
     browser: :chrome,
-    capabilities: [options]
+    options: options,
   )
 end
 Capybara.default_driver = :chrome
@@ -202,7 +209,7 @@ describe "SAML Authentication", type: :feature do
         fill_in "Password", with: "asdf"
         click_on "Sign in"
         expect(page).to have_content(:all, "Example Domain This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.")
-        expect(current_url).to eq("http://www.example.com/")
+        expect(current_url).to eq("https://www.example.com/")
       end
     end
   end

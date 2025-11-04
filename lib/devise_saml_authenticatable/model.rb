@@ -12,22 +12,6 @@ module Devise
         attr_accessor :password_confirmation
       end
 
-      def after_saml_authentication(session_index)
-        if Devise.saml_session_index_key && self.respond_to?(Devise.saml_session_index_key)
-          self.update_attribute(Devise.saml_session_index_key, session_index)
-        end
-      end
-
-      def authenticatable_salt
-        if Devise.saml_session_index_key &&
-           self.respond_to?(Devise.saml_session_index_key) &&
-           self.send(Devise.saml_session_index_key).present?
-          self.send(Devise.saml_session_index_key)
-        else
-          super
-        end
-      end
-
       module ClassMethods
         def authenticate_with_saml(saml_response, relay_state)
           key = Devise.saml_default_user_key
@@ -50,7 +34,7 @@ module Devise
                     else Devise.saml_resource_validator_hook.call(resource, decorated_response, auth_value)
                     end
             if !valid
-              logger.info("User(#{auth_value}) did not pass custom validation.")
+              logger.info("#{self.name}(#{auth_value}) did not pass custom validation.")
               return nil
             end
           end
@@ -60,10 +44,10 @@ module Devise
                         end
           if resource.nil?
             if create_user
-              logger.info("Creating user(#{auth_value}).")
+              logger.info("Creating #{self.name.downcase}(#{auth_value}).")
               resource = new
             else
-              logger.info("User(#{auth_value}) not found.  Not configured to create the user.")
+              logger.info("#{self.name}(#{auth_value}) not found. Not configured to create the #{self.name.downcase}.")
               return nil
             end
           end
@@ -76,11 +60,6 @@ module Devise
           end
 
           resource
-        end
-
-        def reset_session_key_for(name_id)
-          resource = find_by(Devise.saml_default_user_key => name_id)
-          resource.update_attribute(Devise.saml_session_index_key, nil) unless resource.nil?
         end
 
         def find_for_shibb_authentication(conditions)

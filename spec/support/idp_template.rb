@@ -6,13 +6,9 @@
 @valid_destination = ENV.fetch('VALID_DESTINATION', "true")
 
 gem 'stub_saml_idp'
-gem 'thin'
-
-if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new("3.1")
-  gem 'net-smtp', require: false
-  gem 'net-imap', require: false
-  gem 'net-pop', require: false
-end
+gem 'net-smtp', require: false
+gem 'net-imap', require: false
+gem 'net-pop', require: false
 
 route "get '/saml/auth' => 'saml_idp#new'"
 route "post '/saml/auth' => 'saml_idp#create'"

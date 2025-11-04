@@ -12,18 +12,10 @@ ruby_saml_version = ENV.fetch("RUBY_SAML_VERSION")
 
 gem 'devise_saml_authenticatable', path: File.expand_path("../../..", __FILE__)
 gem 'ruby-saml', ruby_saml_version
-gem 'thin'
+gem 'net-smtp', require: false
+gem 'net-imap', require: false
+gem 'net-pop', require: false
 
-if Gem::Version.new(RUBY_VERSION.dup) >= Gem::Version.new("3.1")
-  gem 'net-smtp', require: false
-  gem 'net-imap', require: false
-  gem 'net-pop', require: false
-end
-
-if Rails::VERSION::MAJOR < 6
-  # sqlite3 is hard-coded in Rails < 6 to v1.3.x
-  gsub_file 'Gemfile', /^gem 'sqlite3'.*$/, "gem 'sqlite3', '~> 1.3.6'"
-end
 
 template File.expand_path('../attribute_map_resolver.rb.erb', __FILE__), 'app/lib/attribute_map_resolver.rb'
 template File.expand_path('../idp_settings_adapter.rb.erb', __FILE__), 'app/lib/idp_settings_adapter.rb'
@@ -40,7 +32,7 @@ create_file('app/lib/our_saml_failed_callback_handler.rb', <<-CALLBACKHANDLER)
 
 class OurSamlFailedCallbackHandler
   def handle(response, strategy)
-    strategy.redirect! "http://www.example.com"
+    strategy.redirect! "https://www.example.com"
   end
 end
 CALLBACKHANDLER
@@ -139,8 +131,8 @@ end
 
   rake "db:create"
   rake "db:migrate"
-  rake "db:create", env: "production"
-  rake "db:migrate", env: "production"
+  rake "db:create", env: "test"
+  rake "db:migrate", env: "test"
 
   # Remove any specs so that future RSpec runs don't try to also run these
   run 'rm -rf spec'

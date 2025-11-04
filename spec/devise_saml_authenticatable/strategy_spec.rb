@@ -23,8 +23,10 @@ describe Devise::Strategies::SamlAuthenticatable do
   end
 
   let(:params) { {} }
+  let(:session) { {} }
   before do
     allow(strategy).to receive(:params).and_return(params)
+    allow_any_instance_of(ActionDispatch::Request).to receive(:session).and_return(session)
   end
 
   context "with a login SAMLResponse parameter" do
@@ -37,10 +39,25 @@ describe Devise::Strategies::SamlAuthenticatable do
     it "authenticates with the response" do
       expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], anything)
       expect(user_class).to receive(:authenticate_with_saml).with(response, nil)
-      expect(user).to receive(:after_saml_authentication).with(response.sessionindex)
 
       expect(strategy).to receive(:success!).with(user)
       strategy.authenticate!
+      expect(session).to eq(Devise.saml_session_index_key => response.sessionindex)
+    end
+
+    context "when saml_session_index_key is not configured" do
+      before do
+        Devise.saml_session_index_key = nil
+      end
+
+      it "authenticates with the response" do
+        expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], anything)
+        expect(user_class).to receive(:authenticate_with_saml).with(response, nil)
+
+        expect(strategy).to receive(:success!).with(user)
+        strategy.authenticate!
+        expect(session).to eq({})
+      end
     end
 
     context "and a RelayState parameter" do
@@ -62,7 +79,7 @@ describe Devise::Strategies::SamlAuthenticatable do
               assertion_consumer_service_binding: "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
               name_identifier_format: "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
               sp_entity_id: "sp_issuer",
-              idp_entity_id: "http://www.example.com",
+              idp_entity_id: "https://www.example.com",
               authn_context: "",
               idp_cert: "idp_cert"
             }
@@ -95,10 +112,10 @@ describe Devise::Strategies::SamlAuthenticatable do
         expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], anything)
         expect(idp_providers_adapter).to receive(:settings).with(idp_entity_id, anything)
         expect(user_class).to receive(:authenticate_with_saml).with(response, params[:RelayState])
-        expect(user).to receive(:after_saml_authentication).with(response.sessionindex)
 
         expect(strategy).to receive(:success!).with(user)
         strategy.authenticate!
+        expect(session).to eq(Devise.saml_session_index_key => response.sessionindex)
       end
     end
 
@@ -173,7 +190,6 @@ describe Devise::Strategies::SamlAuthenticatable do
 
       before do
         allow(Devise).to receive(:saml_validate_in_response_to).and_return(true)
-        allow_any_instance_of(ActionDispatch::Request).to receive(:session).and_return(session)
       end
 
       context "when the session has a saml_transaction_id" do
@@ -193,8 +209,6 @@ describe Devise::Strategies::SamlAuthenticatable do
       end
 
       context "when the session is missing a saml_transaction_id" do
-        let(:session) { { } }
-
         it "uses 'ID_MISSING' for matches_request_id so validation will fail" do
           expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(matches_request_id: "ID_MISSING"))
           strategy.authenticate!
