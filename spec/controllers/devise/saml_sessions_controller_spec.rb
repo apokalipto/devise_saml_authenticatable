@@ -77,7 +77,7 @@ describe Devise::SamlSessionsController, type: :controller do
 
       it 'stores saml_transaction_id in the session' do
         do_get
-        if OneLogin::RubySaml::Authrequest.public_instance_methods.include?(:request_id)
+        if ::RubySaml::Authrequest.public_instance_methods.include?(:request_id)
           expect(session[:saml_transaction_id]).to be_present
         end
       end
@@ -95,7 +95,7 @@ describe Devise::SamlSessionsController, type: :controller do
 
       it 'stores saml_transaction_id in the session' do
         do_get
-        if OneLogin::RubySaml::Authrequest.public_instance_methods.include?(:request_id)
+        if ::RubySaml::Authrequest.public_instance_methods.include?(:request_id)
           expect(session[:saml_transaction_id]).to be_present
         end
       end
@@ -153,7 +153,7 @@ describe Devise::SamlSessionsController, type: :controller do
         get :metadata
 
         # Remove ID that can vary across requests
-        expected_metadata = OneLogin::RubySaml::Metadata.new.generate(saml_config)
+        expected_metadata = ::RubySaml::Metadata.new.generate(saml_config)
         metadata_pattern = Regexp.escape(expected_metadata).gsub(/ ID='[^']+'/, " ID='[\\w-]+'")
         expect(response.body).to match(Regexp.new(metadata_pattern))
       end
@@ -176,7 +176,7 @@ describe Devise::SamlSessionsController, type: :controller do
         get :metadata
 
         # Remove ID that can vary across requests
-        expected_metadata = OneLogin::RubySaml::Metadata.new.generate(saml_config)
+        expected_metadata = ::RubySaml::Metadata.new.generate(saml_config)
         metadata_pattern = Regexp.escape(expected_metadata).gsub(/ ID='[^']+'/, " ID='[\\w-]+'")
         expect(response.body).to match(Regexp.new(metadata_pattern))
       end
@@ -197,7 +197,7 @@ describe Devise::SamlSessionsController, type: :controller do
 
       shared_examples 'not create SP initiated logout request' do
         it do
-          expect(OneLogin::RubySaml::Logoutrequest).not_to receive(:new)
+          expect(::RubySaml::Logoutrequest).not_to receive(:new)
           subject
         end
       end
@@ -261,7 +261,7 @@ describe Devise::SamlSessionsController, type: :controller do
           session[Devise.saml_session_index_key] = 'sessionindex'
 
           actual_settings = nil
-          expect_any_instance_of(OneLogin::RubySaml::Logoutrequest).to receive(:create) do |_, settings|
+          expect_any_instance_of(::RubySaml::Logoutrequest).to receive(:create) do |_, settings|
             actual_settings = settings
             'http://localhost:8009/saml/logout'
           end
@@ -319,7 +319,7 @@ describe Devise::SamlSessionsController, type: :controller do
     let(:saml_response) { double(:slo_logoutresponse) }
     let(:response_url) { 'http://localhost/logout_response' }
     before do
-      allow(OneLogin::RubySaml::SloLogoutresponse).to receive(:new).and_return(saml_response)
+      allow(::RubySaml::SloLogoutresponse).to receive(:new).and_return(saml_response)
       allow(saml_response).to receive(:create).and_return(response_url)
     end
 
@@ -369,7 +369,7 @@ describe Devise::SamlSessionsController, type: :controller do
       end
       let(:name_id) { '12312312' }
       before do
-        allow(OneLogin::RubySaml::SloLogoutrequest).to receive(:new).and_return(saml_request)
+        allow(::RubySaml::SloLogoutrequest).to receive(:new).and_return(saml_request)
         session[Devise.saml_session_index_key] = 'sessionindex'
       end
 

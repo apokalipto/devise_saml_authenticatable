@@ -1,6 +1,6 @@
 # Set up a SAML Service Provider
 
-require "onelogin/ruby-saml/version"
+require "ruby-saml/version"
 
 attribute_map_resolver = ENV.fetch("ATTRIBUTE_MAP_RESOLVER", "nil")
 saml_session_index_key = ENV.fetch('SAML_SESSION_INDEX_KEY', ":session_index")
@@ -44,9 +44,9 @@ class OurEntityIdReader
     if params[:entity_id]
       params[:entity_id]
     elsif params[:SAMLRequest]
-      OneLogin::RubySaml::SloLogoutrequest.new(params[:SAMLRequest]).issuer
+      ::RubySaml::SloLogoutrequest.new(params[:SAMLRequest]).issuer
     elsif params[:SAMLResponse]
-      OneLogin::RubySaml::Response.new(params[:SAMLResponse]).issuers.first
+      ::RubySaml::Response.new(params[:SAMLResponse]).issuers.first
     else
       "http://www.cats.com"
     end

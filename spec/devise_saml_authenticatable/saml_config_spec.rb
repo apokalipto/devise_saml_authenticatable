@@ -15,10 +15,10 @@ describe DeviseSamlAuthenticatable::SamlConfig do
 
     it "is the global devise SAML config" do
       Devise.saml_configure do |settings|
-        settings.assertion_consumer_logout_service_binding = 'test'
+        settings.single_logout_service_binding = 'test'
       end
       expect(saml_config).to be(Devise.saml_config)
-      expect(saml_config.assertion_consumer_logout_service_binding).to eq('test')
+      expect(saml_config.single_logout_service_binding).to eq('test')
     end
 
     context "when the idp_providers_adapter key exists" do
@@ -93,7 +93,7 @@ describe DeviseSamlAuthenticatable::SamlConfig do
           }, else_do: proc {
             expect(saml_config.idp_sso_target_url).to eq('idp_sso_url')
           })
-          expect(saml_config.class).to eq OneLogin::RubySaml::Settings
+          expect(saml_config.class).to eq ::RubySaml::Settings
         end
       end
 
@@ -106,7 +106,7 @@ describe DeviseSamlAuthenticatable::SamlConfig do
           }, else_do: proc {
             expect(saml_config.idp_sso_target_url).to eq('idp_sso_url_other')
           })
-          expect(saml_config.class).to eq OneLogin::RubySaml::Settings
+          expect(saml_config.class).to eq ::RubySaml::Settings
         end
       end
     end
@@ -117,8 +117,8 @@ describe DeviseSamlAuthenticatable::SamlConfig do
       yaml = <<-IDP
 ---
 environment:
-  assertion_consumer_logout_service_binding: assertion_consumer_logout_service_binding
-  assertion_consumer_logout_service_url: assertion_consumer_logout_service_url
+  single_logout_service_binding: single_logout_service_binding
+  single_logout_service_url: single_logout_service_url
   assertion_consumer_service_binding: assertion_consumer_service_binding
   assertion_consumer_service_url: assertion_consumer_service_url
   attributes_index: attributes_index
@@ -126,8 +126,9 @@ environment:
   authn_context_comparison: authn_context_comparison
   authn_context_decl_ref: authn_context_decl_ref
   certificate: certificate
-  compress_request: compress_request
-  compress_response: compress_response
+  # compress_request and compress_response are deprecated and no longer functional in ruby-saml 2.x
+  # compress_request: compress_request
+  # compress_response: compress_response
   double_quote_xml_attribute_values: double_quote_xml_attribute_values
   force_authn: force_authn
   idp_cert: idp_cert
@@ -161,8 +162,8 @@ TARGET_URLS
     end
 
     it "uses that file's contents" do
-      expect(saml_config.assertion_consumer_logout_service_binding).to eq('assertion_consumer_logout_service_binding')
-      expect(saml_config.assertion_consumer_logout_service_url).to eq('assertion_consumer_logout_service_url')
+      expect(saml_config.single_logout_service_binding).to eq('single_logout_service_binding')
+      expect(saml_config.single_logout_service_url).to eq('single_logout_service_url')
       expect(saml_config.assertion_consumer_service_binding).to eq('assertion_consumer_service_binding')
       expect(saml_config.assertion_consumer_service_url).to eq('assertion_consumer_service_url')
       expect(saml_config.attributes_index).to eq('attributes_index')
@@ -170,9 +171,11 @@ TARGET_URLS
       expect(saml_config.authn_context_comparison).to eq('authn_context_comparison')
       expect(saml_config.authn_context_decl_ref).to eq('authn_context_decl_ref')
       expect(saml_config.certificate).to eq('certificate')
-      expect(saml_config.compress_request).to eq('compress_request')
-      expect(saml_config.compress_response).to eq('compress_response')
-      expect(saml_config.double_quote_xml_attribute_values).to eq('double_quote_xml_attribute_values')
+      # compress_request and compress_response are deprecated and no longer functional in ruby-saml 2.x
+      # expect(saml_config.compress_request).to eq('compress_request')
+      # expect(saml_config.compress_response).to eq('compress_response')
+      # double_quote_xml_attribute_values is deprecated in ruby-saml 2.x and always returns true
+      expect(saml_config.double_quote_xml_attribute_values).to eq(true)
       expect(saml_config.force_authn).to eq('force_authn')
       expect(saml_config.idp_cert).to eq('idp_cert')
       expect(saml_config.idp_cert_fingerprint).to eq('idp_cert_fingerprint')

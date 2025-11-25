@@ -55,7 +55,7 @@ describe Devise::Models::SamlAuthenticatable do
   let(:attributemap) { attribute_map_resolver.new(nil).attribute_map }
   let(:response) { double(:response, attributes: attributes, name_id: name_id) }
   let(:attributes) {
-    OneLogin::RubySaml::Attributes.new(
+    ::RubySaml::Attributes.new(
       'saml-email-format' => ['user@example.com'],
       'saml-name-format'  => ['A User'],
     )
@@ -74,7 +74,7 @@ describe Devise::Models::SamlAuthenticatable do
   end
 
   context "when configured to use the subject" do
-    let(:attributes) { OneLogin::RubySaml::Attributes.new('saml-name-format' => ['A User']) }
+    let(:attributes) { ::RubySaml::Attributes.new('saml-name-format' => ['A User']) }
     let(:name_id) { 'user@example.com' }
 
     before do
@@ -298,7 +298,7 @@ describe Devise::Models::SamlAuthenticatable do
     end
 
     context "when using default user key" do
-      let(:attributes) { OneLogin::RubySaml::Attributes.new('saml-email-format' => ['UPPER@example.com']) }
+      let(:attributes) { ::RubySaml::Attributes.new('saml-email-format' => ['UPPER@example.com']) }
 
       include_examples "correct downcasing"
     end

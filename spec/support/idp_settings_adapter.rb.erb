@@ -10,7 +10,7 @@ class IdpSettingsAdapter
         authn_context: "",
         idp_cert_fingerprint: "9E:65:2E:03:06:8D:80:F2:86:C7:6C:77:A1:D9:14:97:0A:4D:F4:4D"
       }
-      if Gem::Version.new(OneLogin::RubySaml::VERSION) >= Gem::Version.new("1.12.0")
+      if Gem::Version.new(::RubySaml::VERSION) >= Gem::Version.new("1.12.0")
         base.merge!(
           idp_slo_service_url: "http://localhost:8010/saml/logout",
           idp_sso_service_url: "http://localhost:8010/saml/auth",

@@ -23,7 +23,7 @@ def create_app(name, env = {})
   puts "[#{name}] Creating Rails app"
   rails_new_options = %w[-A -G -C -T -J -S --skip-spring --skip-listen --skip-bootsnap --skip-action-mailbox --skip-jbuilder --skip-active-storage]
   rails_new_options << "-O" if name == "idp"
-  env.merge!("RUBY_SAML_VERSION" => OneLogin::RubySaml::VERSION)
+  env.merge!("RUBY_SAML_VERSION" => ::RubySaml::VERSION)
   Dir.chdir(working_directory) do
     FileUtils.rm_rf(name)
     puts("[#{working_directory}] rails _#{Rails.version}_ new #{name} #{rails_new_options.join(" ")} -m #{File.expand_path("../#{name}_template.rb", __FILE__)}")
