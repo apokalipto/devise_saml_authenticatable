@@ -4,6 +4,7 @@ require "tempfile"
 require "timeout"
 require "bundler/setup"
 require "bundler/gem_tasks"
+require "ruby-saml"
 
 APP_READY_TIMEOUT ||= 30
 

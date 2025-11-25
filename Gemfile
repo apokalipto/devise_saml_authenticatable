@@ -8,7 +8,7 @@ gem 'ruby-saml', git: 'https://github.com/SAML-Toolkits/ruby-saml.git', branch: 
 group :test do
   gem 'rake'
   gem 'rspec', '~> 3.0'
-  gem 'rails', '~> 8.0.0'
+  gem 'rails', '~> 8.0'
   gem 'rspec-rails'
   gem 'sqlite3', '~> 2.6.0'
   gem 'capybara'
