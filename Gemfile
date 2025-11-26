@@ -3,10 +3,12 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in devise_saml_authenticatable.gemspec
 gemspec
 
+gem 'ruby-saml', git: 'https://github.com/SAML-Toolkits/ruby-saml.git', branch: 'v2.x'
+
 group :test do
   gem 'rake'
   gem 'rspec', '~> 3.0'
-  gem 'rails', '~> 8.0.0'
+  gem 'rails', '~> 8.0'
   gem 'rspec-rails'
   gem 'sqlite3', '~> 2.6.0'
   gem 'capybara'

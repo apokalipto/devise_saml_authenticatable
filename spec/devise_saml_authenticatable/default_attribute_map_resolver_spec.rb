@@ -6,7 +6,7 @@ describe DeviseSamlAuthenticatable::DefaultAttributeMapResolver do
   let(:logger) { instance_double("Logger", info: nil) }
   let(:rails_root) { Pathname.new("tmp") }
 
-  let(:saml_response) { instance_double("OneLogin::RubySaml::Response") }
+  let(:saml_response) { instance_double("::RubySaml::Response") }
   let(:file_contents) {
     <<YAML
 ---

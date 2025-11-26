@@ -42,4 +42,5 @@ end
 require 'support/rails_app'
 require 'logger'
 require "action_controller" # https://github.com/heartcombo/responders/pull/95
+require 'ruby-saml'
 require 'devise_saml_authenticatable'

@@ -15,7 +15,7 @@ module DeviseSamlAuthenticatable
       idp_config_path = "#{Rails.root}/config/idp.yml"
 
       if File.exist?(idp_config_path)
-        @file_based_config ||= OneLogin::RubySaml::Settings.new(YAML.load(File.read(idp_config_path))[Rails.env])
+        @file_based_config ||= ::RubySaml::Settings.new(YAML.load(File.read(idp_config_path))[Rails.env])
       end
     end
 

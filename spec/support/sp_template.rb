@@ -1,17 +1,15 @@
 # Set up a SAML Service Provider
 
-require "onelogin/ruby-saml/version"
-
 attribute_map_resolver = ENV.fetch("ATTRIBUTE_MAP_RESOLVER", "nil")
 saml_session_index_key = ENV.fetch('SAML_SESSION_INDEX_KEY', ":session_index")
 use_subject_to_authenticate = ENV.fetch('USE_SUBJECT_TO_AUTHENTICATE')
 idp_settings_adapter = ENV.fetch('IDP_SETTINGS_ADAPTER', "nil")
 idp_entity_id_reader = ENV.fetch('IDP_ENTITY_ID_READER', '"DeviseSamlAuthenticatable::DefaultIdpEntityIdReader"')
 saml_failed_callback = ENV.fetch('SAML_FAILED_CALLBACK', "nil")
-ruby_saml_version = ENV.fetch("RUBY_SAML_VERSION")
+ruby_saml_version = ENV.fetch("RUBY_SAML_VERSION", "2.0.0")
 
 gem 'devise_saml_authenticatable', path: File.expand_path("../../..", __FILE__)
-gem 'ruby-saml', ruby_saml_version
+gem 'ruby-saml', git: 'https://github.com/SAML-Toolkits/ruby-saml.git', branch: 'v2.x'
 gem 'net-smtp', require: false
 gem 'net-imap', require: false
 gem 'net-pop', require: false
@@ -44,9 +42,9 @@ class OurEntityIdReader
     if params[:entity_id]
       params[:entity_id]
     elsif params[:SAMLRequest]
-      OneLogin::RubySaml::SloLogoutrequest.new(params[:SAMLRequest]).issuer
+      ::RubySaml::SloLogoutrequest.new(params[:SAMLRequest]).issuer
     elsif params[:SAMLResponse]
-      OneLogin::RubySaml::Response.new(params[:SAMLResponse]).issuers.first
+      ::RubySaml::Response.new(params[:SAMLResponse]).issuers.first
     else
       "http://www.cats.com"
     end
