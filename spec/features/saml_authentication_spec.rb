@@ -208,7 +208,7 @@ describe "SAML Authentication", type: :feature do
         fill_in "Email", with: "you@example.com"
         fill_in "Password", with: "asdf"
         click_on "Sign in"
-        expect(page).to have_content(:all, "Example Domain This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.")
+        expect(page).to have_content(:all, "Example Domain")
         expect(current_url).to eq("https://www.example.com/")
       end
     end
