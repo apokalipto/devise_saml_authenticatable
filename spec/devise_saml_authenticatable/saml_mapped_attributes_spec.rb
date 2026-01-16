@@ -6,11 +6,13 @@ describe SamlAuthenticatable::SamlMappedAttributes do
   let(:attribute_map_file) { File.join(File.dirname(__FILE__), '../support/attribute-map.yml') }
   let(:attribute_map) { YAML.load(File.read(attribute_map_file)) }
   let(:saml_attributes) do
-    {
+    OneLogin::RubySaml::Attributes.new({
       "first_name" => ["John"],
-      "last_name"=>["Smith"],
-      "email"=>["john.smith@example.com"]
-    }
+      "last_name"=> ["Smith"],
+      "email"=> ["john.smith@example.com"],
+      "groups" => ["admin", "reporting"],
+      "multiple_but_single" => ["1", "2", "3"]
+    })
   end
 
   describe "#value_by_resource_key" do
@@ -18,7 +20,7 @@ describe SamlAuthenticatable::SamlMappedAttributes do
       subject(:perform) { instance.value_by_resource_key(resource_key) }
 
       it "correctly maps the resource key, #{resource_key}, to the value of the '#{saml_key}' SAML key" do
-        saml_attributes[saml_key] = saml_attributes.delete(resource_key)
+        saml_attributes[saml_key] = saml_attributes.to_h.delete(resource_key)
         expect(perform).to eq(expected_value)
       end
     end
@@ -27,7 +29,7 @@ describe SamlAuthenticatable::SamlMappedAttributes do
       saml_keys = ['urn:mace:dir:attribute-def:first_name', 'first_name', 'firstName', 'firstname']
 
       saml_keys.each do |saml_key|
-        include_examples 'correctly maps the value of the resource key', saml_key, 'first_name', ['John']
+        include_examples 'correctly maps the value of the resource key', saml_key, 'first_name', 'John'
       end
     end
 
@@ -35,7 +37,7 @@ describe SamlAuthenticatable::SamlMappedAttributes do
       saml_keys = ['urn:mace:dir:attribute-def:last_name', 'last_name', 'lastName', 'lastname']
 
       saml_keys.each do |saml_key|
-        include_examples 'correctly maps the value of the resource key', saml_key, 'last_name', ['Smith']
+        include_examples 'correctly maps the value of the resource key', saml_key, 'last_name', 'Smith'
       end
     end
 
@@ -43,7 +45,23 @@ describe SamlAuthenticatable::SamlMappedAttributes do
       saml_keys = ['urn:mace:dir:attribute-def:email', 'email_address', 'emailAddress', 'email']
 
       saml_keys.each do |saml_key|
-        include_examples 'correctly maps the value of the resource key', saml_key, 'email', ['john.smith@example.com']
+        include_examples 'correctly maps the value of the resource key', saml_key, 'email', 'john.smith@example.com'
+      end
+    end
+
+    context 'multiple groups' do
+     saml_keys = ['groups']
+
+      saml_keys.each do |saml_key|
+        include_examples 'correctly maps the value of the resource key', saml_key, 'groups', ["admin", "reporting"]
+      end
+    end
+
+    context 'multiple values, but configured as single' do
+     saml_keys = ['multiple_but_single']
+
+      saml_keys.each do |saml_key|
+        include_examples 'correctly maps the value of the resource key', saml_key, 'multiple_but_single', "1"
       end
     end
   end

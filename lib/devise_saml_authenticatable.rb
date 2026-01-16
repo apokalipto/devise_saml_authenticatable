@@ -113,6 +113,10 @@ module Devise
   # See saml_update_resource_hook for more information.
   mattr_reader :saml_default_update_resource_hook
   @@saml_default_update_resource_hook = Proc.new do |user, saml_response, auth_value|
+    if saml_response.attributes.unmapped_keys.any?
+      DeviseSamlAuthenticatable::Logger.send("SAML response contained attributes that are not mapped: #{saml_response.attributes.unmapped_keys.join(", ")}")
+    end
+
     saml_response.attributes.resource_keys.each do |key|
       user.send "#{key}=", saml_response.attribute_value_by_resource_key(key)
     end

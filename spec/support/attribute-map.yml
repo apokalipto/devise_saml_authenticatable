@@ -1,12 +1,42 @@
-"urn:mace:dir:attribute-def:first_name": "first_name"
-"first_name": "first_name"
-"firstName": "first_name"
-"firstname": "first_name"
-"urn:mace:dir:attribute-def:last_name": "last_name"
-"last_name": "last_name"
-"lastName": "last_name"
-"lastname": "last_name"
-"urn:mace:dir:attribute-def:email": "email"
-"email_address": "email"
-"emailAddress": "email"
-"email": "email"
+"urn:mace:dir:attribute-def:first_name": 
+  "resource_key": "first_name"
+  "attribute_type": "single"
+"first_name":
+  "resource_key": "first_name"
+  "attribute_type": "single"
+"firstName":
+  "resource_key": "first_name"
+  "attribute_type": "single"
+"firstname":
+  "resource_key": "first_name"
+  "attribute_type": "single"
+"urn:mace:dir:attribute-def:last_name":
+  "resource_key": "last_name"
+  "attribute_type": "single"
+"last_name":
+  "resource_key": "last_name"
+  "attribute_type": "single"
+"lastName":
+  "resource_key": "last_name"
+  "attribute_type": "single"
+"lastname":
+  "resource_key": "last_name"
+  "attribute_type": "single"
+"urn:mace:dir:attribute-def:email":
+  "resource_key": "email"
+  "attribute_type": "single"
+"email_address":
+  "resource_key": "email"
+  "attribute_type": "single"
+"emailAddress":
+  "resource_key": "email"
+  "attribute_type": "single"
+"email":
+  "resource_key": "email"
+  "attribute_type": "single"
+"groups":
+  "resource_key": "groups"
+  "attribute_type": "multi"
+"multiple_but_single":
+  "resource_key": "multiple_but_single"
+  "attribute_type": "single"
