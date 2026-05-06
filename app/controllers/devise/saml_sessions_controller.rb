@@ -8,7 +8,7 @@ class Devise::SamlSessionsController < Devise::SessionsController
 
   def new
     idp_entity_id = get_idp_entity_id(params)
-    auth_request = OneLogin::RubySaml::Authrequest.new
+    auth_request = ::RubySaml::Authrequest.new
     auth_params = { RelayState: relay_state } if relay_state
     action = auth_request.create(saml_config(idp_entity_id, request), auth_params || {})
     session[:saml_transaction_id] = auth_request.request_id if auth_request.respond_to?(:request_id)
@@ -17,7 +17,7 @@ class Devise::SamlSessionsController < Devise::SessionsController
 
   def metadata
     idp_entity_id = params[:idp_entity_id]
-    meta = OneLogin::RubySaml::Metadata.new
+    meta = ::RubySaml::Metadata.new
     render xml: meta.generate(saml_config(idp_entity_id, request))
   end
 
@@ -27,7 +27,7 @@ class Devise::SamlSessionsController < Devise::SessionsController
       session[Devise.saml_session_index_key] = nil
 
       saml_config = saml_config(get_idp_entity_id(params), request)
-      logout_request = OneLogin::RubySaml::SloLogoutrequest.new(params[:SAMLRequest], settings: saml_config)
+      logout_request = ::RubySaml::SloLogoutrequest.new(params[:SAMLRequest], settings: saml_config)
       redirect_to generate_idp_logout_response(saml_config, logout_request.id), allow_other_host: true
     elsif params[:SAMLResponse]
       # Currently Devise handles the session invalidation when the request is made.
@@ -64,7 +64,7 @@ class Devise::SamlSessionsController < Devise::SessionsController
   # Override devise to send user to IdP logout for SLO
   def after_sign_out_path_for(_)
     idp_entity_id = get_idp_entity_id(params)
-    logout_request = OneLogin::RubySaml::Logoutrequest.new
+    logout_request = ::RubySaml::Logoutrequest.new
     saml_settings = saml_config(idp_entity_id, request).dup
 
     # Add attributes to saml_settings which will later be used to create the SP
@@ -93,6 +93,6 @@ class Devise::SamlSessionsController < Devise::SessionsController
     params = {}
     params[:RelayState] = relay_state if relay_state
 
-    OneLogin::RubySaml::SloLogoutresponse.new.create(saml_config, logout_request_id, nil, params)
+    ::RubySaml::SloLogoutresponse.new.create(saml_config, logout_request_id, nil, params)
   end
 end

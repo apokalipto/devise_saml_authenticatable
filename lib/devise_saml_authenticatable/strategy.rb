@@ -6,7 +6,7 @@ module Devise
       include DeviseSamlAuthenticatable::SamlConfig
       def valid?
         if params[:SAMLResponse]
-          OneLogin::RubySaml::Response.new(
+          ::RubySaml::Response.new(
             params[:SAMLResponse],
             response_options,
           )
@@ -35,7 +35,7 @@ module Devise
 
       private
       def parse_saml_response
-        @response = OneLogin::RubySaml::Response.new(
+        @response = ::RubySaml::Response.new(
           params[:SAMLResponse],
           response_options,
         )

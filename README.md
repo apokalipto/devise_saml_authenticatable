@@ -149,7 +149,7 @@ In `config/initializers/devise.rb`:
     # header that matches the ID of the SAML request. (Default is false)
     # config.saml_validate_in_response_to = false
 
-    # Configure with your SAML settings (see ruby-saml's README for more information: https://github.com/onelogin/ruby-saml).
+    # Configure with your SAML settings (see ruby-saml's README for more information: https://github.com/SAML-Toolkits/ruby-saml).
     config.saml_configure do |settings|
       settings.assertion_consumer_service_url     = "http://localhost:3000/users/saml/auth"
       settings.assertion_consumer_service_binding = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
@@ -159,7 +159,7 @@ In `config/initializers/devise.rb`:
       settings.idp_slo_service_url                = "http://localhost/simplesaml/www/saml2/idp/SingleLogoutService.php"
       settings.idp_sso_service_url                = "http://localhost/simplesaml/www/saml2/idp/SSOService.php"
       settings.idp_cert_fingerprint               = "00:A1:2B:3C:44:55:6F:A7:88:CC:DD:EE:22:33:44:55:D6:77:8F:99"
-      settings.idp_cert_fingerprint_algorithm     = "http://www.w3.org/2000/09/xmldsig#sha1"
+      settings.idp_cert_fingerprint_algorithm     =  RubySaml::XML::SHA256
     end
   end
 ```

@@ -8,6 +8,8 @@ require "devise_saml_authenticatable/saml_config"
 require "devise_saml_authenticatable/default_attribute_map_resolver"
 require "devise_saml_authenticatable/default_idp_entity_id_reader"
 
+require "ruby-saml"
+
 begin
   Rails::Engine
 rescue
@@ -103,7 +105,7 @@ module Devise
   @@allowed_clock_drift_in_seconds
 
   mattr_accessor :saml_config
-  @@saml_config = OneLogin::RubySaml::Settings.new
+  @@saml_config = ::RubySaml::Settings.new
   def self.saml_configure
     yield saml_config
   end

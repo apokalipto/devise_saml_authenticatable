@@ -8,9 +8,10 @@ class IdpSettingsAdapter
         sp_entity_id: "sp_issuer",
         idp_entity_id: "http://localhost:8020/saml/metadata",
         authn_context: "",
-        idp_cert_fingerprint: "9E:65:2E:03:06:8D:80:F2:86:C7:6C:77:A1:D9:14:97:0A:4D:F4:4D"
+        idp_cert_fingerprint: "81:AD:2F:4C:60:68:1D:60:14:50:D8:3E:E1:91:2E:25:6A:4D:C2:33",
+        idp_cert_fingerprint_algorithm: "http://www.w3.org/2000/09/xmldsig#sha1"
       }
-      if Gem::Version.new(OneLogin::RubySaml::VERSION) >= Gem::Version.new("1.12.0")
+      if Gem::Version.new(::RubySaml::VERSION) >= Gem::Version.new("1.12.0")
         base.merge!(
           idp_slo_service_url: "http://localhost:8010/saml/logout",
           idp_sso_service_url: "http://localhost:8010/saml/auth",

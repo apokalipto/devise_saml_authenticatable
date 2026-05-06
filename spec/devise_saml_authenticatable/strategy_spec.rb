@@ -11,7 +11,7 @@ describe Devise::Strategies::SamlAuthenticatable do
   let(:response) { double(:response, issuers: [idp_entity_id], :settings= => nil, is_valid?: true, sessionindex: '123123123', errors: errors) }
   let(:idp_entity_id) { "https://test/saml/metadata/123123" }
   before do
-    allow(OneLogin::RubySaml::Response).to receive(:new).and_return(response)
+    allow(::RubySaml::Response).to receive(:new).and_return(response)
   end
 
   let(:mapping) { double(:mapping, to: user_class) }
@@ -37,7 +37,7 @@ describe Devise::Strategies::SamlAuthenticatable do
     end
 
     it "authenticates with the response" do
-      expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], anything)
+      expect(::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], anything)
       expect(user_class).to receive(:authenticate_with_saml).with(response, nil)
 
       expect(strategy).to receive(:success!).with(user)
@@ -109,7 +109,7 @@ describe Devise::Strategies::SamlAuthenticatable do
       end
 
       it "authenticates with the response for the corresponding idp" do
-        expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], anything)
+        expect(::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], anything)
         expect(idp_providers_adapter).to receive(:settings).with(idp_entity_id, anything)
         expect(user_class).to receive(:authenticate_with_saml).with(response, params[:RelayState])
 
@@ -173,12 +173,12 @@ describe Devise::Strategies::SamlAuthenticatable do
       end
 
       it "is valid with the configured clock drift" do
-        expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(allowed_clock_drift: 30))
+        expect(::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(allowed_clock_drift: 30))
         expect(strategy).to be_valid
       end
 
       it "authenticates with the configured clock drift" do
-        expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(allowed_clock_drift: 30))
+        expect(::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(allowed_clock_drift: 30))
 
         expect(strategy).to receive(:success!).with(user)
         strategy.authenticate!
@@ -196,12 +196,12 @@ describe Devise::Strategies::SamlAuthenticatable do
         let(:session) { { saml_transaction_id: transaction_id }}
 
         it "is valid with the matches_request_id parameter" do
-          expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(matches_request_id: transaction_id))
+          expect(::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(matches_request_id: transaction_id))
           expect(strategy).to be_valid
         end
 
         it "authenticates with the matches_request_id parameter" do
-          expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(matches_request_id: transaction_id))
+          expect(::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(matches_request_id: transaction_id))
 
           expect(strategy).to receive(:success!).with(user)
           strategy.authenticate!
@@ -210,7 +210,7 @@ describe Devise::Strategies::SamlAuthenticatable do
 
       context "when the session is missing a saml_transaction_id" do
         it "uses 'ID_MISSING' for matches_request_id so validation will fail" do
-          expect(OneLogin::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(matches_request_id: "ID_MISSING"))
+          expect(::RubySaml::Response).to receive(:new).with(params[:SAMLResponse], hash_including(matches_request_id: "ID_MISSING"))
           strategy.authenticate!
         end
       end
